@@ -1,10 +1,10 @@
 namespace TanksServer;
 
-internal class MapDrawer(MapService map)
+internal class MapDrawer(MapService map):ITickStep
 {
     private const uint GameFieldPixelCount = MapService.PixelsPerRow * MapService.PixelsPerColumn;
 
-    public void DrawInto(DisplayPixelBuffer buf)
+    private void DrawInto(DisplayPixelBuffer buf)
     {
         for (var tileY = 0; tileY < MapService.TilesPerColumn; tileY++)
         for (var tileX = 0; tileX < MapService.TilesPerRow; tileX++)
@@ -23,7 +23,7 @@ internal class MapDrawer(MapService map)
         }
     }
 
-    public DisplayPixelBuffer CreateGameFieldPixelBuffer()
+    private DisplayPixelBuffer CreateGameFieldPixelBuffer()
     {
         var data = new byte[10 + GameFieldPixelCount / 8];
         var result = new DisplayPixelBuffer(data)
@@ -36,5 +36,21 @@ internal class MapDrawer(MapService map)
             HeightInPixels = MapService.PixelsPerColumn
         };
         return result;
+    }
+
+    private DisplayPixelBuffer? _lastFrame;
+
+    public DisplayPixelBuffer LastFrame
+    {
+        get => _lastFrame ?? throw new InvalidOperationException("first frame not yet drawn");
+        private set => _lastFrame = value;
+    }
+
+    public Task TickAsync()
+    {
+        var buffer = CreateGameFieldPixelBuffer();
+        DrawInto(buffer);
+        LastFrame = buffer;
+        return Task.CompletedTask;
     }
 }

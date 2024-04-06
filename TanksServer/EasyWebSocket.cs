@@ -12,6 +12,7 @@ internal abstract class EasyWebSocket
     private readonly WebSocket _socket;
     private readonly Task _readLoop;
     private readonly ArraySegment<byte> _buffer;
+    private int _closed;
 
     protected EasyWebSocket(WebSocket socket, ILogger logger, ArraySegment<byte> buffer)
     {
@@ -33,21 +34,38 @@ internal abstract class EasyWebSocket
 
             await ReceiveAsync(_buffer[..response.Count]);
         } while (_socket.State == WebSocketState.Open);
+
+        await CloseAsync();
     }
 
     protected abstract Task ReceiveAsync(ArraySegment<byte> buffer);
+    protected abstract Task ClosingAsync();
 
-    protected Task SendAsync(byte[] data)
+    protected async Task TrySendAsync(byte[] data)
     {
+        if (_socket.State != WebSocketState.Open)
+            await CloseAsync();
+        
         _logger.LogTrace("sending {} bytes of data", _buffer.Count);
-        return _socket.SendAsync(data, WebSocketMessageType.Binary, true, CancellationToken.None);
+
+        try
+        {
+            await _socket.SendAsync(data, WebSocketMessageType.Binary, true, CancellationToken.None);
+        }
+        catch (WebSocketException wsEx)
+        {
+            _logger.LogDebug(wsEx, "send failed");
+        }
     }
 
     public async Task CloseAsync()
     {
+        if (Interlocked.Exchange(ref _closed, 1) == 1)
+            return;
         _logger.LogDebug("closing socket");
         await _socket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
         await _readLoop;
+        await ClosingAsync();
         _completionSource.SetResult();
     }
 }

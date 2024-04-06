@@ -7,8 +7,9 @@ namespace TanksServer;
 
 internal sealed class ClientScreenServer(
     ILogger<ClientScreenServer> logger,
-    ILoggerFactory loggerFactory
-) : IHostedLifecycleService
+    ILoggerFactory loggerFactory,
+    MapDrawer drawer
+) : IHostedLifecycleService, ITickStep
 {
     private readonly List<ClientScreenServerConnection> _connections = new();
 
@@ -16,15 +17,9 @@ internal sealed class ClientScreenServer(
     {
         logger.LogDebug("HandleClient");
         var connection =
-            new ClientScreenServerConnection(socket, loggerFactory.CreateLogger<ClientScreenServerConnection>());
+            new ClientScreenServerConnection(socket, loggerFactory.CreateLogger<ClientScreenServerConnection>(), this);
         _connections.Add(connection);
         return connection.Done;
-    }
-
-    public Task Send(DisplayPixelBuffer buf)
-    {
-        logger.LogDebug("Sending buffer to {} clients", _connections.Count);
-        return Task.WhenAll(_connections.Select(c => c.Send(buf)));
     }
 
     public Task StoppingAsync(CancellationToken cancellationToken)
@@ -33,28 +28,46 @@ internal sealed class ClientScreenServer(
         return Task.WhenAll(_connections.Select(c => c.CloseAsync()));
     }
 
+    public Task TickAsync()
+    {
+        logger.LogTrace("Sending buffer to {} clients", _connections.Count);
+        return Task.WhenAll(_connections.Select(c => c.SendAsync(drawer.LastFrame)));
+    }
+
     public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     public Task StartedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     public Task StartingAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     public Task StoppedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-}
-
-internal sealed class ClientScreenServerConnection(WebSocket webSocket, ILogger<ClientScreenServerConnection> logger)
-    : EasyWebSocket(webSocket, logger, ArraySegment<byte>.Empty)
-{
-    private bool _wantsNewFrame = true;
-
-    public Task Send(DisplayPixelBuffer buf)
+    
+    private void Remove(ClientScreenServerConnection connection) => _connections.Remove(connection);
+    
+    private sealed class ClientScreenServerConnection(
+        WebSocket webSocket,
+        ILogger<ClientScreenServerConnection> logger,
+        ClientScreenServer server
+    ) : EasyWebSocket(webSocket, logger, ArraySegment<byte>.Empty)
     {
-        if (!_wantsNewFrame)
+        private bool _wantsNewFrame = true;
+
+        public Task SendAsync(DisplayPixelBuffer buf)
+        {
+            if (!_wantsNewFrame)
+                return Task.CompletedTask;
+            _wantsNewFrame = false;
+            return TrySendAsync(buf.Data);
+        }
+
+        protected override Task ReceiveAsync(ArraySegment<byte> buffer)
+        {
+            _wantsNewFrame = true;
             return Task.CompletedTask;
-        return SendAsync(buf.Data);
-    }
+        }
 
-    protected override Task ReceiveAsync(ArraySegment<byte> buffer)
-    {
-        _wantsNewFrame = true;
-        return Task.CompletedTask;
+        protected override Task ClosingAsync()
+        {
+            server.Remove(this);
+            return Task.CompletedTask;
+        }
     }
 }

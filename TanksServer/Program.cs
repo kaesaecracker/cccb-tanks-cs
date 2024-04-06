@@ -12,13 +12,7 @@ internal static class Program
     {
         var app = Configure(args);
 
-        var display = app.Services.GetRequiredService<ServicePointDisplay>();
-        var mapDrawer = app.Services.GetRequiredService<MapDrawer>();
         var clientScreenServer = app.Services.GetRequiredService<ClientScreenServer>();
-
-        var buffer = mapDrawer.CreateGameFieldPixelBuffer();
-        mapDrawer.DrawInto(buffer);
-        await display.Send(buffer);
 
         var clientFileProvider = new PhysicalFileProvider(Path.Combine(app.Environment.ContentRootPath, "client"));
         app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = clientFileProvider });
@@ -46,10 +40,16 @@ internal static class Program
 
         builder.Services.AddSingleton<ServicePointDisplay>();
         builder.Services.AddSingleton<MapService>();
+        
         builder.Services.AddSingleton<MapDrawer>();
+        builder.Services.AddSingleton<ITickStep, MapDrawer>(sp => sp.GetRequiredService<MapDrawer>());
+        
         builder.Services.AddSingleton<ClientScreenServer>();
         builder.Services.AddHostedService<ClientScreenServer>(sp => sp.GetRequiredService<ClientScreenServer>());
+        builder.Services.AddSingleton<ITickStep, ClientScreenServer>(sp => sp.GetRequiredService<ClientScreenServer>());
 
+        builder.Services.AddHostedService<GameTickService>();
+        
         return builder.Build();
     }
 }
