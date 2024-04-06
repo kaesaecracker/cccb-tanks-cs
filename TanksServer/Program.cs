@@ -1,5 +1,6 @@
 using System.IO;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 
@@ -27,11 +28,13 @@ internal static class Program
         app.Map("/screen", async context =>
         {
             if (!context.WebSockets.IsWebSocketRequest)
+            {
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 return;
-            var ws = await context.WebSockets.AcceptWebSocketAsync();
-            var client = clientScreenServer.AddClient(ws);
-            await client.Send(buffer);
-            await client.Done;
+            }
+
+            using var ws = await context.WebSockets.AcceptWebSocketAsync();
+            await clientScreenServer.HandleClient(ws);
         });
 
         await app.RunAsync();
@@ -45,6 +48,7 @@ internal static class Program
         builder.Services.AddSingleton<MapService>();
         builder.Services.AddSingleton<MapDrawer>();
         builder.Services.AddSingleton<ClientScreenServer>();
+        builder.Services.AddHostedService<ClientScreenServer>(sp => sp.GetRequiredService<ClientScreenServer>());
 
         return builder.Build();
     }

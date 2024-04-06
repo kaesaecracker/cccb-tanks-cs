@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace TanksServer;
 
-public sealed class FixedSizeBitFieldView(Memory<byte> data) : IList<bool>
+internal sealed class FixedSizeBitFieldView(Memory<byte> data) : IList<bool>
 {
     public int Count => data.Length * 8;
     public bool IsReadOnly => false;

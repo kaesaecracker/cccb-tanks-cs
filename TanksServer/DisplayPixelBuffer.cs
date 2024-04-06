@@ -1,6 +1,6 @@
 namespace TanksServer;
 
-public sealed class DisplayPixelBuffer(byte[] data)
+internal sealed class DisplayPixelBuffer(byte[] data)
 {
     public byte[] Data => data;
 

@@ -1,52 +1,60 @@
 using System.Net.WebSockets;
+using System.Threading;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace TanksServer;
 
-internal sealed class ClientScreenServer
+internal sealed class ClientScreenServer(
+    ILogger<ClientScreenServer> logger,
+    ILoggerFactory loggerFactory
+) : IHostedLifecycleService
 {
     private readonly List<ClientScreenServerConnection> _connections = new();
 
-    public ClientScreenServerConnection AddClient(WebSocket socket)
+    public Task HandleClient(WebSocket socket)
     {
-        var connection = new ClientScreenServerConnection(socket);
+        logger.LogDebug("HandleClient");
+        var connection =
+            new ClientScreenServerConnection(socket, loggerFactory.CreateLogger<ClientScreenServerConnection>());
         _connections.Add(connection);
-        return connection;
+        return connection.Done;
     }
 
     public Task Send(DisplayPixelBuffer buf)
     {
+        logger.LogDebug("Sending buffer to {} clients", _connections.Count);
         return Task.WhenAll(_connections.Select(c => c.Send(buf)));
     }
+
+    public Task StoppingAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("closing connections");
+        return Task.WhenAll(_connections.Select(c => c.CloseAsync()));
+    }
+
+    public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    public Task StartedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    public Task StartingAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    public Task StoppedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }
 
-internal sealed class ClientScreenServerConnection
+internal sealed class ClientScreenServerConnection(WebSocket webSocket, ILogger<ClientScreenServerConnection> logger)
+    : EasyWebSocket(webSocket, logger, ArraySegment<byte>.Empty)
 {
-    private readonly WebSocket _socket;
-    private readonly Task _readTask;
-    private readonly TaskCompletionSource _completionSource = new();
     private bool _wantsNewFrame = true;
-
-    public ClientScreenServerConnection(WebSocket webSocket)
-    {
-        _socket = webSocket;
-        _readTask = Read();
-    }
-
-    public Task Done => _completionSource.Task;
-
-    private async Task Read()
-    {
-        while (true)
-        {
-            await _socket.ReceiveAsync(ArraySegment<byte>.Empty, default);
-            _wantsNewFrame = true;
-        }
-    }
 
     public Task Send(DisplayPixelBuffer buf)
     {
         if (!_wantsNewFrame)
             return Task.CompletedTask;
-        return _socket.SendAsync(buf.Data, WebSocketMessageType.Binary, true, default);
+        return SendAsync(buf.Data);
+    }
+
+    protected override Task ReceiveAsync(ArraySegment<byte> buffer)
+    {
+        _wantsNewFrame = true;
+        return Task.CompletedTask;
     }
 }

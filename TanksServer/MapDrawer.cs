@@ -1,6 +1,6 @@
 namespace TanksServer;
 
-public class MapDrawer(MapService map)
+internal class MapDrawer(MapService map)
 {
     private const uint GameFieldPixelCount = MapService.PixelsPerRow * MapService.PixelsPerColumn;
 

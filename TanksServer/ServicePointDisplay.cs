@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace TanksServer;
 
-public class ServicePointDisplay(IOptions<ServicePointDisplayConfiguration> options)
+internal class ServicePointDisplay(IOptions<ServicePointDisplayConfiguration> options)
 {
     private readonly UdpClient _udpClient = new(options.Value.Hostname, options.Value.Port);
 
@@ -11,4 +11,10 @@ public class ServicePointDisplay(IOptions<ServicePointDisplayConfiguration> opti
     {
         return _udpClient.SendAsync(buffer.Data);
     }
+}
+
+internal class ServicePointDisplayConfiguration
+{
+    public string Hostname { get; set; } = string.Empty;
+    public int Port { get; set; }
 }
