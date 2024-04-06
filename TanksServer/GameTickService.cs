@@ -21,7 +21,7 @@ public class GameTickService(IEnumerable<ITickStep> steps) : IHostedService
         {
             foreach (var step in _steps)
                 await step.TickAsync();
-            await Task.Delay(1000 / 250);
+            await Task.Delay(1000);
         }
     }
 
