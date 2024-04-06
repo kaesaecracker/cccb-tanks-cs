@@ -1,5 +1,4 @@
 using System.Net.WebSockets;
-using System.Threading;
 using Microsoft.Extensions.Logging;
 
 namespace TanksServer;
@@ -34,8 +33,6 @@ internal abstract class EasyWebSocket
 
             await ReceiveAsync(_buffer[..response.Count]);
         } while (_socket.State == WebSocketState.Open);
-
-        await CloseAsync();
     }
 
     protected abstract Task ReceiveAsync(ArraySegment<byte> buffer);
@@ -45,7 +42,7 @@ internal abstract class EasyWebSocket
     {
         if (_socket.State != WebSocketState.Open)
             await CloseAsync();
-        
+
         _logger.LogTrace("sending {} bytes of data", _buffer.Count);
 
         try
@@ -58,12 +55,15 @@ internal abstract class EasyWebSocket
         }
     }
 
-    public async Task CloseAsync()
+    public async Task CloseAsync(
+        WebSocketCloseStatus status = WebSocketCloseStatus.NormalClosure,
+        string? description = null
+    )
     {
         if (Interlocked.Exchange(ref _closed, 1) == 1)
             return;
         _logger.LogDebug("closing socket");
-        await _socket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
+        await _socket.CloseAsync(status, description, CancellationToken.None);
         await _readLoop;
         await ClosingAsync();
         _completionSource.SetResult();

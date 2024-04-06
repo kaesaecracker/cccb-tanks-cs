@@ -1,5 +1,4 @@
 using System.Net.WebSockets;
-using System.Threading;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 

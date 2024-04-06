@@ -1,5 +1,4 @@
 using System.IO;
-using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +18,7 @@ internal static class Program
 
         var clientScreenServer = app.Services.GetRequiredService<ClientScreenServer>();
         var playerService = app.Services.GetRequiredService<PlayerService>();
+        var controlsServer = app.Services.GetRequiredService<ControlsServer>();
 
         var clientFileProvider = new PhysicalFileProvider(Path.Combine(app.Environment.ContentRootPath, "client"));
         app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = clientFileProvider });
@@ -38,17 +38,17 @@ internal static class Program
             await clientScreenServer.HandleClient(ws);
         });
 
-        app.Map("/controls", async (HttpContext context, [FromQuery] string playerId) =>
+        app.Map("/controls", async (HttpContext context, [FromQuery] Guid playerId) =>
         {
             if (!context.WebSockets.IsWebSocketRequest)
-            {
-                context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                return;
-            }
+                return Results.BadRequest();
 
+            if (!playerService.TryGet(playerId, out var player))
+                return Results.NotFound();
+            
             using var ws = await context.WebSockets.AcceptWebSocketAsync();
-            await clientScreenServer.HandleClient(ws);
-
+            await controlsServer.HandleClient(ws, player);
+            return Results.Empty;
         });
 
         await app.RunAsync();
@@ -80,6 +80,8 @@ internal static class Program
         builder.Services.AddHostedService<ClientScreenServer>(sp => sp.GetRequiredService<ClientScreenServer>());
         builder.Services.AddSingleton<ITickStep, ClientScreenServer>(sp => sp.GetRequiredService<ClientScreenServer>());
 
+        builder.Services.AddSingleton<ControlsServer>();
+
         builder.Services.AddHostedService<GameTickService>();
 
         builder.Services.AddSingleton<PlayerService>();
@@ -87,6 +89,3 @@ internal static class Program
         return builder.Build();
     }
 }
-
-[JsonSerializable(typeof(Player))]
-internal partial class AppSerializerContext: JsonSerializerContext;

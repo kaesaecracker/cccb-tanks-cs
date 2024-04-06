@@ -22,16 +22,18 @@ export default function Controls({playerId}: {
         if (event.defaultPrevented)
             return;
 
+        const typeCode = type === 'input-on' ? 0x01 : 0x02;
+
         const controls = {
-            'ArrowLeft': 'left',
-            'ArrowUp': 'up',
-            'ArrowRight': 'right',
-            'ArrowDown': 'down',
-            'Space': 'shoot',
-            'KeyW': 'up',
-            'KeyA': 'left',
-            'KeyS': 'down',
-            'KeyD': 'right',
+            'ArrowLeft': 0x03,
+            'ArrowUp': 0x01,
+            'ArrowRight': 0x04,
+            'ArrowDown': 0x02,
+            'Space': 0x05,
+            'KeyW': 0x01,
+            'KeyA': 0x03,
+            'KeyS': 0x02,
+            'KeyD': 0x04,
         };
 
         // @ts-ignore
@@ -39,7 +41,9 @@ export default function Controls({playerId}: {
         if (!value)
             return;
 
-        sendMessage(JSON.stringify({type, value}));
+        const message = new Uint8Array([typeCode, value]);
+        console.log('input', message);
+        sendMessage(message);
     };
 
     useEffect(() => {
@@ -51,7 +55,7 @@ export default function Controls({playerId}: {
             window.onkeydown = null;
             window.onkeyup = null;
         };
-    }, []);
+    }, [sendMessage]);
 
     return <div className="controls">
         <div className="control">
