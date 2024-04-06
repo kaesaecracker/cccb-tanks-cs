@@ -1,5 +1,7 @@
+using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 
 namespace TanksServer;
 
@@ -11,18 +13,25 @@ internal static class Program
 
         var display = app.Services.GetRequiredService<ServicePointDisplay>();
         var mapDrawer = app.Services.GetRequiredService<MapDrawer>();
+        var clientScreenServer = app.Services.GetRequiredService<ClientScreenServer>();
 
         var buffer = mapDrawer.CreateGameFieldPixelBuffer();
         mapDrawer.DrawInto(buffer);
         await display.Send(buffer);
 
-        app.UseWebSockets();
+        var clientFileProvider = new PhysicalFileProvider(Path.Combine(app.Environment.ContentRootPath, "client"));
+        app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = clientFileProvider });
+        app.UseStaticFiles(new StaticFileOptions { FileProvider = clientFileProvider });
 
+        app.UseWebSockets();
         app.Map("/screen", async context =>
         {
             if (!context.WebSockets.IsWebSocketRequest)
                 return;
-            using var ws = await context.WebSockets.AcceptWebSocketAsync();
+            var ws = await context.WebSockets.AcceptWebSocketAsync();
+            var client = clientScreenServer.AddClient(ws);
+            await client.Send(buffer);
+            await client.Done;
         });
 
         await app.RunAsync();
@@ -35,6 +44,7 @@ internal static class Program
         builder.Services.AddSingleton<ServicePointDisplay>();
         builder.Services.AddSingleton<MapService>();
         builder.Services.AddSingleton<MapDrawer>();
+        builder.Services.AddSingleton<ClientScreenServer>();
 
         return builder.Build();
     }
