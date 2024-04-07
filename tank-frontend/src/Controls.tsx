@@ -1,6 +1,7 @@
 import './Controls.css';
 import useWebSocket from 'react-use-websocket';
 import {useEffect} from 'react';
+import {statusTextForReadyState} from './statusTextForReadyState.tsx';
 
 export default function Controls({playerId}: {
     playerId: string
@@ -9,7 +10,8 @@ export default function Controls({playerId}: {
     url.searchParams.set('playerId', playerId);
     const {
         sendMessage,
-        getWebSocket
+        getWebSocket,
+        readyState
     } = useWebSocket(url.toString(), {
         shouldReconnect: () => true,
     });
@@ -56,21 +58,24 @@ export default function Controls({playerId}: {
         };
     }, [sendMessage]);
 
-    return <div className="controls">
-        <div className="control">
-            <div className="row">
-                <kbd className="up">▲</kbd>
+    return <>
+        <span>The controller is currently {statusTextForReadyState[readyState]}</span>
+        <div className="controls">
+            <div className="control">
+                <div className="row">
+                    <kbd className="up">▲</kbd>
+                </div>
+                <div className="row">
+                    <kbd>◀</kbd>
+                    <kbd>▼</kbd>
+                    <kbd>▶</kbd>
+                </div>
+                <h3>Move</h3>
             </div>
-            <div className="row">
-                <kbd>◀</kbd>
-                <kbd>▼</kbd>
-                <kbd>▶</kbd>
+            <div className="control">
+                <kbd className="space">Space</kbd>
+                <h3>Fire</h3>
             </div>
-            <h3>Move</h3>
         </div>
-        <div className="control">
-            <kbd className="space">Space</kbd>
-            <h3>Fire</h3>
-        </div>
-    </div>;
+    </>;
 }

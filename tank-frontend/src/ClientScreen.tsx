@@ -1,6 +1,7 @@
-import useWebSocket, {ReadyState} from 'react-use-websocket';
+import useWebSocket from 'react-use-websocket';
 import {useEffect, useRef} from 'react';
 import './ClientScreen.css';
+import {statusTextForReadyState} from './statusTextForReadyState.tsx';
 
 const pixelsPerRow = 352;
 const pixelsPerCol = 160;
@@ -47,7 +48,6 @@ function drawPixelsToCanvas(pixels: Uint8Array, canvas: HTMLCanvasElement) {
 
     drawContext.putImageData(imageData, 0, 0);
 }
-
 export default function ClientScreen({}: {}) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -74,16 +74,8 @@ export default function ClientScreen({}: {}) {
         sendMessage('');
     }, [lastMessage, canvasRef.current]);
 
-    const connectionStatus = {
-        [ReadyState.CONNECTING]: 'Connecting',
-        [ReadyState.OPEN]: 'Open',
-        [ReadyState.CLOSING]: 'Closing',
-        [ReadyState.CLOSED]: 'Closed',
-        [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
-    }[readyState];
-
     return <>
-        <span>The WebSocket is currently {connectionStatus}</span>
+        <span>The screen is currently {statusTextForReadyState[readyState]}</span>
         <canvas ref={canvasRef} id="screen" width={pixelsPerRow} height={pixelsPerCol}/>
     </>;
 }
