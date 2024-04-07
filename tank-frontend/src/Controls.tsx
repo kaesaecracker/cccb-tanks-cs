@@ -42,7 +42,6 @@ export default function Controls({playerId}: {
             return;
 
         const message = new Uint8Array([typeCode, value]);
-        console.log('input', message);
         sendMessage(message);
     };
 

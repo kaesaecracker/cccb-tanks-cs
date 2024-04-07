@@ -36,11 +36,25 @@ internal sealed class ControlsServer(ILogger<ControlsServer> logger, ILoggerFact
         _connections.Remove(connection);
     }
 
-    private sealed class ControlsServerConnection(
-            WebSocket socket, ILogger<ControlsServerConnection> logger,
-            ControlsServer server, Player player)
-        : EasyWebSocket(socket, logger, new byte[2])
+    private sealed class ControlsServerConnection
     {
+        private readonly ByteChannelWebSocket _binaryWebSocket;
+        private readonly ILogger<ControlsServerConnection> _logger;
+        private readonly ControlsServer _server;
+        private readonly Player _player;
+
+        public ControlsServerConnection(WebSocket socket, ILogger<ControlsServerConnection> logger,
+            ControlsServer server, Player player)
+        {
+            _logger = logger;
+            _server = server;
+            _player = player;
+            _binaryWebSocket = new(socket, logger, 2);
+            Done = ReceiveAsync();
+        }
+
+        public Task Done { get; }
+
         private enum MessageType : byte
         {
             Enable = 0x01,
@@ -56,48 +70,47 @@ internal sealed class ControlsServer(ILogger<ControlsServer> logger, ILoggerFact
             Shoot = 0x05
         }
 
-        protected override Task ReceiveAsync(ArraySegment<byte> buffer)
+        private async Task ReceiveAsync()
         {
-            var type = (MessageType)buffer[0];
-            var control = (InputType)buffer[1];
-
-            Logger.LogTrace("player input {} {} {}", player.Id, type, control);
-
-            var isEnable = type switch
+            await foreach (var buffer in _binaryWebSocket.Reader.ReadAllAsync())
             {
-                MessageType.Enable => true,
-                MessageType.Disable => false,
-                _ => throw new ArgumentException("invalid message type")
-            };
+                var type = (MessageType)buffer[0];
+                var control = (InputType)buffer[1];
 
-            switch (control)
-            {
-                case InputType.Forward:
-                    player.Controls.Forward = isEnable;
-                    break;
-                case InputType.Backward:
-                    player.Controls.Backward = isEnable;
-                    break;
-                case InputType.Left:
-                    player.Controls.TurnLeft = isEnable;
-                    break;
-                case InputType.Right:
-                    player.Controls.TurnRight = isEnable;
-                    break;
-                case InputType.Shoot:
-                    player.Controls.Shoot = isEnable;
-                    break;
-                default:
-                    throw new ArgumentException("invalid control type");
+                _logger.LogTrace("player input {} {} {}", _player.Id, type, control);
+
+                var isEnable = type switch
+                {
+                    MessageType.Enable => true,
+                    MessageType.Disable => false,
+                    _ => throw new ArgumentException("invalid message type")
+                };
+
+                switch (control)
+                {
+                    case InputType.Forward:
+                        _player.Controls.Forward = isEnable;
+                        break;
+                    case InputType.Backward:
+                        _player.Controls.Backward = isEnable;
+                        break;
+                    case InputType.Left:
+                        _player.Controls.TurnLeft = isEnable;
+                        break;
+                    case InputType.Right:
+                        _player.Controls.TurnRight = isEnable;
+                        break;
+                    case InputType.Shoot:
+                        _player.Controls.Shoot = isEnable;
+                        break;
+                    default:
+                        throw new ArgumentException("invalid control type");
+                }
             }
 
-            return Task.CompletedTask;
+            _server.Remove(this);
         }
 
-        protected override Task ClosingAsync()
-        {
-            server.Remove(this);
-            return Task.CompletedTask;
-        }
+        public Task CloseAsync() => _binaryWebSocket.CloseAsync();
     }
 }

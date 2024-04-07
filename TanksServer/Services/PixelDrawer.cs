@@ -75,14 +75,17 @@ internal sealed class PixelDrawer : ITickStep
     {
         foreach (var tank in _tanks)
         {
+            var pos = new PixelPosition((int)tank.Position.X, (int)tank.Position.Y);
+            var rotationVariant = (int)Math.Floor(tank.Rotation);
             for (var dy = 0; dy < MapService.TileSize; dy++)
             {
-                var rowStartIndex = (tank.Position.Y + dy) * MapService.PixelsPerRow;
+                var rowStartIndex = (pos.Y + dy) * MapService.PixelsPerRow;
 
                 for (var dx = 0; dx < MapService.TileSize; dx++)
                 {
-                    var i = rowStartIndex + tank.Position.X + dx;
-                    buf.Pixels[i] = TankSpriteAt(dx, dy, tank.Rotation);
+                    var i = rowStartIndex + pos.X + dx;
+                    if (TankSpriteAt(dx, dy, rotationVariant))
+                        buf.Pixels[i] = true;
                 }
             }
         }
@@ -91,8 +94,13 @@ internal sealed class PixelDrawer : ITickStep
     private bool TankSpriteAt(int dx, int dy, int tankRotation)
     {
         var x = tankRotation % 4 * (MapService.TileSize + 1);
-        var y = tankRotation / 4 * (MapService.TileSize + 1);
-        return _tankSprite[(y + dy) * _tankSpriteWidth + x + dx];
+        var y = (int)Math.Floor(tankRotation / 4d) * (MapService.TileSize + 1);
+        var index = (y + dy) * _tankSpriteWidth + x + dx;
+
+        if (index < 0 || index > _tankSprite.Length)
+            Debugger.Break();
+
+        return _tankSprite[index];
     }
 
     private static DisplayPixelBuffer CreateGameFieldPixelBuffer()

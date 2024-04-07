@@ -21,7 +21,7 @@ internal sealed class SpawnQueue(TankManager tanks, MapService map) : ITickStep
         return Task.CompletedTask;
     }
 
-    private PixelPosition ChooseSpawnPosition()
+    private FloatPosition ChooseSpawnPosition()
     {
         List<TilePosition> candidates = new();
         
@@ -33,12 +33,12 @@ internal sealed class SpawnQueue(TankManager tanks, MapService map) : ITickStep
             if (map.IsCurrentlyWall(tile))
                 continue;
             
-            // TODO: check tanks
+            // TODO: check tanks and bullets
             candidates.Add(tile);
         }
 
         var chosenTile = candidates[Random.Shared.Next(candidates.Count)];
-        return new PixelPosition(
+        return new FloatPosition(
             chosenTile.X * MapService.TileSize,
             chosenTile.Y * MapService.TileSize
         );

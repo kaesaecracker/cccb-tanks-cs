@@ -1,8 +1,16 @@
 namespace TanksServer.Models;
 
-internal sealed class Tank(Player player, PixelPosition spawnPosition)
+internal sealed class Tank(Player player, FloatPosition spawnPosition)
 {
+    private double _rotation;
+    
     public Player Owner { get; } = player;
-    public int Rotation { get; set; }
-    public PixelPosition Position { get; set; } = spawnPosition;
+
+    public double Rotation
+    {
+        get => _rotation;
+        set => _rotation = value % 16d;
+    }
+
+    public FloatPosition Position { get; set; } = spawnPosition;
 }

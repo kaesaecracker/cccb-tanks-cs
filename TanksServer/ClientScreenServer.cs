@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Net.WebSockets;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -12,27 +14,36 @@ internal sealed class ClientScreenServer(
     PixelDrawer drawer
 ) : IHostedLifecycleService, ITickStep
 {
-    private readonly List<ClientScreenServerConnection> _connections = new();
+    private readonly ConcurrentDictionary<ClientScreenServerConnection, byte> _connections = new();
+    private bool _closing;
 
     public Task HandleClient(WebSocket socket)
     {
+        if (_closing)
+        {
+            logger.LogWarning("ignoring request because connections are closing");
+            return Task.CompletedTask;
+        }
+
         logger.LogDebug("HandleClient");
         var connection =
             new ClientScreenServerConnection(socket, loggerFactory.CreateLogger<ClientScreenServerConnection>(), this);
-        _connections.Add(connection);
+        var added = _connections.TryAdd(connection, 0);
+        Debug.Assert(added);
         return connection.Done;
     }
 
     public Task StoppingAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("closing connections");
-        return Task.WhenAll(_connections.Select(c => c.CloseAsync()));
+        _closing = true;
+        return Task.WhenAll(_connections.Keys.Select(c => c.CloseAsync()));
     }
 
     public Task TickAsync()
     {
         logger.LogTrace("Sending buffer to {} clients", _connections.Count);
-        return Task.WhenAll(_connections.Select(c => c.SendAsync(drawer.LastFrame)));
+        return Task.WhenAll(_connections.Keys.Select(c => c.SendAsync(drawer.LastFrame)));
     }
 
     public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
@@ -40,35 +51,62 @@ internal sealed class ClientScreenServer(
     public Task StartedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     public Task StartingAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     public Task StoppedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-    
-    private void Remove(ClientScreenServerConnection connection) => _connections.Remove(connection);
-    
-    private sealed class ClientScreenServerConnection(
-        WebSocket webSocket,
-        ILogger<ClientScreenServerConnection> logger,
-        ClientScreenServer server
-    ) : EasyWebSocket(webSocket, logger, ArraySegment<byte>.Empty)
+
+    private void Remove(ClientScreenServerConnection connection) => _connections.TryRemove(connection, out _);
+
+    private sealed class ClientScreenServerConnection: IDisposable
     {
-        private bool _wantsNewFrame = true;
+        private readonly ByteChannelWebSocket _channel;
+        private readonly SemaphoreSlim _wantedFrames = new(1);
+        private readonly ClientScreenServer _server;
+        private readonly ILogger<ClientScreenServerConnection> _logger;
 
-        public Task SendAsync(DisplayPixelBuffer buf)
+        public ClientScreenServerConnection(WebSocket webSocket,
+            ILogger<ClientScreenServerConnection> logger,
+            ClientScreenServer server)
         {
-            if (!_wantsNewFrame)
-                return Task.CompletedTask;
-            _wantsNewFrame = false;
-            return TrySendAsync(buf.Data);
+            _server = server;
+            _logger = logger;
+            _channel = new(webSocket, logger, 0);
+            Done = ReceiveAsync();
         }
 
-        protected override Task ReceiveAsync(ArraySegment<byte> buffer)
+        public async Task SendAsync(DisplayPixelBuffer buf)
         {
-            _wantsNewFrame = true;
-            return Task.CompletedTask;
+            if (await _wantedFrames.WaitAsync(TimeSpan.Zero))
+            {
+                _logger.LogTrace("sending");
+                await _channel.Writer.WriteAsync(buf.Data);
+            }
+            else
+            {
+                _logger.LogTrace("client does not want a frame yet");
+            }
         }
 
-        protected override Task ClosingAsync()
+        private async Task ReceiveAsync()
         {
-            server.Remove(this);
-            return Task.CompletedTask;
+            await foreach (var _ in _channel.Reader.ReadAllAsync())
+            {
+                _wantedFrames.Release();
+            }
+
+            _logger.LogTrace("done receiving");
+            _server.Remove(this);
+        }
+
+        public Task CloseAsync()
+        {
+            _logger.LogDebug("closing connection");
+            return _channel.CloseAsync();
+        }
+
+        public Task Done { get; }
+
+        public void Dispose()
+        {
+            _wantedFrames.Dispose();
+            Done.Dispose();
         }
     }
 }

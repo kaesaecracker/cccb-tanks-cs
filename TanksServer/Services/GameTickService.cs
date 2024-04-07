@@ -20,7 +20,7 @@ internal sealed class GameTickService(IEnumerable<ITickStep> steps) : IHostedSer
         {
             foreach (var step in _steps)
                 await step.TickAsync();
-            await Task.Delay(1000);
+            await Task.Delay(1000/25);
         }
     }
 

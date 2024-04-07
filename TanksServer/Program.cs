@@ -74,23 +74,25 @@ internal static class Program
 
         builder.Services.AddSingleton<ServicePointDisplay>();
         builder.Services.AddSingleton<MapService>();
-        builder.Services.AddSingleton<TankManager>();
 
         builder.Services.AddHostedService<GameTickService>();
-
-        builder.Services.AddSingleton<SpawnQueue>();
-        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<SpawnQueue>());
-
-        builder.Services.AddSingleton<PixelDrawer>();
-        builder.Services.AddSingleton<ITickStep, PixelDrawer>(sp => sp.GetRequiredService<PixelDrawer>());
-
-        builder.Services.AddSingleton<ClientScreenServer>();
-        builder.Services.AddHostedService(sp => sp.GetRequiredService<ClientScreenServer>());
-        builder.Services.AddSingleton<ITickStep, ClientScreenServer>(sp => sp.GetRequiredService<ClientScreenServer>());
+        
+        builder.Services.AddSingleton<TankManager>();
+        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<TankManager>());
 
         builder.Services.AddSingleton<ControlsServer>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ControlsServer>());
         
+        builder.Services.AddSingleton<SpawnQueue>();
+        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<SpawnQueue>());
+
+        builder.Services.AddSingleton<PixelDrawer>();
+        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<PixelDrawer>());
+
+        builder.Services.AddSingleton<ClientScreenServer>();
+        builder.Services.AddHostedService(sp => sp.GetRequiredService<ClientScreenServer>());
+        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<ClientScreenServer>());
+
         builder.Services.AddSingleton<PlayerServer>();
 
         return builder.Build();

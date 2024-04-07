@@ -20,8 +20,6 @@ function drawPixelsToCanvas(pixels: Uint8Array, canvas: HTMLCanvasElement) {
     const imageData = drawContext.getImageData(0, 0, canvas.width, canvas.height, {colorSpace: 'srgb'});
     const data = imageData.data;
 
-    console.log('draw', {width: canvas.width, height: canvas.height, dataLength: data.byteLength});
-
     for (let y = 0; y < canvas.height; y++) {
         const rowStartPixelIndex = y * pixelsPerRow;
         for (let x = 0; x < canvas.width; x++) {
