@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net.WebSockets;
+using System.Threading.Channels;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TanksServer.Helpers;
@@ -76,7 +77,14 @@ internal sealed class ClientScreenServer(
             if (await _wantedFrames.WaitAsync(TimeSpan.Zero))
             {
                 _logger.LogTrace("sending");
-                await _channel.Writer.WriteAsync(buf.Data);
+                try
+                {
+                    await _channel.Writer.WriteAsync(buf.Data);
+                }
+                catch (ChannelClosedException)
+                {
+                    _logger.LogWarning("send failed, channel is closed");
+                }
             }
             else
             {
@@ -86,11 +94,9 @@ internal sealed class ClientScreenServer(
 
         private async Task ReceiveAsync()
         {
-            await foreach (var _ in _channel.Reader.ReadAllAsync())
-            {
+            await foreach (var _ in _channel.Reader.ReadAllAsync()) 
                 _wantedFrames.Release();
-            }
-
+            
             _logger.LogTrace("done receiving");
             _server.Remove(this);
         }

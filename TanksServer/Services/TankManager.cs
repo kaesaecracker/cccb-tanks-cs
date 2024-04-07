@@ -6,7 +6,7 @@ using TanksServer.Models;
 
 namespace TanksServer.Services;
 
-internal sealed class TankManager(ILogger<TankManager> logger, IOptions<TanksConfiguration> options)
+internal sealed class TankManager(ILogger<TankManager> logger, IOptions<TanksConfiguration> options, MapService map)
     : ITickStep, IEnumerable<Tank>
 {
     private readonly ConcurrentBag<Tank> _tanks = new();
@@ -33,36 +33,49 @@ internal sealed class TankManager(ILogger<TankManager> logger, IOptions<TanksCon
         logger.LogTrace("moving tank for player {}", tank.Owner.Id);
         var player = tank.Owner;
 
-        // move turret
-        if (player.Controls.TurnLeft) Rotate(tank, -_config.TurnSpeed);
-        if (player.Controls.TurnRight) Rotate(tank, +_config.TurnSpeed);
+        if (player.Controls.TurnLeft)
+            tank.Rotation -= _config.TurnSpeed;
+        if (player.Controls.TurnRight)
+            tank.Rotation += _config.TurnSpeed;
 
-        if (player.Controls is { Forward: false, Backward: false })
+        double speed;
+        switch (player.Controls)
+        {
+            case { Forward: false, Backward: false }:
+            case { Forward: true, Backward: true }:
+                return false;
+            case { Forward: true }:
+                speed = +_config.MoveSpeed;
+                break;
+            case { Backward: true }:
+                speed = -_config.MoveSpeed;
+                break;
+            default:
+                return false;
+        }
+
+        var angle = tank.Rotation / 16d * 2d * Math.PI;
+        var newX = tank.Position.X + Math.Sin(angle) * speed;
+        var newY = tank.Position.Y - Math.Cos(angle) * speed;
+
+        return TryMove(tank, new FloatPosition(newX, newY))
+               || TryMove(tank, tank.Position with { X = newX })
+               || TryMove(tank, tank.Position with { Y = newY });
+    }
+
+    private bool TryMove(Tank tank, FloatPosition newPosition)
+    {
+        var x0 = (int)Math.Floor(newPosition.X / MapService.TileSize);
+        var x1 = (int)Math.Ceiling(newPosition.X / MapService.TileSize);
+        var y0 = (int)Math.Floor(newPosition.Y / MapService.TileSize);
+        var y1 = (int)Math.Ceiling(newPosition.Y / MapService.TileSize);
+        
+        TilePosition[] positions = { new(x0, y0), new(x0, y1), new(x1, y0), new(x1, y1) };
+        if (positions.Any(map.IsCurrentlyWall))
             return false;
 
-        var direction = player.Controls.Forward ? 1 : -1;
-        var angle = tank.Rotation / 16d * 2d * Math.PI;
-        var newX = tank.Position.X + Math.Sin(angle) * direction * _config.MoveSpeed;
-        var newY = tank.Position.Y - Math.Cos(angle) * direction * _config.MoveSpeed;
-
-        return TryMove(tank, newX, newY)
-               || TryMove(tank, newX, tank.Position.Y)
-               || TryMove(tank, tank.Position.X, newY);
-    }
-
-    private static bool TryMove(Tank tank, double newX, double newY)
-    {
-        // TODO implement
-
-        tank.Position = new FloatPosition(newX, newY);
+        tank.Position = newPosition;
         return true;
-    }
-
-    private void Rotate(Tank t, double speed)
-    {
-        var newRotation = (t.Rotation + speed + 16) % 16;
-        logger.LogTrace("rotating tank for {} from {} to {}", t.Owner.Id, t.Rotation, newRotation);
-        t.Rotation = newRotation;
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

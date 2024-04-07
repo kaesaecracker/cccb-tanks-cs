@@ -75,7 +75,7 @@ internal sealed class PixelDrawer : ITickStep
     {
         foreach (var tank in _tanks)
         {
-            var pos = new PixelPosition((int)tank.Position.X, (int)tank.Position.Y);
+            var pos = tank.Position.ToPixelPosition();
             var rotationVariant = (int)Math.Floor(tank.Rotation);
             for (var dy = 0; dy < MapService.TileSize; dy++)
             {
@@ -83,9 +83,11 @@ internal sealed class PixelDrawer : ITickStep
 
                 for (var dx = 0; dx < MapService.TileSize; dx++)
                 {
+                    if (!TankSpriteAt(dx, dy, rotationVariant))
+                        continue;
+                    
                     var i = rowStartIndex + pos.X + dx;
-                    if (TankSpriteAt(dx, dy, rotationVariant))
-                        buf.Pixels[i] = true;
+                    buf.Pixels[i] = true;
                 }
             }
         }
