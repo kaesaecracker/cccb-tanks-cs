@@ -1,6 +1,4 @@
-using TanksServer.Helpers;
-
-namespace TanksServer;
+namespace TanksServer.Helpers;
 
 internal sealed class DisplayPixelBuffer(byte[] data)
 {

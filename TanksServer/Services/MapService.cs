@@ -1,6 +1,8 @@
+using TanksServer.Models;
+
 namespace TanksServer.Services;
 
-internal class MapService
+internal sealed class MapService
 {
     public const int TilesPerRow = 44;
     public const int TilesPerColumn = 20;
@@ -35,8 +37,8 @@ internal class MapService
 
     private char this[int tileX, int tileY] => _map[tileX + tileY * TilesPerRow];
 
-    public bool IsCurrentlyWall(int tileX, int tileY)
+    public bool IsCurrentlyWall(TilePosition position)
     {
-        return this[tileX, tileY] == '#';
+        return this[position.X, position.Y] == '#';
     }
 }

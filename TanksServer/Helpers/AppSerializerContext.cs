@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
+using TanksServer.Models;
 
-namespace TanksServer;
+namespace TanksServer.Helpers;
 
 [JsonSerializable(typeof(Player))]
-internal partial class AppSerializerContext: JsonSerializerContext;
+internal sealed partial class AppSerializerContext: JsonSerializerContext;

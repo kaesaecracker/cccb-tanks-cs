@@ -9,7 +9,7 @@ namespace TanksServer;
 internal sealed class ClientScreenServer(
     ILogger<ClientScreenServer> logger,
     ILoggerFactory loggerFactory,
-    MapDrawer drawer
+    PixelDrawer drawer
 ) : IHostedLifecycleService, ITickStep
 {
     private readonly List<ClientScreenServerConnection> _connections = new();

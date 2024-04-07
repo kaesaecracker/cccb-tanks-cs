@@ -2,6 +2,7 @@ using System.Net.WebSockets;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TanksServer.Helpers;
+using TanksServer.Models;
 
 namespace TanksServer;
 
@@ -35,8 +36,9 @@ internal sealed class ControlsServer(ILogger<ControlsServer> logger, ILoggerFact
         _connections.Remove(connection);
     }
 
-    private sealed class ControlsServerConnection(WebSocket socket, ILogger logger, ControlsServer server,
-            Player player)
+    private sealed class ControlsServerConnection(
+            WebSocket socket, ILogger<ControlsServerConnection> logger,
+            ControlsServer server, Player player)
         : EasyWebSocket(socket, logger, new byte[2])
     {
         private enum MessageType : byte
@@ -58,8 +60,8 @@ internal sealed class ControlsServer(ILogger<ControlsServer> logger, ILoggerFact
         {
             var type = (MessageType)buffer[0];
             var control = (InputType)buffer[1];
-            
-            logger.LogTrace("player input {} {} {}", player.Id, type, control);
+
+            Logger.LogTrace("player input {} {} {}", player.Id, type, control);
 
             var isEnable = type switch
             {

@@ -3,13 +3,21 @@ using Microsoft.Extensions.Options;
 
 namespace TanksServer.Services;
 
-internal sealed class ServicePointDisplay(IOptions<ServicePointDisplayConfiguration> options)
+internal sealed class ServicePointDisplay(
+    IOptions<ServicePointDisplayConfiguration> options, 
+    PixelDrawer drawer
+) : ITickStep, IDisposable
 {
     private readonly UdpClient _udpClient = new(options.Value.Hostname, options.Value.Port);
 
-    public ValueTask<int> Send(DisplayPixelBuffer buffer)
+    public Task TickAsync()
     {
-        return _udpClient.SendAsync(buffer.Data);
+        return _udpClient.SendAsync(drawer.LastFrame.Data).AsTask();
+    }
+
+    public void Dispose()
+    {
+        _udpClient.Dispose();
     }
 }
 

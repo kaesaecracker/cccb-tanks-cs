@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using TanksServer.Helpers;
 using TanksServer.Services;
 
 namespace TanksServer;
@@ -26,7 +27,7 @@ internal static class Program
         app.UseStaticFiles(new StaticFileOptions { FileProvider = clientFileProvider });
 
         app.MapGet("/player", playerService.GetOrAdd);
-        
+
         app.Map("/screen", async context =>
         {
             if (!context.WebSockets.IsWebSocketRequest)
@@ -46,7 +47,7 @@ internal static class Program
 
             if (!playerService.TryGet(playerId, out var player))
                 return Results.NotFound();
-            
+
             using var ws = await context.WebSockets.AcceptWebSocketAsync();
             await controlsServer.HandleClient(ws, player);
             return Results.Empty;
@@ -73,18 +74,23 @@ internal static class Program
 
         builder.Services.AddSingleton<ServicePointDisplay>();
         builder.Services.AddSingleton<MapService>();
-
-        builder.Services.AddSingleton<MapDrawer>();
-        builder.Services.AddSingleton<ITickStep, MapDrawer>(sp => sp.GetRequiredService<MapDrawer>());
-
-        builder.Services.AddSingleton<ClientScreenServer>();
-        builder.Services.AddHostedService<ClientScreenServer>(sp => sp.GetRequiredService<ClientScreenServer>());
-        builder.Services.AddSingleton<ITickStep, ClientScreenServer>(sp => sp.GetRequiredService<ClientScreenServer>());
-
-        builder.Services.AddSingleton<ControlsServer>();
+        builder.Services.AddSingleton<TankManager>();
 
         builder.Services.AddHostedService<GameTickService>();
 
+        builder.Services.AddSingleton<SpawnQueue>();
+        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<SpawnQueue>());
+
+        builder.Services.AddSingleton<PixelDrawer>();
+        builder.Services.AddSingleton<ITickStep, PixelDrawer>(sp => sp.GetRequiredService<PixelDrawer>());
+
+        builder.Services.AddSingleton<ClientScreenServer>();
+        builder.Services.AddHostedService(sp => sp.GetRequiredService<ClientScreenServer>());
+        builder.Services.AddSingleton<ITickStep, ClientScreenServer>(sp => sp.GetRequiredService<ClientScreenServer>());
+
+        builder.Services.AddSingleton<ControlsServer>();
+        builder.Services.AddHostedService(sp => sp.GetRequiredService<ControlsServer>());
+        
         builder.Services.AddSingleton<PlayerServer>();
 
         return builder.Build();

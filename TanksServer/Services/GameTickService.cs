@@ -2,7 +2,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace TanksServer.Services;
 
-internal sealed class GameTickService(IEnumerable<ITickStep> steps) : IHostedService
+internal sealed class GameTickService(IEnumerable<ITickStep> steps) : IHostedService, IDisposable
 {
     private readonly CancellationTokenSource _cancellation = new();
     private readonly List<ITickStep> _steps = steps.ToList();
@@ -28,6 +28,12 @@ internal sealed class GameTickService(IEnumerable<ITickStep> steps) : IHostedSer
     {
         await _cancellation.CancelAsync();
         if (_run != null) await _run;
+    }
+
+    public void Dispose()
+    {
+        _cancellation.Dispose();
+        _run?.Dispose();
     }
 }
 

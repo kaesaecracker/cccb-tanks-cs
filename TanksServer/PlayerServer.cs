@@ -1,16 +1,18 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
+using TanksServer.Models;
+using TanksServer.Services;
 
 namespace TanksServer;
 
-internal sealed class PlayerServer(ILogger<PlayerServer> logger)
+internal sealed class PlayerServer(ILogger<PlayerServer> logger, SpawnQueue spawnQueue)
 {
     private readonly ConcurrentDictionary<string, Player> _players = new();
 
     public Player GetOrAdd(string name)
     {
-        var player = _players.GetOrAdd(name, _ => new Player(name));
+        var player = _players.GetOrAdd(name, AddAndSpawn);
         logger.LogInformation("player {} (re)joined", player.Id);
         return player;
     }
@@ -28,22 +30,11 @@ internal sealed class PlayerServer(ILogger<PlayerServer> logger)
         foundPlayer = null;
         return false;
     }
-}
-
-internal sealed class Player(string name)
-{
-    public string Name => name;
-
-    public Guid Id { get; } = Guid.NewGuid();
     
-    public PlayerControls Controls { get; } = new();
-}
-
-internal sealed class PlayerControls
-{
-    public bool Forward { get; set; }
-    public bool Backward { get; set; }
-    public bool TurnLeft { get; set; }
-    public bool TurnRight { get; set; }
-    public bool Shoot { get; set; }
+    private Player AddAndSpawn(string name)
+    {
+        var player = new Player(name);
+        spawnQueue.SpawnTankForPlayer(player);
+        return player;
+    }
 }
