@@ -1,3 +1,5 @@
+using TanksServer.Models;
+
 namespace TanksServer.Services;
 
 internal sealed class BulletManager

@@ -1,6 +1,7 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using TanksServer.Helpers;
+using TanksServer.Services;
 
 namespace TanksServer.DrawSteps;
 

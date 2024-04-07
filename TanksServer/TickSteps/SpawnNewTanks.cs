@@ -1,14 +1,13 @@
-using System.Collections.Concurrent;
+using TanksServer.Models;
+using TanksServer.Services;
 
 namespace TanksServer.TickSteps;
 
-internal sealed class SpawnNewTanks(TankManager tanks, MapService map) : ITickStep
+internal sealed class SpawnNewTanks(TankManager tanks, MapService map, SpawnQueueProvider queueProvider) : ITickStep
 {
-    private readonly ConcurrentQueue<Player> _playersToSpawn = new();
-
     public Task TickAsync()
     {
-        while (_playersToSpawn.TryDequeue(out var player))
+        while (queueProvider.Queue.TryDequeue(out var player))
         {
             var tank = new Tank(player, ChooseSpawnPosition())
             {
@@ -41,10 +40,5 @@ internal sealed class SpawnNewTanks(TankManager tanks, MapService map) : ITickSt
             chosenTile.X * MapService.TileSize,
             chosenTile.Y * MapService.TileSize
         );
-    }
-
-    public void SpawnTankForPlayer(Player player)
-    {
-        _playersToSpawn.Enqueue(player);
     }
 }

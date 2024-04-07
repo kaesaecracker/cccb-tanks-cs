@@ -1,11 +1,11 @@
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
-using TanksServer.TickSteps;
+using TanksServer.Models;
+using TanksServer.Services;
 
 namespace TanksServer.Servers;
 
-internal sealed class PlayerServer(ILogger<PlayerServer> logger, SpawnNewTanks spawnNewTanks)
+internal sealed class PlayerServer(ILogger<PlayerServer> logger, SpawnQueueProvider spawnQueueProvider)
 {
     private readonly ConcurrentDictionary<string, Player> _players = new();
 
@@ -33,7 +33,7 @@ internal sealed class PlayerServer(ILogger<PlayerServer> logger, SpawnNewTanks s
     private Player AddAndSpawn(string name)
     {
         var player = new Player(name);
-        spawnNewTanks.SpawnTankForPlayer(player);
+        spawnQueueProvider.Queue.Enqueue(player);
         return player;
     }
 }

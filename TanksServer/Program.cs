@@ -6,7 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using TanksServer.DrawSteps;
 using TanksServer.Helpers;
+using TanksServer.Models;
 using TanksServer.Servers;
+using TanksServer.Services;
 using TanksServer.TickSteps;
 
 namespace TanksServer;
@@ -74,14 +76,17 @@ internal static class Program
             options.SerializerOptions.TypeInfoResolverChain.Insert(0, new AppSerializerContext());
         });
 
+        builder.Services.AddOptions();
+
         builder.Services.AddSingleton<MapService>();
         builder.Services.AddSingleton<BulletManager>();
         builder.Services.AddSingleton<TankManager>();
         builder.Services.AddSingleton<SpawnNewTanks>();
-        builder.Services.AddSingleton<PixelDrawer>();
         builder.Services.AddSingleton<ControlsServer>();
         builder.Services.AddSingleton<PlayerServer>();
         builder.Services.AddSingleton<ClientScreenServer>();
+        builder.Services.AddSingleton<LastFinishedFrameProvider>();
+        builder.Services.AddSingleton<SpawnQueueProvider>();
 
         builder.Services.AddHostedService<GameTickService>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ControlsServer>());
@@ -94,13 +99,16 @@ internal static class Program
         builder.Services.AddSingleton<ITickStep, MoveTanks>();
         builder.Services.AddSingleton<ITickStep, ShootFromTanks>();
         builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<SpawnNewTanks>());
-        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<PixelDrawer>());
+        builder.Services.AddSingleton<ITickStep, DrawStateToFrame>();
         builder.Services.AddSingleton<ITickStep, SendToServicePointDisplay>();
         builder.Services.AddSingleton<ITickStep, SendToClientScreen>();
 
         builder.Services.AddSingleton<IDrawStep, MapDrawer>();
         builder.Services.AddSingleton<IDrawStep, TankDrawer>();
         builder.Services.AddSingleton<IDrawStep, BulletDrawer>();
+
+        builder.Services.Configure<ServicePointDisplayConfiguration>(
+            builder.Configuration.GetSection("ServicePointDisplay"));
 
         return builder.Build();
     }

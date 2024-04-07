@@ -1,13 +1,18 @@
 using TanksServer.Servers;
+using TanksServer.Services;
 
 namespace TanksServer.TickSteps;
 
 internal sealed class SendToClientScreen(
-    ClientScreenServer clientScreenServer, PixelDrawer drawer
+    ClientScreenServer clientScreenServer,
+    LastFinishedFrameProvider lastFinishedFrameProvider
 ) : ITickStep
 {
     public Task TickAsync()
     {
-        return Task.WhenAll(clientScreenServer.GetConnections().Select(c => c.SendAsync(drawer.LastFrame)));
+        var tasks = clientScreenServer
+            .GetConnections()
+            .Select(c => c.SendAsync(lastFinishedFrameProvider.LastFrame));
+        return Task.WhenAll(tasks);
     }
 }

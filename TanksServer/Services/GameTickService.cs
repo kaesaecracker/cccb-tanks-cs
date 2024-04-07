@@ -1,9 +1,12 @@
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using TanksServer.TickSteps;
 
 namespace TanksServer.Services;
 
-internal sealed class GameTickService(IEnumerable<ITickStep> steps) : IHostedService, IDisposable
+internal sealed class GameTickService(
+    IEnumerable<ITickStep> steps, IHostApplicationLifetime lifetime, ILogger<GameTickService> logger
+) : IHostedService, IDisposable
 {
     private readonly CancellationTokenSource _cancellation = new();
     private readonly List<ITickStep> _steps = steps.ToList();
@@ -17,11 +20,19 @@ internal sealed class GameTickService(IEnumerable<ITickStep> steps) : IHostedSer
 
     private async Task RunAsync()
     {
-        while (!_cancellation.IsCancellationRequested)
+        try
         {
-            foreach (var step in _steps)
-                await step.TickAsync();
-            await Task.Delay(1000/25);
+            while (!_cancellation.IsCancellationRequested)
+            {
+                foreach (var step in _steps)
+                    await step.TickAsync();
+                await Task.Delay(1000 / 25);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "game tick service crashed");
+            lifetime.StopApplication();
         }
     }
 
