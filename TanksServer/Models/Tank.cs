@@ -25,10 +25,9 @@ internal sealed class Tank(Player player, FloatPosition spawnPosition)
 
     public (FloatPosition TopLeft, FloatPosition BottomRight) GetBounds()
     {
-        const int halfTile = MapService.TileSize / 2;
         return (
-            new FloatPosition(Position.X - halfTile, Position.Y - halfTile),
-            new FloatPosition(Position.X + halfTile, Position.Y + halfTile)
+            Position,
+            new FloatPosition(Position.X + MapService.TileSize , Position.Y + MapService.TileSize )
         );
     }
 }
