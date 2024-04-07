@@ -74,21 +74,20 @@ internal sealed class ClientScreenServer(
 
         public async Task SendAsync(DisplayPixelBuffer buf)
         {
-            if (await _wantedFrames.WaitAsync(TimeSpan.Zero))
-            {
-                _logger.LogTrace("sending");
-                try
-                {
-                    await _channel.Writer.WriteAsync(buf.Data);
-                }
-                catch (ChannelClosedException)
-                {
-                    _logger.LogWarning("send failed, channel is closed");
-                }
-            }
-            else
+            if (!await _wantedFrames.WaitAsync(TimeSpan.Zero))
             {
                 _logger.LogTrace("client does not want a frame yet");
+                return;
+            }
+
+            _logger.LogTrace("sending");
+            try
+            {
+                await _channel.Writer.WriteAsync(buf.Data);
+            }
+            catch (ChannelClosedException)
+            {
+                _logger.LogWarning("send failed, channel is closed");
             }
         }
 

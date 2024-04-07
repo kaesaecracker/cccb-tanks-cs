@@ -6,8 +6,12 @@ using TanksServer.Models;
 
 namespace TanksServer.Services;
 
-internal sealed class TankManager(ILogger<TankManager> logger, IOptions<TanksConfiguration> options, MapService map)
-    : ITickStep, IEnumerable<Tank>
+internal sealed class TankManager(
+    ILogger<TankManager> logger,
+    IOptions<TanksConfiguration> options,
+    MapService map,
+    BulletManager bullets
+) : ITickStep, IEnumerable<Tank>
 {
     private readonly ConcurrentBag<Tank> _tanks = new();
     private readonly TanksConfiguration _config = options.Value;
@@ -22,7 +26,9 @@ internal sealed class TankManager(ILogger<TankManager> logger, IOptions<TanksCon
     {
         foreach (var tank in _tanks)
         {
-            TryMoveTank(tank);
+            if (TryMoveTank(tank))
+                continue;
+            Shoot(tank);
         }
 
         return Task.CompletedTask;
@@ -69,13 +75,31 @@ internal sealed class TankManager(ILogger<TankManager> logger, IOptions<TanksCon
         var x1 = (int)Math.Ceiling(newPosition.X / MapService.TileSize);
         var y0 = (int)Math.Floor(newPosition.Y / MapService.TileSize);
         var y1 = (int)Math.Ceiling(newPosition.Y / MapService.TileSize);
-        
+
         TilePosition[] positions = { new(x0, y0), new(x0, y1), new(x1, y0), new(x1, y1) };
         if (positions.Any(map.IsCurrentlyWall))
             return false;
 
         tank.Position = newPosition;
         return true;
+    }
+
+    private void Shoot(Tank tank)
+    {
+        if (!tank.Owner.Controls.Shoot)
+            return;
+        if (tank.NextShotAfter >= DateTime.Now)
+            return;
+
+        tank.NextShotAfter = DateTime.Now.AddMilliseconds(_config.ShootDelayMs);
+
+        var angle = tank.Rotation / 16 * 2 * Math.PI;
+        var position = new FloatPosition(
+            X: tank.Position.X + MapService.TileSize / 2d + Math.Sin(angle) * _config.BulletSpeed,
+            Y: tank.Position.Y + MapService.TileSize / 2d - Math.Cos(angle) * _config.BulletSpeed
+        );
+
+        bullets.Spawn(new Bullet(tank.Owner, position, tank.Rotation));
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

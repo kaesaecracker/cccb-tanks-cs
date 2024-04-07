@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using TanksServer.DrawSteps;
 using TanksServer.Helpers;
 using TanksServer.Services;
 
@@ -76,10 +77,13 @@ internal static class Program
         builder.Services.AddSingleton<MapService>();
 
         builder.Services.AddHostedService<GameTickService>();
+
+        builder.Services.AddSingleton<BulletManager>();
+        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<BulletManager>());
         
         builder.Services.AddSingleton<TankManager>();
         builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<TankManager>());
-
+        
         builder.Services.AddSingleton<ControlsServer>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ControlsServer>());
         
@@ -94,6 +98,10 @@ internal static class Program
         builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<ClientScreenServer>());
 
         builder.Services.AddSingleton<PlayerServer>();
+
+        builder.Services.AddSingleton<IDrawStep, MapDrawer>();
+        builder.Services.AddSingleton<IDrawStep, TankDrawer>();
+        builder.Services.AddSingleton<IDrawStep, BulletDrawer>();
 
         return builder.Build();
     }
