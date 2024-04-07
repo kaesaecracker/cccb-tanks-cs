@@ -1,9 +1,9 @@
 using System.Net.Sockets;
 using Microsoft.Extensions.Options;
 
-namespace TanksServer;
+namespace TanksServer.Services;
 
-internal class ServicePointDisplay(IOptions<ServicePointDisplayConfiguration> options)
+internal sealed class ServicePointDisplay(IOptions<ServicePointDisplayConfiguration> options)
 {
     private readonly UdpClient _udpClient = new(options.Value.Hostname, options.Value.Port);
 
@@ -13,7 +13,7 @@ internal class ServicePointDisplay(IOptions<ServicePointDisplayConfiguration> op
     }
 }
 
-internal class ServicePointDisplayConfiguration
+internal sealed class ServicePointDisplayConfiguration
 {
     public string Hostname { get; set; } = string.Empty;
     public int Port { get; set; }

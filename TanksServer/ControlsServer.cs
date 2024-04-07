@@ -1,6 +1,7 @@
 using System.Net.WebSockets;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TanksServer.Helpers;
 
 namespace TanksServer;
 
@@ -55,22 +56,19 @@ internal sealed class ControlsServer(ILogger<ControlsServer> logger, ILoggerFact
 
         protected override Task ReceiveAsync(ArraySegment<byte> buffer)
         {
-            logger.LogDebug("player input {} {}", buffer[0], buffer[1]);
+            var type = (MessageType)buffer[0];
+            var control = (InputType)buffer[1];
+            
+            logger.LogTrace("player input {} {} {}", player.Id, type, control);
 
-            bool isEnable;
-            switch ((MessageType)buffer[0])
+            var isEnable = type switch
             {
-                case MessageType.Enable:
-                    isEnable = true;
-                    break;
-                case MessageType.Disable:
-                    isEnable = false;
-                    break;
-                default:
-                    return CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "invalid state");
-            }
+                MessageType.Enable => true,
+                MessageType.Disable => false,
+                _ => throw new ArgumentException("invalid message type")
+            };
 
-            switch ((InputType)buffer[1])
+            switch (control)
             {
                 case InputType.Forward:
                     player.Controls.Forward = isEnable;
@@ -88,7 +86,7 @@ internal sealed class ControlsServer(ILogger<ControlsServer> logger, ILoggerFact
                     player.Controls.Shoot = isEnable;
                     break;
                 default:
-                    return CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "invalid control");
+                    throw new ArgumentException("invalid control type");
             }
 
             return Task.CompletedTask;

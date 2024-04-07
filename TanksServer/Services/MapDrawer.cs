@@ -1,4 +1,4 @@
-namespace TanksServer;
+namespace TanksServer.Services;
 
 internal class MapDrawer(MapService map):ITickStep
 {

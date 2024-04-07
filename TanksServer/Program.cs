@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using TanksServer.Services;
 
 namespace TanksServer;
 
@@ -17,7 +18,7 @@ internal static class Program
         app.UseWebSockets();
 
         var clientScreenServer = app.Services.GetRequiredService<ClientScreenServer>();
-        var playerService = app.Services.GetRequiredService<PlayerService>();
+        var playerService = app.Services.GetRequiredService<PlayerServer>();
         var controlsServer = app.Services.GetRequiredService<ControlsServer>();
 
         var clientFileProvider = new PhysicalFileProvider(Path.Combine(app.Environment.ContentRootPath, "client"));
@@ -84,7 +85,7 @@ internal static class Program
 
         builder.Services.AddHostedService<GameTickService>();
 
-        builder.Services.AddSingleton<PlayerService>();
+        builder.Services.AddSingleton<PlayerServer>();
 
         return builder.Build();
     }

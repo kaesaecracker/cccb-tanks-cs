@@ -4,11 +4,16 @@ using Microsoft.Extensions.Logging;
 
 namespace TanksServer;
 
-internal sealed class PlayerService(ILogger<PlayerService> logger)
+internal sealed class PlayerServer(ILogger<PlayerServer> logger)
 {
     private readonly ConcurrentDictionary<string, Player> _players = new();
 
-    public Player GetOrAdd(string name) => _players.GetOrAdd(name, _ => new Player(name));
+    public Player GetOrAdd(string name)
+    {
+        var player = _players.GetOrAdd(name, _ => new Player(name));
+        logger.LogInformation("player {} (re)joined", player.Id);
+        return player;
+    }
 
     public bool TryGet(Guid? playerId, [MaybeNullWhen(false)] out Player foundPlayer)
     {

@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace TanksServer;
+namespace TanksServer.Helpers;
 
 internal sealed class FixedSizeBitFieldView(Memory<byte> data) : IList<bool>
 {

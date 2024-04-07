@@ -1,8 +1,11 @@
 using System.Net.WebSockets;
 using Microsoft.Extensions.Logging;
 
-namespace TanksServer;
+namespace TanksServer.Helpers;
 
+/// <summary>
+/// Hacky class for easier semantics
+/// </summary>
 internal abstract class EasyWebSocket
 {
     private readonly TaskCompletionSource _completionSource = new();

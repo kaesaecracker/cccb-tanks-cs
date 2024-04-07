@@ -14,5 +14,11 @@
             <Link>.dockerignore</Link>
         </Content>
     </ItemGroup>
+    
+    <PropertyGroup>
+        <AnalysisMode>Recommended</AnalysisMode>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <NoWarn>CA1805,CA1848</NoWarn>
+    </PropertyGroup>
 
 </Project>

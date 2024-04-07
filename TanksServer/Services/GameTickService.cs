@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Hosting;
 
-namespace TanksServer;
+namespace TanksServer.Services;
 
-public class GameTickService(IEnumerable<ITickStep> steps) : IHostedService
+internal sealed class GameTickService(IEnumerable<ITickStep> steps) : IHostedService
 {
     private readonly CancellationTokenSource _cancellation = new();
     private readonly List<ITickStep> _steps = steps.ToList();
