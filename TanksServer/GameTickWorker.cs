@@ -1,11 +1,12 @@
+using System.Diagnostics;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TanksServer.TickSteps;
 
-namespace TanksServer.Services;
+namespace TanksServer;
 
-internal sealed class GameTickService(
-    IEnumerable<ITickStep> steps, IHostApplicationLifetime lifetime, ILogger<GameTickService> logger
+internal sealed class GameTickWorker(
+    IEnumerable<ITickStep> steps, IHostApplicationLifetime lifetime, ILogger<GameTickWorker> logger
 ) : IHostedService, IDisposable
 {
     private readonly CancellationTokenSource _cancellation = new();
@@ -22,11 +23,16 @@ internal sealed class GameTickService(
     {
         try
         {
+            var sw = new Stopwatch();
             while (!_cancellation.IsCancellationRequested)
             {
+                logger.LogTrace("since last frame: {}", sw.Elapsed);
+                sw.Restart();
+
                 foreach (var step in _steps)
                     await step.TickAsync();
-                await Task.Delay(1000 / 25);
+                
+                await Task.Delay(TimeSpan.FromMilliseconds(1000 / 25) - sw.Elapsed);
             }
         }
         catch (Exception ex)

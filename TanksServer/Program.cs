@@ -88,7 +88,7 @@ internal static class Program
         builder.Services.AddSingleton<LastFinishedFrameProvider>();
         builder.Services.AddSingleton<SpawnQueueProvider>();
 
-        builder.Services.AddHostedService<GameTickService>();
+        builder.Services.AddHostedService<GameTickWorker>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ControlsServer>());
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ClientScreenServer>());
 
