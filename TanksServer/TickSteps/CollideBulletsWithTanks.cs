@@ -3,7 +3,7 @@ using TanksServer.Services;
 
 namespace TanksServer.TickSteps;
 
-internal sealed class CollideBulletsWithTanks(BulletManager bullets) : ITickStep
+internal sealed class CollideBulletsWithTanks(BulletManager bullets, TankManager tanks) : ITickStep
 {
     public Task TickAsync()
     {
@@ -13,6 +13,21 @@ internal sealed class CollideBulletsWithTanks(BulletManager bullets) : ITickStep
 
     private bool BulletHitsTank(Bullet bullet)
     {
-        return false; // TODO
+        foreach (var tank in tanks)
+        {
+            var (topLeft, bottomRight) = tank.GetBounds();
+            if (bullet.Position.X <= topLeft.X || bullet.Position.X >= bottomRight.X ||
+                bullet.Position.Y <= topLeft.Y || bullet.Position.Y >= bottomRight.Y)
+                continue;
+
+            if (bullet.Owner != tank.Owner)
+                bullet.Owner.Kills++;
+            tank.Owner.Deaths++;
+            
+            tanks.Remove(tank);
+            return true;
+        }
+
+        return false;
     }
 }

@@ -7,6 +7,10 @@ internal sealed class Player(string name)
     public Guid Id { get; } = Guid.NewGuid();
 
     public PlayerControls Controls { get; } = new();
+
+    public int Kills { get; set; }
+    
+    public int Deaths { get; set; }
 }
 
 internal sealed class PlayerControls

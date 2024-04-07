@@ -1,3 +1,5 @@
+using TanksServer.Services;
+
 namespace TanksServer.Models;
 
 internal sealed class Tank(Player player, FloatPosition spawnPosition)
@@ -16,8 +18,17 @@ internal sealed class Tank(Player player, FloatPosition spawnPosition)
     }
 
     public FloatPosition Position { get; set; } = spawnPosition;
-    
+
     public DateTime NextShotAfter { get; set; }
-    
+
     public bool Moved { get; set; }
+
+    public (FloatPosition TopLeft, FloatPosition BottomRight) GetBounds()
+    {
+        const int halfTile = MapService.TileSize / 2;
+        return (
+            new FloatPosition(Position.X - halfTile, Position.Y - halfTile),
+            new FloatPosition(Position.X + halfTile, Position.Y + halfTile)
+        );
+    }
 }

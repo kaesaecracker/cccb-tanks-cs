@@ -34,7 +34,7 @@ internal sealed class TankDrawer : IDrawStep
         foreach (var tank in _tanks)
         {
             var pos = tank.Position.ToPixelPosition();
-            var rotationVariant = (int)Math.Floor(tank.Rotation);
+            var rotationVariant = (int)Math.Round(tank.Rotation) % 16;
             for (var dy = 0; dy < MapService.TileSize; dy++)
             {
                 var rowStartIndex = (pos.Y + dy) * MapService.PixelsPerRow;
