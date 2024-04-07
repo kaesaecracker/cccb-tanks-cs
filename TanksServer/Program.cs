@@ -6,7 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using TanksServer.DrawSteps;
 using TanksServer.Helpers;
-using TanksServer.Services;
+using TanksServer.Servers;
+using TanksServer.TickSteps;
 
 namespace TanksServer;
 
@@ -73,31 +74,29 @@ internal static class Program
             options.SerializerOptions.TypeInfoResolverChain.Insert(0, new AppSerializerContext());
         });
 
-        builder.Services.AddSingleton<ServicePointDisplay>();
         builder.Services.AddSingleton<MapService>();
+        builder.Services.AddSingleton<BulletManager>();
+        builder.Services.AddSingleton<TankManager>();
+        builder.Services.AddSingleton<SpawnNewTanks>();
+        builder.Services.AddSingleton<PixelDrawer>();
+        builder.Services.AddSingleton<ControlsServer>();
+        builder.Services.AddSingleton<PlayerServer>();
+        builder.Services.AddSingleton<ClientScreenServer>();
 
         builder.Services.AddHostedService<GameTickService>();
-
-        builder.Services.AddSingleton<BulletManager>();
-        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<BulletManager>());
-        
-        builder.Services.AddSingleton<TankManager>();
-        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<TankManager>());
-        
-        builder.Services.AddSingleton<ControlsServer>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ControlsServer>());
-        
-        builder.Services.AddSingleton<SpawnQueue>();
-        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<SpawnQueue>());
-
-        builder.Services.AddSingleton<PixelDrawer>();
-        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<PixelDrawer>());
-
-        builder.Services.AddSingleton<ClientScreenServer>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ClientScreenServer>());
-        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<ClientScreenServer>());
 
-        builder.Services.AddSingleton<PlayerServer>();
+        builder.Services.AddSingleton<ITickStep, MoveBullets>();
+        builder.Services.AddSingleton<ITickStep, CollideBulletsWithTanks>();
+        builder.Services.AddSingleton<ITickStep, CollideBulletsWithMap>();
+        builder.Services.AddSingleton<ITickStep, RotateTanks>();
+        builder.Services.AddSingleton<ITickStep, MoveTanks>();
+        builder.Services.AddSingleton<ITickStep, ShootFromTanks>();
+        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<SpawnNewTanks>());
+        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<PixelDrawer>());
+        builder.Services.AddSingleton<ITickStep, SendToServicePointDisplay>();
+        builder.Services.AddSingleton<ITickStep, SendToClientScreen>();
 
         builder.Services.AddSingleton<IDrawStep, MapDrawer>();
         builder.Services.AddSingleton<IDrawStep, TankDrawer>();

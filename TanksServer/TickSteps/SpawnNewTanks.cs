@@ -1,9 +1,8 @@
 using System.Collections.Concurrent;
-using TanksServer.Models;
 
-namespace TanksServer.Services;
+namespace TanksServer.TickSteps;
 
-internal sealed class SpawnQueue(TankManager tanks, MapService map) : ITickStep
+internal sealed class SpawnNewTanks(TankManager tanks, MapService map) : ITickStep
 {
     private readonly ConcurrentQueue<Player> _playersToSpawn = new();
 

@@ -1,9 +1,8 @@
 using System.Net.Sockets;
-using Microsoft.Extensions.Options;
 
-namespace TanksServer.Services;
+namespace TanksServer.TickSteps;
 
-internal sealed class ServicePointDisplay(
+internal sealed class SendToServicePointDisplay(
     IOptions<ServicePointDisplayConfiguration> options, 
     PixelDrawer drawer
 ) : ITickStep, IDisposable
@@ -19,10 +18,4 @@ internal sealed class ServicePointDisplay(
     {
         _udpClient.Dispose();
     }
-}
-
-internal sealed class ServicePointDisplayConfiguration
-{
-    public string Hostname { get; set; } = string.Empty;
-    public int Port { get; set; }
 }

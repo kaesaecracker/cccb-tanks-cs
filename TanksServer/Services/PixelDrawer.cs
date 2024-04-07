@@ -1,11 +1,6 @@
-using System.Diagnostics;
-using System.Net.Mime;
-using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using TanksServer.DrawSteps;
 using TanksServer.Helpers;
-using TanksServer.Models;
+using TanksServer.TickSteps;
 
 namespace TanksServer.Services;
 

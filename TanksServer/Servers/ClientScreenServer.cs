@@ -5,15 +5,13 @@ using System.Threading.Channels;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TanksServer.Helpers;
-using TanksServer.Services;
 
-namespace TanksServer;
+namespace TanksServer.Servers;
 
 internal sealed class ClientScreenServer(
     ILogger<ClientScreenServer> logger,
-    ILoggerFactory loggerFactory,
-    PixelDrawer drawer
-) : IHostedLifecycleService, ITickStep
+    ILoggerFactory loggerFactory
+) : IHostedLifecycleService
 {
     private readonly ConcurrentDictionary<ClientScreenServerConnection, byte> _connections = new();
     private bool _closing;
@@ -41,12 +39,6 @@ internal sealed class ClientScreenServer(
         return Task.WhenAll(_connections.Keys.Select(c => c.CloseAsync()));
     }
 
-    public Task TickAsync()
-    {
-        logger.LogTrace("Sending buffer to {} clients", _connections.Count);
-        return Task.WhenAll(_connections.Keys.Select(c => c.SendAsync(drawer.LastFrame)));
-    }
-
     public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     public Task StartedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
@@ -54,8 +46,10 @@ internal sealed class ClientScreenServer(
     public Task StoppedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
     private void Remove(ClientScreenServerConnection connection) => _connections.TryRemove(connection, out _);
+    
+    public IEnumerable<ClientScreenServerConnection> GetConnections() => _connections.Keys;
 
-    private sealed class ClientScreenServerConnection: IDisposable
+    internal sealed class ClientScreenServerConnection: IDisposable
     {
         private readonly ByteChannelWebSocket _channel;
         private readonly SemaphoreSlim _wantedFrames = new(1);

@@ -18,4 +18,6 @@ internal sealed class Tank(Player player, FloatPosition spawnPosition)
     public FloatPosition Position { get; set; } = spawnPosition;
     
     public DateTime NextShotAfter { get; set; }
+    
+    public bool Moved { get; set; }
 }

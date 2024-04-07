@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Hosting;
+using TanksServer.TickSteps;
 
 namespace TanksServer.Services;
 
@@ -35,9 +36,4 @@ internal sealed class GameTickService(IEnumerable<ITickStep> steps) : IHostedSer
         _cancellation.Dispose();
         _run?.Dispose();
     }
-}
-
-public interface ITickStep
-{
-    Task TickAsync();
 }
