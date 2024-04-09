@@ -1,12 +1,13 @@
 using TanksServer.Helpers;
 using TanksServer.Models;
+using TanksServer.ServicePointDisplay;
 using TanksServer.Services;
 
 namespace TanksServer.DrawSteps;
 
 internal sealed class MapDrawer(MapService map) : IDrawStep
 {
-    public void Draw(DisplayPixelBuffer buffer)
+    public void Draw(PixelDisplayBufferView buffer)
     {
         for (var tileY = 0; tileY < MapService.TilesPerColumn; tileY++)
         for (var tileX = 0; tileX < MapService.TilesPerRow; tileX++)

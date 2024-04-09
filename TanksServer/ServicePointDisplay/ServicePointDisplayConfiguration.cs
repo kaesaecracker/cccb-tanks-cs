@@ -1,4 +1,4 @@
-namespace TanksServer.Models;
+namespace TanksServer.ServicePointDisplay;
 
 internal sealed class ServicePointDisplayConfiguration
 {

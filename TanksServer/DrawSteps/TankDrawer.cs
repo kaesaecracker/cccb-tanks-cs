@@ -1,6 +1,7 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using TanksServer.Helpers;
+using TanksServer.ServicePointDisplay;
 using TanksServer.Services;
 
 namespace TanksServer.DrawSteps;
@@ -29,7 +30,7 @@ internal sealed class TankDrawer : IDrawStep
         _tankSpriteWidth = tankImage.Width;
     }
 
-    public void Draw(DisplayPixelBuffer buffer)
+    public void Draw(PixelDisplayBufferView buffer)
     {
         foreach (var tank in _tanks)
         {

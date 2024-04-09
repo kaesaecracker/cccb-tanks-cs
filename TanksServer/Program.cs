@@ -6,8 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using TanksServer.DrawSteps;
 using TanksServer.Helpers;
-using TanksServer.Models;
 using TanksServer.Servers;
+using TanksServer.ServicePointDisplay;
 using TanksServer.Services;
 using TanksServer.TickSteps;
 
@@ -81,7 +81,6 @@ internal static class Program
         builder.Services.AddSingleton<MapService>();
         builder.Services.AddSingleton<BulletManager>();
         builder.Services.AddSingleton<TankManager>();
-        builder.Services.AddSingleton<SpawnNewTanks>();
         builder.Services.AddSingleton<ControlsServer>();
         builder.Services.AddSingleton<PlayerServer>();
         builder.Services.AddSingleton<ClientScreenServer>();
@@ -98,7 +97,7 @@ internal static class Program
         builder.Services.AddSingleton<ITickStep, RotateTanks>();
         builder.Services.AddSingleton<ITickStep, MoveTanks>();
         builder.Services.AddSingleton<ITickStep, ShootFromTanks>();
-        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<SpawnNewTanks>());
+        builder.Services.AddSingleton<ITickStep, SpawnNewTanks>();
         builder.Services.AddSingleton<ITickStep, DrawStateToFrame>();
         builder.Services.AddSingleton<ITickStep, SendToServicePointDisplay>();
         builder.Services.AddSingleton<ITickStep, SendToClientScreen>();

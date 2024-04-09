@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace TanksServer.Helpers;
+namespace TanksServer.ServicePointDisplay;
 
 internal sealed class FixedSizeBitFieldView(Memory<byte> data) : IList<bool>
 {
@@ -8,6 +8,7 @@ internal sealed class FixedSizeBitFieldView(Memory<byte> data) : IList<bool>
     public bool IsReadOnly => false;
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
     public IEnumerator<bool> GetEnumerator()
     {
         return Enumerable().GetEnumerator();
@@ -32,10 +33,17 @@ internal sealed class FixedSizeBitFieldView(Memory<byte> data) : IList<bool>
             array[i + arrayIndex] = this[i];
     }
 
-    private static (int byteIndex, int bitInByteIndex) GetIndexes(int bitIndex)
+    private (int byteIndex, int bitInByteIndex) GetIndexes(int bitIndex)
     {
         var byteIndex = bitIndex / 8;
         var bitInByteIndex = 7 - bitIndex % 8;
+        if (byteIndex >= data.Length)
+        {
+            throw new ArgumentOutOfRangeException(nameof(bitIndex), 
+                $"accessing this bit field at position {bitIndex} would result in an access to byte " +
+                $"{byteIndex} but byte length is {data.Length}");
+        }
+
         return (byteIndex, bitInByteIndex);
     }
 

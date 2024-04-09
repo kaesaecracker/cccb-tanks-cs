@@ -3,12 +3,16 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TanksServer.TickSteps;
 
-namespace TanksServer;
+namespace TanksServer.Services;
 
 internal sealed class GameTickWorker(
-    IEnumerable<ITickStep> steps, IHostApplicationLifetime lifetime, ILogger<GameTickWorker> logger
+    IEnumerable<ITickStep> steps,
+    IHostApplicationLifetime lifetime,
+    ILogger<GameTickWorker> logger
 ) : IHostedService, IDisposable
 {
+    private const int TicksPerSecond = 25;
+    private static readonly TimeSpan TickPacing = TimeSpan.FromMilliseconds((int)(1000 / TicksPerSecond));
     private readonly CancellationTokenSource _cancellation = new();
     private readonly List<ITickStep> _steps = steps.ToList();
     private Task? _run;
@@ -31,8 +35,10 @@ internal sealed class GameTickWorker(
 
                 foreach (var step in _steps)
                     await step.TickAsync();
-                
-                await Task.Delay(TimeSpan.FromMilliseconds(1000 / 25) - sw.Elapsed);
+
+                var wantedDelay = TickPacing - sw.Elapsed;
+                if (wantedDelay.Ticks > 0)
+                    await Task.Delay(wantedDelay);
             }
         }
         catch (Exception ex)

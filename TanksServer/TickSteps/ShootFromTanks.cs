@@ -4,7 +4,9 @@ using TanksServer.Services;
 namespace TanksServer.TickSteps;
 
 internal sealed class ShootFromTanks(
-    TankManager tanks, IOptions<TanksConfiguration> options, BulletManager bulletManager
+    TankManager tanks,
+    IOptions<TanksConfiguration> options,
+    BulletManager bulletManager
 ) : ITickStep
 {
     private readonly TanksConfiguration _config = options.Value;

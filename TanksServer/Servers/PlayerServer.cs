@@ -29,6 +29,8 @@ internal sealed class PlayerServer(ILogger<PlayerServer> logger, SpawnQueueProvi
         foundPlayer = null;
         return false;
     }
+
+    public IEnumerable<Player> GetAll() => _players.Values;
     
     private Player AddAndSpawn(string name)
     {

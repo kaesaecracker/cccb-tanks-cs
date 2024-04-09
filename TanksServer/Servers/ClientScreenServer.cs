@@ -4,6 +4,7 @@ using System.Threading.Channels;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TanksServer.Helpers;
+using TanksServer.ServicePointDisplay;
 
 namespace TanksServer.Servers;
 
@@ -65,7 +66,7 @@ internal sealed class ClientScreenServer(
             Done = ReceiveAsync();
         }
 
-        public async Task SendAsync(DisplayPixelBuffer buf)
+        public async Task SendAsync(PixelDisplayBufferView buf)
         {
             if (!await _wantedFrames.WaitAsync(TimeSpan.Zero))
             {
