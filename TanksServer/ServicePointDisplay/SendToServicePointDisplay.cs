@@ -90,10 +90,10 @@ internal sealed class SendToServicePointDisplay : ITickStep, IDisposable
         foreach (var p in playersToDisplay)
         {
             var score = p.Kills.ToString();
-            var nameLength = ScoresWidth - score.Length;
+            var nameLength = Math.Min(p.Name.Length, ScoresWidth - score.Length - 1);
 
             var name = p.Name[..nameLength];
-            var spaces = new string(' ', nameLength - name.Length + 1);
+            var spaces = new string(' ', ScoresWidth - score.Length - nameLength);
 
             _scoresBuffer.Rows[row] = name + spaces + score;
             row++;

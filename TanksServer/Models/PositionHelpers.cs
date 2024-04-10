@@ -5,8 +5,6 @@ namespace TanksServer.Models;
 
 internal static class PositionHelpers
 {
-    public static int ToPixelIndex(this PixelPosition position) => position.Y * MapService.PixelsPerRow + position.X;
-
     public static PixelPosition GetPixelRelative(this TilePosition position, byte subX, byte subY)
     {
         Debug.Assert(subX < 8);

@@ -17,8 +17,8 @@ internal sealed class MapDrawer(MapService map) : IDrawStep
             for (byte pixelInTileY = 0; pixelInTileY < MapService.TileSize; pixelInTileY++)
             for (byte pixelInTileX = 0; pixelInTileX < MapService.TileSize; pixelInTileX++)
             {
-                var index = tile.GetPixelRelative(pixelInTileX, pixelInTileY).ToPixelIndex();
-                buffer.Pixels[index] = pixelInTileX % 2 == pixelInTileY % 2;
+                var position = tile.GetPixelRelative(pixelInTileX, pixelInTileY);
+                buffer.Pixels[position] = pixelInTileX % 2 == pixelInTileY % 2;
             }
         }
     }

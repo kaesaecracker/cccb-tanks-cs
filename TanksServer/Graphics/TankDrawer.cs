@@ -35,18 +35,15 @@ internal sealed class TankDrawer : IDrawStep
         {
             var pos = tank.Position.ToPixelPosition();
             var rotationVariant = (int)Math.Round(tank.Rotation) % 16;
+            
             for (var dy = 0; dy < MapService.TileSize; dy++)
+            for (var dx = 0; dx < MapService.TileSize; dx++)
             {
-                var rowStartIndex = (pos.Y + dy) * MapService.PixelsPerRow;
+                if (!TankSpriteAt(dx, dy, rotationVariant))
+                    continue;
 
-                for (var dx = 0; dx < MapService.TileSize; dx++)
-                {
-                    if (!TankSpriteAt(dx, dy, rotationVariant))
-                        continue;
-
-                    var i = rowStartIndex + pos.X + dx;
-                    buffer.Pixels[i] = true;
-                }
+                var position = new PixelPosition(pos.X + dx, pos.Y + dy);
+                buffer.Pixels[position] = true;
             }
         }
     }
