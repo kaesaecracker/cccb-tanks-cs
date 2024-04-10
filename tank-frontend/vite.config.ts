@@ -1,12 +1,15 @@
-import {defineConfig} from 'vite';
+import {ConfigEnv, defineConfig} from 'vite';
 import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
-export default defineConfig({
-    plugins: [react()],
+export default defineConfig(() => {
+    const isContainer = process.env.CONTAINERMODE;
+    return {
+        plugins: [react()],
 
-    build: {
-        outDir: '../TanksServer/client',
-        emptyOutDir: true
-    }
+        build: {
+            outDir: isContainer ? undefined : '../TanksServer/client',
+            emptyOutDir: true
+        }
+    };
 });

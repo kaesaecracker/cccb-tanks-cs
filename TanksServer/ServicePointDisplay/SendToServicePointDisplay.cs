@@ -14,6 +14,7 @@ internal sealed class SendToServicePointDisplay : ITickStep, IDisposable
     private readonly TextDisplayBuffer _scoresBuffer;
     private readonly PlayerServer _players;
     private readonly ILogger<SendToServicePointDisplay> _logger;
+    private DateTime _nextFailLog = DateTime.Now;
 
     private const int ScoresWidth = 12;
     private const int ScoresHeight = 20;
@@ -70,7 +71,11 @@ internal sealed class SendToServicePointDisplay : ITickStep, IDisposable
             }
             catch (SocketException ex)
             {
-                _logger.LogWarning(ex, "could not send data to service point display");
+                if (DateTime.Now > _nextFailLog)
+                {
+                    _logger.LogWarning("could not send data to service point display: {}", ex.Message);
+                    _nextFailLog = DateTime.Now + TimeSpan.FromSeconds(5);
+                }
             }
         }
     }

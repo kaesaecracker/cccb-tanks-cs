@@ -5,25 +5,41 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>disable</ImplicitUsings>
         <InvariantGlobalization>true</InvariantGlobalization>
-        <PublishAot>true</PublishAot>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
-    <ItemGroup>
-        <Content Include="..\.dockerignore">
-            <Link>.dockerignore</Link>
-        </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
-      <PackageReference Include="SixLabors.ImageSharp" Version="3.1.3" />
-    </ItemGroup>
-    
     <PropertyGroup>
         <AnalysisMode>Recommended</AnalysisMode>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <NoWarn>CA1805,CA1848</NoWarn>
     </PropertyGroup>
+
+    <PropertyGroup>
+        <IsAotCompatible>true</IsAotCompatible>
+        <PublishAot>true</PublishAot>
+
+        <IlcDisableReflection>false</IlcDisableReflection>
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <StaticExecutable>true</StaticExecutable>
+        <StripSymbols>true</StripSymbols>
+        <StaticallyLinked>true</StaticallyLinked>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0"/>
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.3"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="./assets/tank.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Always" />
+        
+        <Content Include="../Dockerfile">
+            <Link>..\Dockerfile</Link>
+        </Content>
+        <Content Include="../.dockerignore">
+            <Link>../Dockerfile</Link>
+        </Content>
+        <Content Include="../Makefile" />
+    </ItemGroup>
 
 </Project>

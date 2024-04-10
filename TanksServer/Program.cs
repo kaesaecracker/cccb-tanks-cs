@@ -11,14 +11,11 @@ using TanksServer.ServicePointDisplay;
 
 namespace TanksServer;
 
-internal static class Program
+public static class Program
 {
-    public static async Task Main(string[] args)
+    public static void Main(string[] args)
     {
         var app = Configure(args);
-
-        app.UseCors();
-        app.UseWebSockets();
 
         var clientScreenServer = app.Services.GetRequiredService<ClientScreenServer>();
         var playerService = app.Services.GetRequiredService<PlayerServer>();
@@ -52,10 +49,10 @@ internal static class Program
 
             using var ws = await context.WebSockets.AcceptWebSocketAsync();
             await controlsServer.HandleClient(ws, player);
-            return Results.Empty;
+            return Results.Ok();
         });
 
-        await app.RunAsync();
+        app.Run();
     }
 
     private static WebApplication Configure(string[] args)
@@ -74,7 +71,7 @@ internal static class Program
             options.SerializerOptions.TypeInfoResolverChain.Insert(0, new AppSerializerContext());
         });
 
-        builder.Services.AddOptions();
+        builder.Services.AddHttpLogging(_ => { });
 
         builder.Services.AddSingleton<MapService>();
         builder.Services.AddSingleton<BulletManager>();
@@ -107,6 +104,12 @@ internal static class Program
         builder.Services.Configure<ServicePointDisplayConfiguration>(
             builder.Configuration.GetSection("ServicePointDisplay"));
 
-        return builder.Build();
+        var app = builder.Build();
+
+        app.UseCors();
+        app.UseWebSockets();
+        app.UseHttpLogging();
+
+        return app;
     }
 }
