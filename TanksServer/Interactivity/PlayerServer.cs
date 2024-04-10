@@ -1,9 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Extensions.Logging;
-using TanksServer.Models;
-using TanksServer.Services;
+using TanksServer.GameLogic;
 
-namespace TanksServer.Servers;
+namespace TanksServer.Interactivity;
 
 internal sealed class PlayerServer(ILogger<PlayerServer> logger, SpawnQueueProvider spawnQueueProvider)
 {

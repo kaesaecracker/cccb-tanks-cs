@@ -1,7 +1,4 @@
-using TanksServer.Models;
-using TanksServer.Services;
-
-namespace TanksServer.TickSteps;
+namespace TanksServer.GameLogic;
 
 internal sealed class CollideBulletsWithTanks(
     BulletManager bullets, TankManager tanks, SpawnQueueProvider spawnQueueProvider

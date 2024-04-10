@@ -1,9 +1,8 @@
 using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Threading.Channels;
-using Microsoft.Extensions.Logging;
 
-namespace TanksServer.Helpers;
+namespace TanksServer.Interactivity;
 
 /// <summary>
 /// Hacky class for easier semantics

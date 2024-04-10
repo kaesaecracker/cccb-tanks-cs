@@ -1,8 +1,4 @@
-using TanksServer.Helpers;
-using TanksServer.Models;
-using TanksServer.Services;
-
-namespace TanksServer.TickSteps;
+namespace TanksServer.GameLogic;
 
 internal sealed class CollideBulletsWithMap(BulletManager bullets, MapService map) : ITickStep
 {

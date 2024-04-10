@@ -1,10 +1,9 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using Microsoft.Extensions.Logging;
-using TanksServer.Servers;
-using TanksServer.Services;
-using TanksServer.TickSteps;
+using TanksServer.GameLogic;
+using TanksServer.Graphics;
+using TanksServer.Interactivity;
 
 namespace TanksServer.ServicePointDisplay;
 
@@ -34,16 +33,19 @@ internal sealed class SendToServicePointDisplay : ITickStep, IDisposable
             ? new UdpClient(options.Value.Hostname, options.Value.Port)
             : null;
 
-        _scoresBuffer = new(new(MapService.TilesPerRow, 0), 12, 20);
-        _scoresBuffer.Rows[0] = "== TANKS! ==";
-        _scoresBuffer.Rows[1] = "-- scores --";
-
-        _scoresBuffer.Rows[17] = "--  join  --";
-
         var localIp = GetLocalIp(options.Value.Hostname, options.Value.Port).Split('.');
         Debug.Assert(localIp.Length == 4); // were talking legacy ip
-        _scoresBuffer.Rows[18] = string.Join('.', localIp[..2]);
-        _scoresBuffer.Rows[19] = string.Join('.', localIp[2..]);
+        _scoresBuffer = new TextDisplayBuffer(new TilePosition(MapService.TilesPerRow, 0), 12, 20)
+        {
+            Rows =
+            {
+                [0] = "== TANKS! ==",
+                [1] = "-- scores --",
+                [17] = "--  join  --",
+                [18] = string.Join('.', localIp[..2]),
+                [19] = string.Join('.', localIp[2..])
+            }
+        };
     }
 
     private static string GetLocalIp(string host, int port)

@@ -1,8 +1,6 @@
 using System.Collections;
-using Microsoft.Extensions.Logging;
-using TanksServer.Models;
 
-namespace TanksServer.Services;
+namespace TanksServer.GameLogic;
 
 internal sealed class TankManager(ILogger<TankManager> logger) : IEnumerable<Tank>
 {

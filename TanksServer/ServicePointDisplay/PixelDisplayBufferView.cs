@@ -1,6 +1,3 @@
-using TanksServer.Helpers;
-using TanksServer.Services;
-
 namespace TanksServer.ServicePointDisplay;
 
 internal sealed class PixelDisplayBufferView : DisplayBufferView

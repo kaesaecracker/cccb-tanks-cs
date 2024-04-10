@@ -1,6 +1,4 @@
-using TanksServer.Models;
-
-namespace TanksServer.Services;
+namespace TanksServer.GameLogic;
 
 internal sealed class SpawnQueueProvider
 {

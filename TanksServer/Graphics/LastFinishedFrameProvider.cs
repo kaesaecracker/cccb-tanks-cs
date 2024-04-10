@@ -1,6 +1,6 @@
 using TanksServer.ServicePointDisplay;
 
-namespace TanksServer.Services;
+namespace TanksServer.Graphics;
 
 internal sealed class LastFinishedFrameProvider
 {

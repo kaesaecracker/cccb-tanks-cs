@@ -2,11 +2,9 @@ using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Threading.Channels;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using TanksServer.Helpers;
 using TanksServer.ServicePointDisplay;
 
-namespace TanksServer.Servers;
+namespace TanksServer.Interactivity;
 
 internal sealed class ClientScreenServer(
     ILogger<ClientScreenServer> logger,

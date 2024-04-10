@@ -1,10 +1,9 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using TanksServer.Helpers;
+using TanksServer.GameLogic;
 using TanksServer.ServicePointDisplay;
-using TanksServer.Services;
 
-namespace TanksServer.DrawSteps;
+namespace TanksServer.Graphics;
 
 internal sealed class TankDrawer : IDrawStep
 {

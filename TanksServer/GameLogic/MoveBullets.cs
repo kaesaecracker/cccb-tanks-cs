@@ -1,7 +1,4 @@
-using TanksServer.Models;
-using TanksServer.Services;
-
-namespace TanksServer.TickSteps;
+namespace TanksServer.GameLogic;
 
 internal sealed class MoveBullets(BulletManager bullets) : ITickStep
 {

@@ -1,5 +1,3 @@
-using TanksServer.Models;
-
 namespace TanksServer.ServicePointDisplay;
 
 internal class DisplayBufferView(byte[] data)

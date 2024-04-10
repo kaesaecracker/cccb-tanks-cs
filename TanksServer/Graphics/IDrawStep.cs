@@ -1,6 +1,6 @@
 using TanksServer.ServicePointDisplay;
 
-namespace TanksServer.DrawSteps;
+namespace TanksServer.Graphics;
 
 internal interface IDrawStep
 {

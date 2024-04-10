@@ -4,12 +4,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using TanksServer.DrawSteps;
-using TanksServer.Helpers;
-using TanksServer.Servers;
+using TanksServer.GameLogic;
+using TanksServer.Graphics;
+using TanksServer.Interactivity;
 using TanksServer.ServicePointDisplay;
-using TanksServer.Services;
-using TanksServer.TickSteps;
 
 namespace TanksServer;
 

@@ -1,5 +1,3 @@
-using TanksServer.Models;
-
 namespace TanksServer.ServicePointDisplay;
 
 internal sealed class TextDisplayBuffer : DisplayBufferView

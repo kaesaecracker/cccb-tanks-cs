@@ -1,7 +1,7 @@
-using TanksServer.Servers;
-using TanksServer.Services;
+using TanksServer.GameLogic;
+using TanksServer.Graphics;
 
-namespace TanksServer.TickSteps;
+namespace TanksServer.Interactivity;
 
 internal sealed class SendToClientScreen(
     ClientScreenServer clientScreenServer,

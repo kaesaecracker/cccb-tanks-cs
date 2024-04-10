@@ -1,4 +1,4 @@
-namespace TanksServer.TickSteps;
+namespace TanksServer.GameLogic;
 
 public interface ITickStep
 {

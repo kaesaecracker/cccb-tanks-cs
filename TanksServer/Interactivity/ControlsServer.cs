@@ -1,15 +1,12 @@
 using System.Net.WebSockets;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using TanksServer.Helpers;
-using TanksServer.Models;
 
-namespace TanksServer.Servers;
+namespace TanksServer.Interactivity;
 
 internal sealed class ControlsServer(ILogger<ControlsServer> logger, ILoggerFactory loggerFactory)
     : IHostedLifecycleService
 {
-    private readonly List<ControlsServerConnection> _connections = new();
+    private readonly List<ControlsServerConnection> _connections = [];
 
     public Task HandleClient(WebSocket ws, Player player)
     {

@@ -1,10 +1,9 @@
-using TanksServer.Models;
-using TanksServer.Services;
-
-namespace TanksServer.TickSteps;
+namespace TanksServer.GameLogic;
 
 internal sealed class MoveTanks(
-    TankManager tanks, IOptions<TanksConfiguration> options, MapService map
+    TankManager tanks, 
+    IOptions<TanksConfiguration> options,
+    MapService map
 ) : ITickStep
 {
     private readonly TanksConfiguration _config = options.Value;

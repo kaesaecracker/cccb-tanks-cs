@@ -1,8 +1,7 @@
-using TanksServer.DrawSteps;
+using TanksServer.GameLogic;
 using TanksServer.ServicePointDisplay;
-using TanksServer.Services;
 
-namespace TanksServer.TickSteps;
+namespace TanksServer.Graphics;
 
 internal sealed class DrawStateToFrame(
     IEnumerable<IDrawStep> drawSteps, LastFinishedFrameProvider lastFrameProvider

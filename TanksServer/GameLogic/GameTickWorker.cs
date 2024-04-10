@@ -1,9 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using TanksServer.TickSteps;
 
-namespace TanksServer.Services;
+namespace TanksServer.GameLogic;
 
 internal sealed class GameTickWorker(
     IEnumerable<ITickStep> steps,

@@ -1,15 +1,11 @@
 using System.Diagnostics;
-using TanksServer.Models;
-using TanksServer.Services;
+using TanksServer.GameLogic;
 
-namespace TanksServer.Helpers;
+namespace TanksServer.Models;
 
 internal static class PositionHelpers
 {
-    public static int ToPixelIndex(this PixelPosition position)
-    {
-        return position.Y * MapService.PixelsPerRow + position.X;
-    }
+    public static int ToPixelIndex(this PixelPosition position) => position.Y * MapService.PixelsPerRow + position.X;
 
     public static PixelPosition GetPixelRelative(this TilePosition position, byte subX, byte subY)
     {

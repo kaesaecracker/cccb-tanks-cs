@@ -1,9 +1,7 @@
-using TanksServer.Helpers;
-using TanksServer.Models;
+using TanksServer.GameLogic;
 using TanksServer.ServicePointDisplay;
-using TanksServer.Services;
 
-namespace TanksServer.DrawSteps;
+namespace TanksServer.Graphics;
 
 internal sealed class MapDrawer(MapService map) : IDrawStep
 {

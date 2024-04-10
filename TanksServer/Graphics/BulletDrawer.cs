@@ -1,8 +1,7 @@
-using TanksServer.Helpers;
+using TanksServer.GameLogic;
 using TanksServer.ServicePointDisplay;
-using TanksServer.Services;
 
-namespace TanksServer.DrawSteps;
+namespace TanksServer.Graphics;
 
 internal sealed class BulletDrawer(BulletManager bullets): IDrawStep
 {
