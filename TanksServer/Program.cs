@@ -1,4 +1,5 @@
 using System.IO;
+using System.Xml;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -59,6 +60,13 @@ public static class Program
     {
         var builder = WebApplication.CreateSlimBuilder(args);
 
+        builder.Logging.AddSimpleConsole(options =>
+        {
+            options.SingleLine = true;
+            options.IncludeScopes = true;
+            options.TimestampFormat = "HH:mm:ss ";
+        });
+
         builder.Services.AddCors(options => options
             .AddDefaultPolicy(policy => policy
                 .AllowAnyHeader()
@@ -80,7 +88,7 @@ public static class Program
         builder.Services.AddSingleton<PlayerServer>();
         builder.Services.AddSingleton<ClientScreenServer>();
         builder.Services.AddSingleton<LastFinishedFrameProvider>();
-        builder.Services.AddSingleton<SpawnQueueProvider>();
+        builder.Services.AddSingleton<SpawnQueue>();
 
         builder.Services.AddHostedService<GameTickWorker>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ControlsServer>());
@@ -103,6 +111,10 @@ public static class Program
 
         builder.Services.Configure<ServicePointDisplayConfiguration>(
             builder.Configuration.GetSection("ServicePointDisplay"));
+        builder.Services.Configure<TanksConfiguration>(
+            builder.Configuration.GetSection("Tanks"));
+        builder.Services.Configure<PlayersConfiguration>(
+            builder.Configuration.GetSection("Players"));
 
         var app = builder.Build();
 

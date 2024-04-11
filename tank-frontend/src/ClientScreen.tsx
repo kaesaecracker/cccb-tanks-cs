@@ -6,6 +6,9 @@ import {statusTextForReadyState} from './statusTextForReadyState.tsx';
 const pixelsPerRow = 352;
 const pixelsPerCol = 160;
 
+const onColor = [0, 180, 0, 255];
+const offColor = [0, 0, 0, 255];
+
 function getIndexes(bitIndex: number) {
     return {
         byteIndex: 10 + Math.floor(bitIndex / 8),
@@ -26,28 +29,18 @@ function drawPixelsToCanvas(pixels: Uint8Array, canvas: HTMLCanvasElement) {
         for (let x = 0; x < canvas.width; x++) {
             const pixelIndex = rowStartPixelIndex + x;
             const {byteIndex, bitInByteIndex} = getIndexes(pixelIndex);
-            const byte = pixels[byteIndex];
             const mask = (1 << bitInByteIndex);
-            const bitCheck = byte & mask;
-            const isOn = bitCheck !== 0;
+            const isOn = (pixels[byteIndex] & mask) !== 0;
+            const color = isOn ? onColor : offColor;
 
-            const dataIndex = pixelIndex * 4;
-            if (isOn) {
-                data[dataIndex] = 0; // r
-                data[dataIndex + 1] = 180; // g
-                data[dataIndex + 2] = 0; // b
-                data[dataIndex + 3] = 255; // a
-            } else {
-                data[dataIndex] = 0; // r
-                data[dataIndex + 1] = 0; // g
-                data[dataIndex + 2] = 0; // b
-                data[dataIndex + 3] = 255; // a
-            }
+            for (let colorChannel of [0, 1, 2, 3])
+                data[pixelIndex * 4 + colorChannel] = color[colorChannel];
         }
     }
 
     drawContext.putImageData(imageData, 0, 0);
 }
+
 export default function ClientScreen({}: {}) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 

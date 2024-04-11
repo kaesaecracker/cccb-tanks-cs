@@ -1,6 +1,6 @@
 namespace TanksServer.Models;
 
-internal sealed class Bullet(Player tankOwner, FloatPosition position, double rotation)
+internal sealed class Bullet(Player tankOwner, FloatPosition position, double rotation): IMapEntity
 {
     public Player Owner { get; } = tankOwner;
     

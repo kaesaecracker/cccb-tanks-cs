@@ -2,7 +2,7 @@ using TanksServer.GameLogic;
 
 namespace TanksServer.Models;
 
-internal sealed class Tank(Player player, FloatPosition spawnPosition)
+internal sealed class Tank(Player player, FloatPosition spawnPosition): IMapEntity
 {
     private double _rotation;
 

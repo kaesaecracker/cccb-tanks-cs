@@ -1,25 +1,29 @@
 namespace TanksServer.GameLogic;
 
-internal sealed class SpawnNewTanks(TankManager tanks, MapService map, SpawnQueueProvider queueProvider) : ITickStep
+internal sealed class SpawnNewTanks(
+    TankManager tanks,
+    MapService map,
+    SpawnQueue queue,
+    BulletManager bullets
+) : ITickStep
 {
     public Task TickAsync()
     {
-        while (queueProvider.Queue.TryDequeue(out var player))
+        if (!queue.TryDequeueNext(out var player))
+            return Task.CompletedTask;
+
+        tanks.Add(new Tank(player, ChooseSpawnPosition())
         {
-            var tank = new Tank(player, ChooseSpawnPosition())
-            {
-                Rotation = Random.Shared.Next(0, 16)
-            };
-            tanks.Add(tank);
-        }
+            Rotation = Random.Shared.Next(0, 16)
+        });
 
         return Task.CompletedTask;
     }
 
     private FloatPosition ChooseSpawnPosition()
     {
-        List<TilePosition> candidates = new();
-        
+        Dictionary<TilePosition, double> candidates = [];
+
         for (var x = 0; x < MapService.TilesPerRow; x++)
         for (var y = 0; y < MapService.TilesPerColumn; y++)
         {
@@ -27,15 +31,24 @@ internal sealed class SpawnNewTanks(TankManager tanks, MapService map, SpawnQueu
 
             if (map.IsCurrentlyWall(tile))
                 continue;
+
+            var tilePixelCenter = tile.GetPixelRelative(4, 4);
+
+            var minDistance = bullets.GetAll()
+                .Cast<IMapEntity>()
+                .Concat(tanks)
+                .Select(entity => Math.Sqrt(
+                    Math.Pow(entity.Position.X - tilePixelCenter.X, 2) +
+                    Math.Pow(entity.Position.Y - tilePixelCenter.Y, 2)))
+                .Aggregate(double.MaxValue, Math.Min);
             
-            // TODO: check tanks and bullets
-            candidates.Add(tile);
+            candidates.Add(tile, minDistance);
         }
 
-        var chosenTile = candidates[Random.Shared.Next(candidates.Count)];
+        var min = candidates.MaxBy(kvp => kvp.Value).Key;
         return new FloatPosition(
-            chosenTile.X * MapService.TileSize,
-            chosenTile.Y * MapService.TileSize
+            min.X * MapService.TileSize,
+            min.Y * MapService.TileSize
         );
     }
 }

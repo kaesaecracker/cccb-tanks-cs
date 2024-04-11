@@ -1,7 +1,7 @@
 namespace TanksServer.GameLogic;
 
 internal sealed class CollideBulletsWithTanks(
-    BulletManager bullets, TankManager tanks, SpawnQueueProvider spawnQueueProvider
+    BulletManager bullets, TankManager tanks, SpawnQueue spawnQueue
 ) : ITickStep
 {
     public Task TickAsync()
@@ -24,7 +24,7 @@ internal sealed class CollideBulletsWithTanks(
             tank.Owner.Deaths++;
 
             tanks.Remove(tank);
-            spawnQueueProvider.Queue.Enqueue(tank.Owner);
+            spawnQueue.EnqueueForDelayedSpawn(tank.Owner);
 
             return true;
         }

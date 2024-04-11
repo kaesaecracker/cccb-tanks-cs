@@ -40,8 +40,8 @@ internal sealed class SendToServicePointDisplay : ITickStep, IDisposable
         {
             Rows =
             {
-                [0] = "== TANKS! ==",
-                [1] = "-- scores --",
+                [00] = "== TANKS! ==",
+                [01] = "-- scores --",
                 [17] = "--  join  --",
                 [18] = string.Join('.', localIp[..2]),
                 [19] = string.Join('.', localIp[2..])
