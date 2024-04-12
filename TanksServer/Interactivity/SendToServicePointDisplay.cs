@@ -13,6 +13,7 @@ internal sealed class SendToServicePointDisplay : ITickStep
     private readonly PlayerServer _players;
     private readonly ILogger<SendToServicePointDisplay> _logger;
     private readonly IDisplayConnection _displayConnection;
+    private PixelGrid? _lastSentFrame;
 
     private DateTime _nextFailLog = DateTime.Now;
 
@@ -50,7 +51,12 @@ internal sealed class SendToServicePointDisplay : ITickStep
         try
         {
             await _displayConnection.SendCp437DataAsync(MapService.TilesPerRow, 0, _scoresBuffer);
-            await _displayConnection.SendBitmapLinearWindowAsync(0, 0, _lastFinishedFrameProvider.LastFrame);
+
+            var currentFrame = _lastFinishedFrameProvider.LastFrame;
+            if (_lastSentFrame == currentFrame)
+                return;
+            _lastSentFrame = currentFrame;
+            await _displayConnection.SendBitmapLinearWindowAsync(0, 0, _lastSentFrame);
         }
         catch (SocketException ex)
         {

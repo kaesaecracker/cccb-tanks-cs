@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace DisplayCommands;
 
-public sealed class PixelGrid(ushort width, ushort height)
+public sealed class PixelGrid(ushort width, ushort height) : IEquatable<PixelGrid>
 {
     private readonly ByteGrid _byteGrid = new((ushort)(width / 8u), height);
 
@@ -33,6 +33,18 @@ public sealed class PixelGrid(ushort width, ushort height)
     }
 
     public void Clear() => _byteGrid.Clear();
+
+    public bool Equals(PixelGrid? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Width == other.Width && Height == other.Height && _byteGrid.Equals(other._byteGrid);
+    }
+
+    public override bool Equals(object? obj) => ReferenceEquals(this, obj) || (obj is PixelGrid other && Equals(other));
+    public override int GetHashCode() => HashCode.Combine(_byteGrid, Width, Height);
+    public static bool operator ==(PixelGrid? left, PixelGrid? right) => Equals(left, right);
+    public static bool operator !=(PixelGrid? left, PixelGrid? right) => !Equals(left, right);
 
     private (ushort byteIndex, byte bitInByteMask) GetIndexes(int x)
     {
