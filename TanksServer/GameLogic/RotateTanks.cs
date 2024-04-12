@@ -11,9 +11,9 @@ internal sealed class RotateTanks(TankManager tanks, IOptions<TanksConfiguration
             var player = tank.Owner;
 
             if (player.Controls.TurnLeft)
-                tank.Rotation -= _config.TurnSpeed;
+                tank.Rotation -= _config.TurnSpeed / 16d;
             if (player.Controls.TurnRight)
-                tank.Rotation += _config.TurnSpeed;
+                tank.Rotation += _config.TurnSpeed / 16d;
         }
 
         return Task.CompletedTask;

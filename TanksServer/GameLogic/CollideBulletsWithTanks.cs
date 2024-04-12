@@ -14,7 +14,7 @@ internal sealed class CollideBulletsWithTanks(
     {
         foreach (var tank in tanks)
         {
-            var (topLeft, bottomRight) = tank.GetBounds();
+            var (topLeft, bottomRight) = TankManager.GetTankBounds(tank.Position.ToPixelPosition());
             if (bullet.Position.X < topLeft.X || bullet.Position.X > bottomRight.X ||
                 bullet.Position.Y < topLeft.Y || bullet.Position.Y > bottomRight.Y)
                 continue;

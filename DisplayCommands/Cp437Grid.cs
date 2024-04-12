@@ -8,6 +8,7 @@ public sealed class Cp437Grid(ushort width, ushort height)
     private readonly ByteGrid _byteGrid = new(width, height);
     
     public ushort Height { get; } = height;
+    
     public ushort Width { get; } = width;
 
     internal Memory<byte> Data => _byteGrid.Data;

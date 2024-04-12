@@ -12,6 +12,7 @@ internal sealed class DrawStateToFrame(
 
     public Task TickAsync()
     {
+        // TODO: fix race condition with shared buffer access
         _drawGrid.Clear();
         foreach (var step in _drawSteps)
             step.Draw(_drawGrid);

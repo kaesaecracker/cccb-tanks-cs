@@ -2,15 +2,15 @@ namespace TanksServer.GameLogic;
 
 internal sealed class MapService
 {
-    public const int TilesPerRow = 44;
-    public const int TilesPerColumn = 20;
-    public const int TileSize = 8;
-    public const int PixelsPerRow = TilesPerRow * TileSize;
-    public const int PixelsPerColumn = TilesPerColumn * TileSize;
+    public const ushort TilesPerRow = 44;
+    public const ushort TilesPerColumn = 20;
+    public const ushort TileSize = 8;
+    public const ushort PixelsPerRow = TilesPerRow * TileSize;
+    public const ushort PixelsPerColumn = TilesPerColumn * TileSize;
 
     private readonly string _map =
         """
-            ############################################
+            #############..###################.#########
             #...................##.....................#
             #...................##.....................#
             #.....####......................####.......#
@@ -29,7 +29,7 @@ internal sealed class MapService
             #.....####......................####.......#
             #...................##.....................#
             #...................##.....................#
-            ############################################
+            #############..###################.#########
             """
             .ReplaceLineEndings(string.Empty);
 

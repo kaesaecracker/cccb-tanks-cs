@@ -25,10 +25,10 @@ internal sealed class ShootFromTanks(
 
         tank.NextShotAfter = DateTime.Now.AddMilliseconds(_config.ShootDelayMs);
 
-        var angle = tank.Rotation / 16 * 2 * Math.PI;
+        var angle = tank.Rotation * 2 * Math.PI;
         var position = new FloatPosition(
-            X: tank.Position.X + MapService.TileSize / 2d + Math.Sin(angle) * _config.BulletSpeed,
-            Y: tank.Position.Y + MapService.TileSize / 2d - Math.Cos(angle) * _config.BulletSpeed
+            x: tank.Position.X + MapService.TileSize / 2d + Math.Sin(angle) * _config.BulletSpeed,
+            y: tank.Position.Y + MapService.TileSize / 2d - Math.Cos(angle) * _config.BulletSpeed
         );
 
         bulletManager.Spawn(new Bullet(tank.Owner, position, tank.Rotation));

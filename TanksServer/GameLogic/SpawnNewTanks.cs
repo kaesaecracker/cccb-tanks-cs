@@ -14,7 +14,7 @@ internal sealed class SpawnNewTanks(
 
         tanks.Add(new Tank(player, ChooseSpawnPosition())
         {
-            Rotation = Random.Shared.Next(0, 16)
+            Rotation = Random.Shared.NextDouble()
         });
 
         return Task.CompletedTask;
@@ -24,8 +24,8 @@ internal sealed class SpawnNewTanks(
     {
         Dictionary<TilePosition, double> candidates = [];
 
-        for (var x = 0; x < MapService.TilesPerRow; x++)
-        for (var y = 0; y < MapService.TilesPerColumn; y++)
+        for (ushort x = 0; x < MapService.TilesPerRow; x++)
+        for (ushort y = 0; y < MapService.TilesPerColumn; y++)
         {
             var tile = new TilePosition(x, y);
 

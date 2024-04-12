@@ -6,9 +6,9 @@ public interface IDisplayConnection
 
     ValueTask SendCp437DataAsync(ushort x, ushort y, Cp437Grid grid);
 
-    ValueTask SendCharBrightnessAsync(ushort x, ushort y, ByteGrid luma);
-
     ValueTask SendBrightnessAsync(byte brightness);
+    
+    ValueTask SendCharBrightnessAsync(ushort x, ushort y, ByteGrid luma);
 
     ValueTask SendHardResetAsync();
 

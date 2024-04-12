@@ -7,8 +7,8 @@ internal sealed class MapDrawer(MapService map) : IDrawStep
 {
     public void Draw(PixelGrid buffer)
     {
-        for (var tileY = 0; tileY < MapService.TilesPerColumn; tileY++)
-        for (var tileX = 0; tileX < MapService.TilesPerRow; tileX++)
+        for (ushort tileY = 0; tileY < MapService.TilesPerColumn; tileY++)
+        for (ushort tileX = 0; tileX < MapService.TilesPerRow; tileX++)
         {
             var tile = new TilePosition(tileX, tileY);
             if (!map.IsCurrentlyWall(tile))

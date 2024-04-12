@@ -1,6 +1,6 @@
 namespace TanksServer.GameLogic;
 
-internal sealed class MoveBullets(BulletManager bullets) : ITickStep
+internal sealed class MoveBullets(BulletManager bullets, IOptions<TanksConfiguration> config) : ITickStep
 {
     public Task TickAsync()
     {
@@ -10,12 +10,12 @@ internal sealed class MoveBullets(BulletManager bullets) : ITickStep
         return Task.CompletedTask;
     }
 
-    private static void MoveBullet(Bullet bullet)
+    private void MoveBullet(Bullet bullet)
     {
-        var angle = bullet.Rotation / 16 * 2 * Math.PI;
+        var angle = bullet.Rotation * 2 * Math.PI;
         bullet.Position = new FloatPosition(
-            X: bullet.Position.X + Math.Sin(angle) * 3,
-            Y: bullet.Position.Y - Math.Cos(angle) * 3
+            x: bullet.Position.X + Math.Sin(angle) * config.Value.BulletSpeed,
+            y: bullet.Position.Y - Math.Cos(angle) * config.Value.BulletSpeed
         );
     }
 }

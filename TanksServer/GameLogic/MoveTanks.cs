@@ -36,26 +36,30 @@ internal sealed class MoveTanks(
                 return false;
         }
 
-        var angle = tank.Rotation / 16d * 2d * Math.PI;
+        var angle = tank.Rotation * 2d * Math.PI;
         var newX = tank.Position.X + Math.Sin(angle) * speed;
         var newY = tank.Position.Y - Math.Cos(angle) * speed;
 
         return TryMoveTankTo(tank, new FloatPosition(newX, newY))
-               || TryMoveTankTo(tank, tank.Position with { X = newX })
-               || TryMoveTankTo(tank, tank.Position with { Y = newY });
+               || TryMoveTankTo(tank, new FloatPosition(newX, tank.Position.Y))
+               || TryMoveTankTo(tank, new FloatPosition(tank.Position.X, newY));
     }
 
     private bool TryMoveTankTo(Tank tank, FloatPosition newPosition)
     {
-        var x0 = (int)Math.Floor(newPosition.X / MapService.TileSize);
-        var x1 = (int)Math.Ceiling(newPosition.X / MapService.TileSize);
-        var y0 = (int)Math.Floor(newPosition.Y / MapService.TileSize);
-        var y1 = (int)Math.Ceiling(newPosition.Y / MapService.TileSize);
-
-        TilePosition[] positions = { new(x0, y0), new(x0, y1), new(x1, y0), new(x1, y1) };
+        var (topLeft, bottomRight) = TankManager.GetTankBounds(newPosition.ToPixelPosition());
+        TilePosition[] positions = [
+            topLeft.ToTilePosition(), 
+            new PixelPosition(bottomRight.X, topLeft.Y).ToTilePosition(),
+            new PixelPosition(topLeft.X, bottomRight.Y).ToTilePosition(),
+            bottomRight.ToTilePosition(), 
+        ];
+        
         if (positions.Any(map.IsCurrentlyWall))
             return false;
 
+        // TODO: check tanks
+        
         tank.Position = newPosition;
         return true;
     }
