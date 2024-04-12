@@ -24,24 +24,22 @@ internal sealed class SpawnNewTanks(
     {
         Dictionary<TilePosition, double> candidates = [];
 
-        for (ushort x = 0; x < MapService.TilesPerRow; x++)
-        for (ushort y = 0; y < MapService.TilesPerColumn; y++)
+        for (ushort x = 1; x < MapService.TilesPerRow - 1; x++)
+        for (ushort y = 1; y < MapService.TilesPerColumn - 1; y++)
         {
             var tile = new TilePosition(x, y);
 
             if (map.IsCurrentlyWall(tile))
                 continue;
 
-            var tilePixelCenter = tile.GetPixelRelative(4, 4);
+            var tilePixelCenter = tile.GetPixelRelative(4, 4).ToFloatPosition();
 
             var minDistance = bullets.GetAll()
                 .Cast<IMapEntity>()
                 .Concat(tanks)
-                .Select(entity => Math.Sqrt(
-                    Math.Pow(entity.Position.X - tilePixelCenter.X, 2) +
-                    Math.Pow(entity.Position.Y - tilePixelCenter.Y, 2)))
+                .Select(entity => entity.Position.Distance(tilePixelCenter))
                 .Aggregate(double.MaxValue, Math.Min);
-            
+
             candidates.Add(tile, minDistance);
         }
 

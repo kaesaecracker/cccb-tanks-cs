@@ -8,15 +8,13 @@ internal sealed class DrawStateToFrame(
 ) : ITickStep
 {
     private readonly List<IDrawStep> _drawSteps = drawSteps.ToList();
-    private readonly PixelGrid _drawGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
 
     public Task TickAsync()
     {
-        // TODO: fix race condition with shared buffer access
-        _drawGrid.Clear();
+        var drawGrid = new PixelGrid(MapService.PixelsPerRow, MapService.PixelsPerColumn);
         foreach (var step in _drawSteps)
-            step.Draw(_drawGrid);
-        lastFrameProvider.LastFrame = _drawGrid;
+            step.Draw(drawGrid);
+        lastFrameProvider.LastFrame = drawGrid;
         return Task.CompletedTask;
     }
 }

@@ -31,4 +31,13 @@ internal static class PositionHelpers
         x: (ushort)(position.X / MapService.TileSize),
         y: (ushort)(position.Y / MapService.TileSize)
     );
+
+    public static FloatPosition ToFloatPosition(this PixelPosition position) => new(position.X, position.Y);
+
+
+    public static double Distance(this FloatPosition p1, FloatPosition p2)
+        => Math.Sqrt(
+            Math.Pow(p1.X - p2.X, 2) +
+            Math.Pow(p1.Y - p2.Y, 2)
+        );
 }

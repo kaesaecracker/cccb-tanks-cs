@@ -1,7 +1,7 @@
 namespace TanksServer.GameLogic;
 
 internal sealed class MoveTanks(
-    TankManager tanks, 
+    TankManager tanks,
     IOptions<TanksConfiguration> options,
     MapService map
 ) : ITickStep
@@ -48,19 +48,30 @@ internal sealed class MoveTanks(
     private bool TryMoveTankTo(Tank tank, FloatPosition newPosition)
     {
         var (topLeft, bottomRight) = TankManager.GetTankBounds(newPosition.ToPixelPosition());
-        TilePosition[] positions = [
-            topLeft.ToTilePosition(), 
-            new PixelPosition(bottomRight.X, topLeft.Y).ToTilePosition(),
-            new PixelPosition(topLeft.X, bottomRight.Y).ToTilePosition(),
-            bottomRight.ToTilePosition(), 
-        ];
-        
-        if (positions.Any(map.IsCurrentlyWall))
+
+        if (HitsWall(topLeft, bottomRight))
+            return false;
+        if (HitsTank(tank, newPosition))
             return false;
 
-        // TODO: check tanks
-        
         tank.Position = newPosition;
         return true;
+    }
+
+    private bool HitsTank(Tank tank, FloatPosition newPosition) =>
+        tanks
+            .Where(otherTank => otherTank != tank)
+            .Any(otherTank => newPosition.Distance(otherTank.Position) < MapService.TileSize);
+
+    private bool HitsWall(PixelPosition topLeft, PixelPosition bottomRight)
+    {
+        TilePosition[] positions =
+        [
+            topLeft.ToTilePosition(),
+            new PixelPosition(bottomRight.X, topLeft.Y).ToTilePosition(),
+            new PixelPosition(topLeft.X, bottomRight.Y).ToTilePosition(),
+            bottomRight.ToTilePosition(),
+        ];
+        return positions.Any(map.IsCurrentlyWall);
     }
 }
