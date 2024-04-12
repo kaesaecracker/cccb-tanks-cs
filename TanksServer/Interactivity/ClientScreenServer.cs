@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Threading.Channels;
+using DisplayCommands;
 using Microsoft.Extensions.Hosting;
-using TanksServer.ServicePointDisplay;
 
 namespace TanksServer.Interactivity;
 
@@ -44,10 +44,10 @@ internal sealed class ClientScreenServer(
     public Task StoppedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
     private void Remove(ClientScreenServerConnection connection) => _connections.TryRemove(connection, out _);
-    
+
     public IEnumerable<ClientScreenServerConnection> GetConnections() => _connections.Keys;
 
-    internal sealed class ClientScreenServerConnection: IDisposable
+    internal sealed class ClientScreenServerConnection : IDisposable
     {
         private readonly ByteChannelWebSocket _channel;
         private readonly SemaphoreSlim _wantedFrames = new(1);
@@ -64,7 +64,7 @@ internal sealed class ClientScreenServer(
             Done = ReceiveAsync();
         }
 
-        public async Task SendAsync(PixelDisplayBufferView buf)
+        public async Task SendAsync(PixelGrid buf)
         {
             if (!await _wantedFrames.WaitAsync(TimeSpan.Zero))
             {
@@ -85,9 +85,9 @@ internal sealed class ClientScreenServer(
 
         private async Task ReceiveAsync()
         {
-            await foreach (var _ in _channel.Reader.ReadAllAsync()) 
+            await foreach (var _ in _channel.Reader.ReadAllAsync())
                 _wantedFrames.Release();
-            
+
             _logger.LogTrace("done receiving");
             _server.Remove(this);
         }

@@ -11,7 +11,7 @@ const offColor = [0, 0, 0, 255];
 
 function getIndexes(bitIndex: number) {
     return {
-        byteIndex: 10 + Math.floor(bitIndex / 8),
+        byteIndex: Math.floor(bitIndex / 8),
         bitInByteIndex: 7 - bitIndex % 8
     };
 }

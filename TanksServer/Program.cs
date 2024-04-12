@@ -8,7 +8,6 @@ using Microsoft.Extensions.FileProviders;
 using TanksServer.GameLogic;
 using TanksServer.Graphics;
 using TanksServer.Interactivity;
-using TanksServer.ServicePointDisplay;
 
 namespace TanksServer;
 
@@ -109,8 +108,6 @@ public static class Program
         builder.Services.AddSingleton<IDrawStep, TankDrawer>();
         builder.Services.AddSingleton<IDrawStep, BulletDrawer>();
 
-        builder.Services.Configure<ServicePointDisplayConfiguration>(
-            builder.Configuration.GetSection("ServicePointDisplay"));
         builder.Services.Configure<TanksConfiguration>(
             builder.Configuration.GetSection("Tanks"));
         builder.Services.Configure<PlayersConfiguration>(

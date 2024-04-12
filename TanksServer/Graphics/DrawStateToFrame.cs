@@ -1,5 +1,5 @@
+using DisplayCommands;
 using TanksServer.GameLogic;
-using TanksServer.ServicePointDisplay;
 
 namespace TanksServer.Graphics;
 
@@ -8,13 +8,14 @@ internal sealed class DrawStateToFrame(
 ) : ITickStep
 {
     private readonly List<IDrawStep> _drawSteps = drawSteps.ToList();
+    private readonly PixelGrid _drawGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
 
     public Task TickAsync()
     {
-        var buffer = PixelDisplayBufferView.New(0, 0, MapService.TilesPerRow, MapService.PixelsPerColumn);
+        _drawGrid.Clear();
         foreach (var step in _drawSteps)
-            step.Draw(buffer);
-        lastFrameProvider.LastFrame = buffer;
+            step.Draw(_drawGrid);
+        lastFrameProvider.LastFrame = _drawGrid;
         return Task.CompletedTask;
     }
 }

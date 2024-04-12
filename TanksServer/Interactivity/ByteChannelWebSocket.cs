@@ -7,15 +7,15 @@ namespace TanksServer.Interactivity;
 /// <summary>
 /// Hacky class for easier semantics
 /// </summary>
-internal sealed class ByteChannelWebSocket : Channel<byte[]>
+internal sealed class ByteChannelWebSocket : Channel<Memory<byte>>
 {
     private readonly ILogger _logger;
     private readonly WebSocket _socket;
     private readonly Task _backgroundDone;
     private readonly byte[] _buffer;
 
-    private readonly Channel<byte[]> _outgoing = Channel.CreateUnbounded<byte[]>();
-    private readonly Channel<byte[]> _incoming = Channel.CreateUnbounded<byte[]>();
+    private readonly Channel<Memory<byte>> _outgoing = Channel.CreateUnbounded<Memory<byte>>();
+    private readonly Channel<Memory<byte>> _incoming = Channel.CreateUnbounded<Memory<byte>>();
 
     public ByteChannelWebSocket(WebSocket socket, ILogger logger, int messageSize)
     {

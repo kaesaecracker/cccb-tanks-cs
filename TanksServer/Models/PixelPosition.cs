@@ -1,3 +1,3 @@
 namespace TanksServer.Models;
 
-internal record struct PixelPosition(int X, int Y);
+internal record struct PixelPosition(ushort X, ushort Y);

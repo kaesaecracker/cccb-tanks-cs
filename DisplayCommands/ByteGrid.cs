@@ -22,4 +22,6 @@ public class ByteGrid(ushort width, ushort height)
         Debug.Assert(y < Height);
         return x + y * Width;
     }
+
+    public void Clear() => Data.Span.Clear();
 }

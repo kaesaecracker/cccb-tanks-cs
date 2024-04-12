@@ -1,11 +1,11 @@
+using DisplayCommands;
 using TanksServer.GameLogic;
-using TanksServer.ServicePointDisplay;
 
 namespace TanksServer.Graphics;
 
 internal sealed class MapDrawer(MapService map) : IDrawStep
 {
-    public void Draw(PixelDisplayBufferView buffer)
+    public void Draw(PixelGrid buffer)
     {
         for (var tileY = 0; tileY < MapService.TilesPerColumn; tileY++)
         for (var tileX = 0; tileX < MapService.TilesPerRow; tileX++)
@@ -18,7 +18,7 @@ internal sealed class MapDrawer(MapService map) : IDrawStep
             for (byte pixelInTileX = 0; pixelInTileX < MapService.TileSize; pixelInTileX++)
             {
                 var position = tile.GetPixelRelative(pixelInTileX, pixelInTileY);
-                buffer.Pixels[position] = pixelInTileX % 2 == pixelInTileY % 2;
+                buffer[position.X, position.Y] = pixelInTileX % 2 == pixelInTileY % 2;
             }
         }
     }

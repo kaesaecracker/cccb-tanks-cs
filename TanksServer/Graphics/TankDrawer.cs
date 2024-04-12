@@ -1,7 +1,7 @@
+using DisplayCommands;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using TanksServer.GameLogic;
-using TanksServer.ServicePointDisplay;
 
 namespace TanksServer.Graphics;
 
@@ -29,21 +29,21 @@ internal sealed class TankDrawer : IDrawStep
         _tankSpriteWidth = tankImage.Width;
     }
 
-    public void Draw(PixelDisplayBufferView buffer)
+    public void Draw(PixelGrid buffer)
     {
         foreach (var tank in _tanks)
         {
             var pos = tank.Position.ToPixelPosition();
             var rotationVariant = (int)Math.Round(tank.Rotation) % 16;
-            
+
             for (var dy = 0; dy < MapService.TileSize; dy++)
             for (var dx = 0; dx < MapService.TileSize; dx++)
             {
                 if (!TankSpriteAt(dx, dy, rotationVariant))
                     continue;
 
-                var position = new PixelPosition(pos.X + dx, pos.Y + dy);
-                buffer.Pixels[position] = true;
+                var position = new PixelPosition((ushort)(pos.X + dx), (ushort)(pos.Y + dy));
+                buffer[position.X, position.Y] = true;
             }
         }
     }

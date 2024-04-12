@@ -1,8 +1,8 @@
-using TanksServer.ServicePointDisplay;
+using DisplayCommands;
 
 namespace TanksServer.Graphics;
 
 internal interface IDrawStep
 {
-    void Draw(PixelDisplayBufferView buffer);
+    void Draw(PixelGrid buffer);
 }

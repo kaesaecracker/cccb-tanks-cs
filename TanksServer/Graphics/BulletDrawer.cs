@@ -1,13 +1,16 @@
+using DisplayCommands;
 using TanksServer.GameLogic;
-using TanksServer.ServicePointDisplay;
 
 namespace TanksServer.Graphics;
 
-internal sealed class BulletDrawer(BulletManager bullets): IDrawStep
+internal sealed class BulletDrawer(BulletManager bullets) : IDrawStep
 {
-    public void Draw(PixelDisplayBufferView buffer)
+    public void Draw(PixelGrid buffer)
     {
         foreach (var bullet in bullets.GetAll())
-            buffer.Pixels[bullet.Position.ToPixelPosition()] = true;
+        {
+            var pos = bullet.Position.ToPixelPosition();
+            buffer[pos.X, pos.Y] = true;
+        }
     }
 }

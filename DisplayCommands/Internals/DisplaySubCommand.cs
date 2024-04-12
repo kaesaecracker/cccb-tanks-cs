@@ -1,6 +1,6 @@
 namespace DisplayCommands.Internals;
 
-internal enum DisplaySubCommand
+internal enum DisplaySubCommand : ushort
 {
     BitmapNormal = 0x0,
     BitmapCompressZ = 0x677a,

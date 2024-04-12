@@ -71,8 +71,8 @@ internal sealed class ControlsServer(ILogger<ControlsServer> logger, ILoggerFact
         {
             await foreach (var buffer in _binaryWebSocket.Reader.ReadAllAsync())
             {
-                var type = (MessageType)buffer[0];
-                var control = (InputType)buffer[1];
+                var type = (MessageType)buffer.Span[0];
+                var control = (InputType)buffer.Span[1];
 
                 _logger.LogTrace("player input {} {} {}", _player.Id, type, control);
 

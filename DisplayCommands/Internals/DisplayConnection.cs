@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Options;
@@ -72,6 +73,27 @@ internal sealed class DisplayConnection(IOptions<DisplayConfiguration> options) 
 
         await SendAsync(header, payload);
         _arrayPool.Return(payloadBuffer);
+    }
+
+    public ValueTask SendBitmapLinearWindowAsync(ushort x, ushort y, PixelGrid pixels)
+    {
+        var header = new HeaderWindow
+        {
+            Command = DisplayCommand.BitmapLinearWin,
+            PosX = x, PosY = y,
+            Width = pixels.Width,
+            Height = pixels.Height
+        };
+
+        return SendAsync(header, pixels.Data);
+    }
+
+    public string GetLocalIPv4()
+    {
+        using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0);
+        socket.Connect(options.Value.Hostname, options.Value.Port);
+        var endPoint = socket.LocalEndPoint as IPEndPoint ?? throw new NotSupportedException();
+        return endPoint.Address.ToString();
     }
 
     private async ValueTask SendAsync(HeaderWindow header, Memory<byte> payload)
