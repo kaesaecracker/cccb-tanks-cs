@@ -83,6 +83,8 @@ internal sealed class ControlsServer(ILogger<ControlsServer> logger, ILoggerFact
                     _ => throw new ArgumentException("invalid message type")
                 };
 
+                _player.LastInput = DateTime.Now;
+                
                 switch (control)
                 {
                     case InputType.Forward:

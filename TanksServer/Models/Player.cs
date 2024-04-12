@@ -14,4 +14,6 @@ internal sealed class Player(string name)
     public int Kills { get; set; }
     
     public int Deaths { get; set; }
+
+    public DateTime LastInput { get; set; } = DateTime.Now;
 }

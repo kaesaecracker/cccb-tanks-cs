@@ -6,9 +6,10 @@ internal sealed class SpawnQueue(
     IOptions<PlayersConfiguration> options
 )
 {
-    private ConcurrentQueue<Player> _queue = new();
-    private ConcurrentDictionary<Player, DateTime> _spawnTimes = new();
+    private readonly ConcurrentQueue<Player> _queue = new();
+    private readonly ConcurrentDictionary<Player, DateTime> _spawnTimes = new();
     private readonly TimeSpan _spawnDelay = TimeSpan.FromMilliseconds(options.Value.SpawnDelayMs);
+    private readonly TimeSpan _idleTimeout = TimeSpan.FromMilliseconds(options.Value.IdleTimeoutMs);
 
     public void EnqueueForImmediateSpawn(Player player)
     {
@@ -24,13 +25,23 @@ internal sealed class SpawnQueue(
     public bool TryDequeueNext([MaybeNullWhen(false)] out Player player)
     {
         if (!_queue.TryDequeue(out player))
+            return false; // no one on queue
+
+        if (player.LastInput + _idleTimeout < DateTime.Now)
+        {
+            // player idle
+            _queue.Enqueue(player);
             return false;
-
+        }
+        
         var now = DateTime.Now;
-        if (_spawnTimes.GetOrAdd(player, DateTime.MinValue) <= now)
-            return true;
+        if (_spawnTimes.GetOrAdd(player, DateTime.MinValue) > now)
+        {
+            // spawn delay
+            _queue.Enqueue(player);
+            return false;
+        }
 
-        _queue.Enqueue(player);
-        return false;
+        return true;
     }
 }
