@@ -42,4 +42,8 @@
         <Content Include="../Makefile" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\DisplayCommands\DisplayCommands.csproj" />
+    </ItemGroup>
+
 </Project>

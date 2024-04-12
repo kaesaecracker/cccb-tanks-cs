@@ -1,5 +1,5 @@
 using System.IO;
-using System.Xml;
+using DisplayCommands;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -115,6 +115,7 @@ public static class Program
             builder.Configuration.GetSection("Tanks"));
         builder.Services.Configure<PlayersConfiguration>(
             builder.Configuration.GetSection("Players"));
+        builder.Services.AddDisplay(builder.Configuration.GetSection("ServicePointDisplay"));
 
         var app = builder.Build();
 
