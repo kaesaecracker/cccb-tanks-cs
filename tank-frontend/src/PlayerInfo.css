@@ -1,0 +1,21 @@
+.Player {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid rgb(76, 76, 76);
+    border-radius: 4px;
+}
+
+.ScoreForm {
+    display: flex;
+    flex-direction: column;
+}
+
+.ElemGroup {
+    display: flex;
+    flex-direction: row;
+}
+
+.Elems {
+    padding: 8px 8px;
+    margin: 8px 8px;
+}

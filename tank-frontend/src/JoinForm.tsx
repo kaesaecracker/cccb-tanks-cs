@@ -1,22 +1,6 @@
 import { useEffect, useState } from 'react';
 import './JoinForm.css';
-
-type PlayerResponse = {
-    readonly name: string;
-    readonly id: string;
-};
-
-export async function fetchPlayer(name: string, options: RequestInit) {
-    const url = new URL(import.meta.env.VITE_TANK_PLAYER_URL);
-    url.searchParams.set('name', name);
-
-    const response = await fetch(url, options);
-    if (!response.ok)
-        return null;
-
-    const json = await response.json() as PlayerResponse;
-    return json.id;
-}
+import { PlayerResponse, postPlayer } from './serverCalls';
 
 export default function JoinForm({ onDone }: { onDone: (id: string) => void }) {
     const [name, setName] = useState('');
@@ -28,12 +12,13 @@ export default function JoinForm({ onDone }: { onDone: (id: string) => void }) {
             return;
 
         try {
-            fetchPlayer(name, {}).then((value: string | null) => {
-                if (value)
-                    onDone(value);
-                else
-                    setClicked(false);
-            });
+            postPlayer(name)
+                .then((value: PlayerResponse | null) => {
+                    if (value)
+                        onDone(value.id);
+                    else
+                        setClicked(false);
+                });
         } catch (e) {
             console.log(e);
             alert(e);
@@ -47,7 +32,7 @@ export default function JoinForm({ onDone }: { onDone: (id: string) => void }) {
         </h1>
         <p className='JoinElems' style={{ "color": "white" }}> Welcome and have fun!</p>
         <div className="JoinForm">
-        <p className='JoinElems' style={{ "color": "white" }}>
+            <p className='JoinElems' style={{ "color": "white" }}>
                 Enter your name to join the game!
             </p>
             <input className="JoinElems"
