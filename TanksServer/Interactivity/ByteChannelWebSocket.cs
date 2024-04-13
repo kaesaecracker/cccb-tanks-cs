@@ -18,7 +18,7 @@ internal sealed class ByteChannelWebSocket(WebSocket socket, ILogger logger, int
                 yield return _buffer.ToArray();
         }
 
-        if (socket.State != WebSocketState.Closed)
+        if (socket.State is not WebSocketState.Closed and not WebSocketState.Aborted)
             Debugger.Break();
     }
 

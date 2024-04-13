@@ -93,9 +93,9 @@ internal sealed class ClientScreenServer(
                 await _channel.SendAsync(pixels.Data);
                 _lastSentPixels = pixels;
             }
-            catch (ChannelClosedException)
+            catch (WebSocketException ex)
             {
-                _logger.LogWarning("send failed, channel is closed");
+                _logger.LogWarning(ex, "send failed");
             }
         }
 

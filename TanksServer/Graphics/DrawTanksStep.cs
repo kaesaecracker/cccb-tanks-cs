@@ -40,8 +40,8 @@ internal sealed class DrawTanksStep : IDrawStep
                 if (!TankSpriteAt(dx, dy, orientation))
                     continue;
 
-                var position = tankPosition.GetPixelRelative(dx, dy);
-                buffer[position.X, position.Y] = true;
+                var (x, y) = tankPosition.GetPixelRelative(dx, dy);
+                buffer[(ushort)x, (ushort)y] = true;
             }
         }
     }

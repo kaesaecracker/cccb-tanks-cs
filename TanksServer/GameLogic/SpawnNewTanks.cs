@@ -32,7 +32,7 @@ internal sealed class SpawnNewTanks(
             if (map.IsCurrentlyWall(tile))
                 continue;
 
-            var tilePixelCenter = tile.GetPixelRelative(4, 4).ToFloatPosition();
+            var tilePixelCenter = tile.ToPixelPosition().GetPixelRelative(4, 4).ToFloatPosition();
 
             var minDistance = bullets.GetAll()
                 .Cast<IMapEntity>()

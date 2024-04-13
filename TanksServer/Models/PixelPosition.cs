@@ -1,9 +1,17 @@
+using System.Diagnostics;
 using TanksServer.GameLogic;
 
 namespace TanksServer.Models;
 
-internal readonly struct PixelPosition(ushort x, ushort y)
+[DebuggerDisplay("({X} | {Y})")]
+internal readonly struct PixelPosition(int x, int y)
 {
-    public ushort X { get; } = (ushort)((x + MapService.PixelsPerRow) % MapService.PixelsPerRow);
-    public ushort Y { get; } = (ushort)((y + MapService.PixelsPerColumn) % MapService.PixelsPerColumn);
+    public int X { get; } = (x + MapService.PixelsPerRow) % MapService.PixelsPerRow;
+    public int Y { get; } = (y + MapService.PixelsPerColumn) % MapService.PixelsPerColumn;
+
+    public void Deconstruct(out int x, out int y)
+    {
+        x = X;
+        y = Y;
+    }
 }

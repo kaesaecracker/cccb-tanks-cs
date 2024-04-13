@@ -52,7 +52,8 @@ public sealed class Cp437Grid(ushort width, ushort height) : IEquatable<Cp437Gri
     {
         ReadOnlySpan<byte> valueBytes = stackalloc byte[] { b };
         Span<char> resultStr = stackalloc char[1];
-        _encoding.GetChars(valueBytes, resultStr);
+        var consumed = _encoding.GetChars(valueBytes, resultStr);
+        Debug.Assert(consumed == 1);
         return resultStr[0];
     }
 

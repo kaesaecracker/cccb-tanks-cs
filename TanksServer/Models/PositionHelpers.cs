@@ -1,31 +1,14 @@
-using System.Diagnostics;
 using TanksServer.GameLogic;
 
 namespace TanksServer.Models;
 
 internal static class PositionHelpers
 {
-    public static PixelPosition GetPixelRelative(this TilePosition position, byte subX, byte subY)
-    {
-        Debug.Assert(subX < 8);
-        Debug.Assert(subY < 8);
-        return new PixelPosition(
-            (ushort)(position.X * MapService.TileSize + subX),
-            (ushort)(position.Y * MapService.TileSize + subY)
-        );
-    }
+    public static PixelPosition GetPixelRelative(this PixelPosition position, short subX, short subY)
+        => new(position.X + subX, position.Y + subY);
 
-    public static PixelPosition GetPixelRelative(this PixelPosition position, byte subX, byte subY)
-    {
-        Debug.Assert(subX < 8);
-        Debug.Assert(subY < 8);
-        return new PixelPosition((ushort)(position.X + subX), (ushort)(position.Y + subY));
-    }
-
-    public static PixelPosition ToPixelPosition(this FloatPosition position) => new(
-        (ushort)((int)position.X % MapService.PixelsPerRow),
-        (ushort)((int)position.Y % MapService.PixelsPerRow)
-    );
+    public static PixelPosition ToPixelPosition(this FloatPosition position)
+        => new((int)position.X, (int)position.Y);
 
     public static PixelPosition ToPixelPosition(this TilePosition position) => new(
         (ushort)(position.X * MapService.TileSize),

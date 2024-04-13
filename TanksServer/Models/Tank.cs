@@ -28,13 +28,12 @@ internal sealed class Tank(Player player, FloatPosition spawnPosition) : IMapEnt
 
     public PixelBounds Bounds => GetBoundsForCenter(Position);
 
-    public static PixelBounds GetBoundsForCenter(FloatPosition position) => new(
-        new PixelPosition(
-            (ushort)(position.X - MapService.TileSize / 2d),
-            (ushort)(position.Y - MapService.TileSize / 2d)
-        ), new PixelPosition(
-            (ushort)(position.X + MapService.TileSize / 2d - 1d),
-            (ushort)(position.Y + MapService.TileSize / 2d - 1d)
-        )
-    );
+    public static PixelBounds GetBoundsForCenter(FloatPosition position)
+    {
+        var pixelPosition = position.ToPixelPosition();
+        return new PixelBounds(
+            pixelPosition.GetPixelRelative(-3, -3),
+            pixelPosition.GetPixelRelative(4, 4)
+        );
+    }
 }
