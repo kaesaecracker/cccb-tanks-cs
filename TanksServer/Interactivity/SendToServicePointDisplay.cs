@@ -8,18 +8,18 @@ namespace TanksServer.Interactivity;
 
 internal sealed class SendToServicePointDisplay : ITickStep
 {
-    private readonly LastFinishedFrameProvider _lastFinishedFrameProvider;
-    private readonly Cp437Grid _scoresBuffer;
-    private readonly PlayerServer _players;
-    private readonly ILogger<SendToServicePointDisplay> _logger;
-    private readonly IDisplayConnection _displayConnection;
-    private PixelGrid? _lastSentFrame;
-
-    private DateTime _nextFailLog = DateTime.Now;
-
     private const int ScoresWidth = 12;
     private const int ScoresHeight = 20;
     private const int ScoresPlayerRows = ScoresHeight - 5;
+
+    private readonly IDisplayConnection _displayConnection;
+    private readonly LastFinishedFrameProvider _lastFinishedFrameProvider;
+    private readonly ILogger<SendToServicePointDisplay> _logger;
+    private readonly PlayerServer _players;
+    private readonly Cp437Grid _scoresBuffer;
+
+    private PixelGrid? _lastSentFrame;
+    private DateTime _nextFailLog = DateTime.Now;
 
     public SendToServicePointDisplay(
         LastFinishedFrameProvider lastFinishedFrameProvider,

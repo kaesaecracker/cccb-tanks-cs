@@ -8,8 +8,6 @@ internal sealed class CollideBulletsWithMap(BulletManager bullets, MapService ma
         return Task.CompletedTask;
     }
 
-    private bool BulletHitsWall(Bullet bullet)
-    {
-        return map.IsCurrentlyWall(bullet.Position.ToPixelPosition().ToTilePosition());
-    }
+    private bool BulletHitsWall(Bullet bullet) =>
+        map.IsCurrentlyWall(bullet.Position.ToPixelPosition().ToTilePosition());
 }

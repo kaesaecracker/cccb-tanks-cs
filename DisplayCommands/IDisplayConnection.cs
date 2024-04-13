@@ -7,7 +7,7 @@ public interface IDisplayConnection
     ValueTask SendCp437DataAsync(ushort x, ushort y, Cp437Grid grid);
 
     ValueTask SendBrightnessAsync(byte brightness);
-    
+
     ValueTask SendCharBrightnessAsync(ushort x, ushort y, ByteGrid luma);
 
     ValueTask SendHardResetAsync();
@@ -17,7 +17,7 @@ public interface IDisplayConnection
     public ValueTask SendBitmapLinearWindowAsync(ushort x, ushort y, PixelGrid pixels);
 
     /// <summary>
-    /// Returns the IPv4 address that is associated with the interface with which the display is reachable.
+    ///     Returns the IPv4 address that is associated with the interface with which the display is reachable.
     /// </summary>
     /// <returns>IPv4 as text</returns>
     public string GetLocalIPv4();

@@ -35,8 +35,5 @@ internal sealed class MapService
 
     private char this[int tileX, int tileY] => _map[tileX + tileY * TilesPerRow];
 
-    public bool IsCurrentlyWall(TilePosition position)
-    {
-        return this[position.X, position.Y] == '#';
-    }
+    public bool IsCurrentlyWall(TilePosition position) => this[position.X, position.Y] == '#';
 }

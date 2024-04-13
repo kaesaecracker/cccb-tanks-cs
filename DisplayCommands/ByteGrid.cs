@@ -16,6 +16,13 @@ public sealed class ByteGrid(ushort width, ushort height) : IEquatable<ByteGrid>
         set => Data.Span[GetIndex(x, y)] = value;
     }
 
+    public bool Equals(ByteGrid? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Height == other.Height && Width == other.Width && Data.Span.SequenceEqual(other.Data.Span);
+    }
+
     private int GetIndex(ushort x, ushort y)
     {
         Debug.Assert(x < Width);
@@ -25,15 +32,11 @@ public sealed class ByteGrid(ushort width, ushort height) : IEquatable<ByteGrid>
 
     public void Clear() => Data.Span.Clear();
 
-    public bool Equals(ByteGrid? other)
-    {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return Height == other.Height && Width == other.Width && Data.Span.SequenceEqual(other.Data.Span);
-    }
-
     public override bool Equals(object? obj) => ReferenceEquals(this, obj) || (obj is ByteGrid other && Equals(other));
+
     public override int GetHashCode() => HashCode.Combine(Height, Width, Data);
+
     public static bool operator ==(ByteGrid? left, ByteGrid? right) => Equals(left, right);
+
     public static bool operator !=(ByteGrid? left, ByteGrid? right) => !Equals(left, right);
 }

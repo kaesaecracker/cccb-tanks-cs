@@ -13,5 +13,5 @@ internal enum DisplayCommand : ushort
     BitmapLinearWin = 0x0013,
     BitmapLinearAnd = 0x0014,
     BitmapLinearOr = 0x0015,
-    BitmapLinearXor = 0x0016,
+    BitmapLinearXor = 0x0016
 }

@@ -29,7 +29,7 @@ internal sealed class PlayerServer(ILogger<PlayerServer> logger, SpawnQueue spaw
     }
 
     public IEnumerable<Player> GetAll() => _players.Values;
-    
+
     private Player AddAndSpawn(string name)
     {
         var player = new Player(name);

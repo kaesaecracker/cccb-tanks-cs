@@ -9,8 +9,8 @@ namespace DisplayCommands.Internals;
 
 internal sealed class DisplayConnection(IOptions<DisplayConfiguration> options) : IDisplayConnection, IDisposable
 {
-    private readonly UdpClient _udpClient = new(options.Value.Hostname, options.Value.Port);
     private readonly ArrayPool<byte> _arrayPool = ArrayPool<byte>.Shared;
+    private readonly UdpClient _udpClient = new(options.Value.Hostname, options.Value.Port);
 
     public ValueTask SendClearAsync()
     {
@@ -119,8 +119,5 @@ internal sealed class DisplayConnection(IOptions<DisplayConfiguration> options) 
         _arrayPool.Return(buffer);
     }
 
-    public void Dispose()
-    {
-        _udpClient.Dispose();
-    }
+    public void Dispose() => _udpClient.Dispose();
 }

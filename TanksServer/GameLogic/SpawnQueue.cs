@@ -11,10 +11,7 @@ internal sealed class SpawnQueue(
     private readonly TimeSpan _spawnDelay = TimeSpan.FromMilliseconds(options.Value.SpawnDelayMs);
     private readonly TimeSpan _idleTimeout = TimeSpan.FromMilliseconds(options.Value.IdleTimeoutMs);
 
-    public void EnqueueForImmediateSpawn(Player player)
-    {
-        _queue.Enqueue(player);
-    }
+    public void EnqueueForImmediateSpawn(Player player) => _queue.Enqueue(player);
 
     public void EnqueueForDelayedSpawn(Player player)
     {
@@ -33,7 +30,7 @@ internal sealed class SpawnQueue(
             _queue.Enqueue(player);
             return false;
         }
-        
+
         var now = DateTime.Now;
         if (_spawnTimes.GetOrAdd(player, DateTime.MinValue) > now)
         {

@@ -8,3 +8,24 @@ indent_style = space
 insert_final_newline = true
 max_line_length = 120
 tab_width = 4
+trim_trailing_whitespace = true
+
+csharp_style_expression_bodied_methods = when_on_single_line:warning
+csharp_style_expression_bodied_lambdas = when_on_single_line:warning
+csharp_style_expression_bodied_properties = when_on_single_line:warning
+
+dotnet_style_collection_initializer = true:warning
+
+dotnet_style_parentheses_in_arithmetic_binary_operators = never_if_unnecessary:none
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:none
+dotnet_style_parentheses_in_relational_binary_operators = never_if_unnecessary:none
+
+dotnet_style_predefined_type_for_locals_parameters_members = true:suggestion
+dotnet_style_predefined_type_for_member_access = true:suggestion
+
+dotnet_style_qualification_for_event = false:suggestion
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning

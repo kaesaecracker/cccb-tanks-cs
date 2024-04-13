@@ -10,15 +10,27 @@ internal sealed class GameTickWorker(
 ) : IHostedService, IDisposable
 {
     private const int TicksPerSecond = 25;
-    private static readonly TimeSpan TickPacing = TimeSpan.FromMilliseconds((int)(1000 / TicksPerSecond));
+    private static readonly TimeSpan TickPacing = TimeSpan.FromMilliseconds(1000 / TicksPerSecond);
     private readonly CancellationTokenSource _cancellation = new();
     private readonly List<ITickStep> _steps = steps.ToList();
     private Task? _run;
+
+    public void Dispose()
+    {
+        _cancellation.Dispose();
+        _run?.Dispose();
+    }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _run = RunAsync();
         return Task.CompletedTask;
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await _cancellation.CancelAsync();
+        if (_run != null) await _run;
     }
 
     private async Task RunAsync()
@@ -44,17 +56,5 @@ internal sealed class GameTickWorker(
             logger.LogError(ex, "game tick service crashed");
             lifetime.StopApplication();
         }
-    }
-
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        await _cancellation.CancelAsync();
-        if (_run != null) await _run;
-    }
-
-    public void Dispose()
-    {
-        _cancellation.Dispose();
-        _run?.Dispose();
     }
 }
