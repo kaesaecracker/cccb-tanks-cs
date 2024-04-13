@@ -1,6 +1,8 @@
 export type PlayerResponse = {
     readonly name: string;
     readonly id: string;
+    readonly kills: number;
+    readonly deaths: number;
 };
 
 export async function fetchTyped<T>({ url, method }: { url: URL; method: string; }) {

@@ -21,18 +21,28 @@ export default function PlayerInfo({ playerId }: { playerId: string }) {
         <div className="ScoreForm">
             <div className='ElemGroup'>
                 <p className='Elems' style={{ "color": "white" }}>
-                    name
+                    name:
                 </p>
                 <p className='Elems' style={{ "color": "white" }}>
                     {player?.name}
                 </p>
             </div>
-            <div className='ElemGroup'></div>
-            <p className='Elems' style={{ "color": "white" }}>
-                {JSON.stringify(player)}
-            </p>
-
-
+            <div className='ElemGroup'>
+                <p className='Elems' style={{ "color": "white" }}>
+                    kills:
+                </p>
+                <p className='Elems' style={{ "color": "white" }}>
+                    {player?.kills}
+                </p>
+            </div>
+            <div className='ElemGroup'>
+                <p className='Elems' style={{ "color": "white" }}>
+                    deaths:
+                </p>
+                <p className='Elems' style={{ "color": "white" }}>
+                    {player?.deaths}
+                </p>
+            </div>
         </div>
     </div >;
 }
