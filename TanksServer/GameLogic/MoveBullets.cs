@@ -14,8 +14,8 @@ internal sealed class MoveBullets(BulletManager bullets, IOptions<TanksConfigura
     {
         var angle = bullet.Rotation * 2 * Math.PI;
         bullet.Position = new FloatPosition(
-            x: bullet.Position.X + Math.Sin(angle) * config.Value.BulletSpeed,
-            y: bullet.Position.Y - Math.Cos(angle) * config.Value.BulletSpeed
+            bullet.Position.X + Math.Sin(angle) * config.Value.BulletSpeed,
+            bullet.Position.Y - Math.Cos(angle) * config.Value.BulletSpeed
         );
     }
 }

@@ -1,89 +1,50 @@
 using System.Diagnostics;
 using System.Net.WebSockets;
-using System.Threading.Channels;
 
 namespace TanksServer.Interactivity;
 
-/// <summary>
-/// Hacky class for easier semantics
-/// </summary>
-internal sealed class ByteChannelWebSocket : Channel<Memory<byte>>
+internal sealed class ByteChannelWebSocket(WebSocket socket, ILogger logger, int messageSize)
 {
-    private readonly ILogger _logger;
-    private readonly WebSocket _socket;
-    private readonly Task _backgroundDone;
-    private readonly byte[] _buffer;
+    private readonly byte[] _buffer = new byte[messageSize];
 
-    private readonly Channel<Memory<byte>> _outgoing = Channel.CreateUnbounded<Memory<byte>>();
-    private readonly Channel<Memory<byte>> _incoming = Channel.CreateUnbounded<Memory<byte>>();
+    public ValueTask SendAsync(ReadOnlyMemory<byte> data) =>
+        socket.SendAsync(data, WebSocketMessageType.Binary, true, CancellationToken.None);
 
-    public ByteChannelWebSocket(WebSocket socket, ILogger logger, int messageSize)
-    {
-        _socket = socket;
-        _logger = logger;
-        _buffer = new byte[messageSize];
-        _backgroundDone = Task.WhenAll(ReadLoopAsync(), WriteLoopAsync());
-
-        Reader = _incoming.Reader;
-        Writer = _outgoing.Writer;
-    }
-
-    private async Task ReadLoopAsync()
+    public async IAsyncEnumerable<Memory<byte>> ReadAllAsync()
     {
         while (true)
         {
-            if (_socket.State is not (WebSocketState.Open or WebSocketState.CloseSent))
+            if (socket.State is not (WebSocketState.Open or WebSocketState.CloseSent))
                 break;
 
-            var response = await _socket.ReceiveAsync(_buffer, CancellationToken.None);
+            var response = await socket.ReceiveAsync(_buffer, CancellationToken.None);
             if (response.MessageType == WebSocketMessageType.Close)
             {
-                if (_socket.State == WebSocketState.CloseReceived)
-                    await _socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty,
+                if (socket.State == WebSocketState.CloseReceived)
+                    await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty,
                         CancellationToken.None);
                 break;
             }
 
             if (response.Count != _buffer.Length)
             {
-                await _socket.CloseAsync(
+                await socket.CloseOutputAsync(
                     WebSocketCloseStatus.InvalidPayloadData,
                     "response has unexpected size",
                     CancellationToken.None);
                 break;
             }
 
-            await _incoming.Writer.WriteAsync(_buffer.ToArray());
+            yield return _buffer.ToArray();
         }
 
-        if (_socket.State != WebSocketState.Closed)
+        if (socket.State != WebSocketState.Closed)
             Debugger.Break();
-
-        _incoming.Writer.Complete();
-    }
-
-    private async Task WriteLoopAsync()
-    {
-        await foreach (var data in _outgoing.Reader.ReadAllAsync())
-        {
-            _logger.LogTrace("sending {} bytes of data", data.Length);
-            try
-            {
-                await _socket.SendAsync(data, WebSocketMessageType.Binary, true, CancellationToken.None);
-            }
-            catch (WebSocketException wsEx)
-            {
-                _logger.LogDebug(wsEx, "send failed");
-            }
-        }
-
-        await _socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
     }
 
     public async Task CloseAsync()
     {
-        _logger.LogDebug("closing socket");
-        _outgoing.Writer.Complete();
-        await _backgroundDone;
+        logger.LogDebug("closing socket");
+        await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
     }
 }
