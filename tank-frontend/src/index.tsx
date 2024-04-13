@@ -11,7 +11,7 @@ function App() {
     return <>
         {id === null && <JoinForm onDone={name => setId(name)}/>}
         <ClientScreen/>
-        {id == null || <Controls playerId={id}/>}
+        {id == null || <Controls playerId={id}/>} 
     </>;
 }
 

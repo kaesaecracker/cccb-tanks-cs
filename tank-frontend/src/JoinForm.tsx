@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import './JoinForm.css';
 
 type PlayerResponse = {
@@ -18,7 +18,7 @@ export async function fetchPlayer(name: string, options: RequestInit) {
     return json.id;
 }
 
-export default function JoinForm({onDone}: { onDone: (id: string) => void }) {
+export default function JoinForm({ onDone }: { onDone: (id: string) => void }) {
     const [name, setName] = useState('');
     const [clicked, setClicked] = useState(false);
     const [data, setData] = useState<PlayerResponse | null>(null);
@@ -41,17 +41,27 @@ export default function JoinForm({onDone}: { onDone: (id: string) => void }) {
     }, [clicked, setData, data]);
 
     const disableButtons = clicked || name.trim() === '';
-    return <div className="JoinForm">
-        <input
-            type="text"
-            value={name}
-            onChange={e => setName(e.target.value)}
-        />
-        <button
-            onClick={() => setClicked(true)}
-            disabled={disableButtons}
-        >
-            join
-        </button>
+    return <div className='TankWelcome'>
+        <h1 className='JoinElems' style={{ "color": "white" }}>
+            Tanks
+        </h1>
+        <p className='JoinElems' style={{ "color": "white" }}> Welcome and have fun!</p>
+        <div className="JoinForm">
+            <p className='JoinElems' style={{ "color": "white" }}>
+                Enter your name to join the game!
+            </p>
+            <input className="JoinElems"
+                type="text"
+                value={name}
+                placeholder='player name'
+                onChange={e => setName(e.target.value)}
+            />
+            <button className="JoinElems"
+                onClick={() => setClicked(true)}
+                disabled={disableButtons}
+            >
+                join
+            </button>
+        </div>
     </div>;
 }
