@@ -5,13 +5,13 @@ using TanksServer.GameLogic;
 
 namespace TanksServer.Graphics;
 
-internal sealed class TankDrawer : IDrawStep
+internal sealed class DrawTanksStep : IDrawStep
 {
     private readonly TankManager _tanks;
     private readonly bool[] _tankSprite;
     private readonly int _tankSpriteWidth;
 
-    public TankDrawer(TankManager tanks)
+    public DrawTanksStep(TankManager tanks)
     {
         _tanks = tanks;
 
@@ -22,9 +22,7 @@ internal sealed class TankDrawer : IDrawStep
         var i = 0;
         for (var y = 0; y < tankImage.Height; y++)
         for (var x = 0; x < tankImage.Width; x++, i++)
-        {
             _tankSprite[i] = tankImage[x, y] == whitePixel;
-        }
 
         _tankSpriteWidth = tankImage.Width;
     }
@@ -33,7 +31,7 @@ internal sealed class TankDrawer : IDrawStep
     {
         foreach (var tank in _tanks)
         {
-            var tankPosition = tank.Position.ToPixelPosition();
+            var tankPosition = tank.Bounds.TopLeft;
             var orientation = (int)Math.Round(tank.Rotation * 16d) % 16;
 
             for (byte dy = 0; dy < MapService.TileSize; dy++)

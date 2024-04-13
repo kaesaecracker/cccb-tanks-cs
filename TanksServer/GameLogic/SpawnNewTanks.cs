@@ -44,9 +44,6 @@ internal sealed class SpawnNewTanks(
         }
 
         var min = candidates.MaxBy(kvp => kvp.Value).Key;
-        return new FloatPosition(
-            min.X * MapService.TileSize,
-            min.Y * MapService.TileSize
-        );
+        return min.ToPixelPosition().GetPixelRelative(4, 4).ToFloatPosition();
     }
 }

@@ -20,9 +20,21 @@ internal sealed class Tank(Player player, FloatPosition spawnPosition) : IMapEnt
         }
     }
 
-    public FloatPosition Position { get; set; } = spawnPosition;
-
     public DateTime NextShotAfter { get; set; }
 
     public bool Moved { get; set; }
+
+    public FloatPosition Position { get; set; } = spawnPosition;
+
+    public PixelBounds Bounds => GetBoundsForCenter(Position);
+
+    public static PixelBounds GetBoundsForCenter(FloatPosition position) => new(
+        new PixelPosition(
+            (ushort)(position.X - MapService.TileSize / 2d),
+            (ushort)(position.Y - MapService.TileSize / 2d)
+        ), new PixelPosition(
+            (ushort)(position.X + MapService.TileSize / 2d - 1d),
+            (ushort)(position.Y + MapService.TileSize / 2d - 1d)
+        )
+    );
 }

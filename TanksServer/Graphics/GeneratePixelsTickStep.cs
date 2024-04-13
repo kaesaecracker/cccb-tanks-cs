@@ -3,8 +3,9 @@ using TanksServer.GameLogic;
 
 namespace TanksServer.Graphics;
 
-internal sealed class DrawStateToFrame(
-    IEnumerable<IDrawStep> drawSteps, LastFinishedFrameProvider lastFrameProvider
+internal sealed class GeneratePixelsTickStep(
+    IEnumerable<IDrawStep> drawSteps,
+    LastFinishedFrameProvider lastFrameProvider
 ) : ITickStep
 {
     private readonly List<IDrawStep> _drawSteps = drawSteps.ToList();

@@ -20,12 +20,4 @@ internal sealed class TankManager(ILogger<TankManager> logger) : IEnumerable<Tan
         logger.LogInformation("Tank removed for player {}", tank.Owner.Id);
         _tanks.Remove(tank, out _);
     }
-
-    public static (PixelPosition TopLeft, PixelPosition BottomRight) GetTankBounds(PixelPosition tankPosition)
-    {
-        return (tankPosition, new PixelPosition(
-            (ushort)(tankPosition.X + MapService.TileSize - 1),
-            (ushort)(tankPosition.Y + MapService.TileSize - 1)
-        ));
-    }
 }

@@ -3,7 +3,7 @@ using TanksServer.GameLogic;
 
 namespace TanksServer.Graphics;
 
-internal sealed class MapDrawer(MapService map) : IDrawStep
+internal sealed class DrawMapStep(MapService map) : IDrawStep
 {
     public void Draw(PixelGrid buffer)
     {

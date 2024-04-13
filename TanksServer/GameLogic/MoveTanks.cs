@@ -47,9 +47,7 @@ internal sealed class MoveTanks(
 
     private bool TryMoveTankTo(Tank tank, FloatPosition newPosition)
     {
-        var (topLeft, bottomRight) = TankManager.GetTankBounds(newPosition.ToPixelPosition());
-
-        if (HitsWall(topLeft, bottomRight))
+        if (HitsWall(newPosition))
             return false;
         if (HitsTank(tank, newPosition))
             return false;
@@ -63,14 +61,15 @@ internal sealed class MoveTanks(
             .Where(otherTank => otherTank != tank)
             .Any(otherTank => newPosition.Distance(otherTank.Position) < MapService.TileSize);
 
-    private bool HitsWall(PixelPosition topLeft, PixelPosition bottomRight)
+    private bool HitsWall(FloatPosition newPosition)
     {
+        var (topLeft, bottomRight) = Tank.GetBoundsForCenter(newPosition);
         TilePosition[] positions =
         [
             topLeft.ToTilePosition(),
             new PixelPosition(bottomRight.X, topLeft.Y).ToTilePosition(),
             new PixelPosition(topLeft.X, bottomRight.Y).ToTilePosition(),
-            bottomRight.ToTilePosition(),
+            bottomRight.ToTilePosition()
         ];
         return positions.Any(map.IsCurrentlyWall);
     }

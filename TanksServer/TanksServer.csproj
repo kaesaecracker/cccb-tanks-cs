@@ -19,7 +19,6 @@
         <PublishAot>true</PublishAot>
 
         <IlcDisableReflection>false</IlcDisableReflection>
-        <InvariantGlobalization>true</InvariantGlobalization>
         <StaticExecutable>true</StaticExecutable>
         <StripSymbols>true</StripSymbols>
         <StaticallyLinked>true</StaticallyLinked>
@@ -31,19 +30,20 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="./assets/tank.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Always" />
-        
+        <None Include="./assets/tank.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Always"/>
+
         <Content Include="../Dockerfile">
-            <Link>..\Dockerfile</Link>
+            <Link>Dockerfile</Link>
         </Content>
         <Content Include="../.dockerignore">
-            <Link>../Dockerfile</Link>
+            <Link>Dockerfile</Link>
         </Content>
-        <Content Include="../Makefile" />
+        <Content Include="../Makefile"/>
+        <Content Include="../.editorconfig"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DisplayCommands\DisplayCommands.csproj" />
+        <ProjectReference Include="../DisplayCommands/DisplayCommands.csproj"/>
     </ItemGroup>
 
 </Project>

@@ -100,13 +100,13 @@ public static class Program
         builder.Services.AddSingleton<ITickStep, MoveTanks>();
         builder.Services.AddSingleton<ITickStep, ShootFromTanks>();
         builder.Services.AddSingleton<ITickStep, SpawnNewTanks>();
-        builder.Services.AddSingleton<ITickStep, DrawStateToFrame>();
+        builder.Services.AddSingleton<ITickStep, GeneratePixelsTickStep>();
         builder.Services.AddSingleton<ITickStep, SendToServicePointDisplay>();
         builder.Services.AddSingleton<ITickStep, SendToClientScreen>();
 
-        builder.Services.AddSingleton<IDrawStep, MapDrawer>();
-        builder.Services.AddSingleton<IDrawStep, TankDrawer>();
-        builder.Services.AddSingleton<IDrawStep, BulletDrawer>();
+        builder.Services.AddSingleton<IDrawStep, DrawMapStep>();
+        builder.Services.AddSingleton<IDrawStep, DrawTanksStep>();
+        builder.Services.AddSingleton<IDrawStep, DrawBulletsStep>();
 
         builder.Services.Configure<TanksConfiguration>(
             builder.Configuration.GetSection("Tanks"));

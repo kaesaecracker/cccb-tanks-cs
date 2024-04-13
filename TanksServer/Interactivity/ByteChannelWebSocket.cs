@@ -12,30 +12,10 @@ internal sealed class ByteChannelWebSocket(WebSocket socket, ILogger logger, int
 
     public async IAsyncEnumerable<Memory<byte>> ReadAllAsync()
     {
-        while (true)
+        while (socket.State is WebSocketState.Open or WebSocketState.CloseSent)
         {
-            if (socket.State is not (WebSocketState.Open or WebSocketState.CloseSent))
-                break;
-
-            var response = await socket.ReceiveAsync(_buffer, CancellationToken.None);
-            if (response.MessageType == WebSocketMessageType.Close)
-            {
-                if (socket.State == WebSocketState.CloseReceived)
-                    await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty,
-                        CancellationToken.None);
-                break;
-            }
-
-            if (response.Count != _buffer.Length)
-            {
-                await socket.CloseOutputAsync(
-                    WebSocketCloseStatus.InvalidPayloadData,
-                    "response has unexpected size",
-                    CancellationToken.None);
-                break;
-            }
-
-            yield return _buffer.ToArray();
+            if (await TryReadAsync())
+                yield return _buffer.ToArray();
         }
 
         if (socket.State != WebSocketState.Closed)
@@ -44,7 +24,45 @@ internal sealed class ByteChannelWebSocket(WebSocket socket, ILogger logger, int
 
     public async Task CloseAsync()
     {
-        logger.LogDebug("closing socket");
-        await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
+        if (socket.State != WebSocketState.Open)
+            return;
+
+        try
+        {
+            await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
+        }
+        catch (WebSocketException socketException)
+        {
+            logger.LogDebug(socketException, "could not close socket properly");
+        }
+    }
+
+    private async Task<bool> TryReadAsync()
+    {
+        try
+        {
+            var response = await socket.ReceiveAsync(_buffer, CancellationToken.None);
+            if (response.MessageType == WebSocketMessageType.Close)
+            {
+                await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty,
+                    CancellationToken.None);
+                return false;
+            }
+
+            if (response.Count != _buffer.Length)
+            {
+                await socket.CloseOutputAsync(WebSocketCloseStatus.InvalidPayloadData,
+                    "response has unexpected size",
+                    CancellationToken.None);
+                return false;
+            }
+
+            return true;
+        }
+        catch (WebSocketException socketException)
+        {
+            logger.LogDebug(socketException, "could not read");
+            return false;
+        }
     }
 }

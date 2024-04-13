@@ -27,8 +27,8 @@ internal sealed class ShootFromTanks(
 
         var angle = tank.Rotation * 2 * Math.PI;
         var position = new FloatPosition(
-            x: tank.Position.X + MapService.TileSize / 2d + Math.Sin(angle) * _config.BulletSpeed,
-            y: tank.Position.Y + MapService.TileSize / 2d - Math.Cos(angle) * _config.BulletSpeed
+            tank.Position.X + Math.Sin(angle) * _config.BulletSpeed,
+            tank.Position.Y - Math.Cos(angle) * _config.BulletSpeed
         );
 
         bulletManager.Spawn(new Bullet(tank.Owner, position, tank.Rotation));

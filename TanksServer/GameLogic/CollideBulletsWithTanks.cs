@@ -1,7 +1,9 @@
 namespace TanksServer.GameLogic;
 
 internal sealed class CollideBulletsWithTanks(
-    BulletManager bullets, TankManager tanks, SpawnQueue spawnQueue
+    BulletManager bullets,
+    TankManager tanks,
+    SpawnQueue spawnQueue
 ) : ITickStep
 {
     public Task TickAsync()
@@ -14,7 +16,7 @@ internal sealed class CollideBulletsWithTanks(
     {
         foreach (var tank in tanks)
         {
-            var (topLeft, bottomRight) = TankManager.GetTankBounds(tank.Position.ToPixelPosition());
+            var (topLeft, bottomRight) = tank.Bounds;
             if (bullet.Position.X < topLeft.X || bullet.Position.X > bottomRight.X ||
                 bullet.Position.Y < topLeft.Y || bullet.Position.Y > bottomRight.Y)
                 continue;
