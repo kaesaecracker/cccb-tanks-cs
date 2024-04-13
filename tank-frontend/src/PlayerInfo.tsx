@@ -4,12 +4,10 @@ import {PlayerResponse, getPlayer} from './serverCalls';
 import {Guid} from "./Guid.ts";
 import Column from "./components/Column.tsx";
 import Row from "./components/Row.tsx";
-import Button from "./components/Button.tsx";
 
-export default function PlayerInfo({playerId, logout, reset}: {
+export default function PlayerInfo({playerId, logout}: {
     playerId: Guid,
-    logout: () => void,
-    reset: () => void
+    logout: () => void
 }) {
     const [player, setPlayer] = useState<PlayerResponse | null>();
 
@@ -28,12 +26,9 @@ export default function PlayerInfo({playerId, logout, reset}: {
     }, [playerId]);
 
     return <Column className='PlayerInfo'>
-        <Row>
-            <h3 className='grow'>
-                {player ? `Playing as "${player?.name}"` : 'loading...'}
-            </h3>
-            <Button className='PlayerInfo-Reset' onClick={() => reset()} text='x'/>
-        </Row>
+        <h3>
+            {player ? `Playing as "${player?.name}"` : 'loading...'}
+        </h3>
         <Row>
             <p className='Elems'> kills: </p>
             <p className='Elems'>{player?.scores.kills}</p>

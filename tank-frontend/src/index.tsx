@@ -10,6 +10,7 @@ import {NameId, postPlayer} from './serverCalls.tsx';
 import Column from "./components/Column.tsx";
 import Row from "./components/Row.tsx";
 import Scoreboard from "./Scoreboard.tsx";
+import Button from "./components/Button.tsx";
 
 const getNewNameId = () => ({
     id: crypto.randomUUID(),
@@ -30,12 +31,16 @@ function App() {
     }, [nameId, isLoggedIn])();
 
     return <Column className='grow'>
-        <h1>Tanks!</h1>
-        {nameId.name === '' && <JoinForm setNameId={setNameId} clientId={nameId.id}/>}
+        <Row>
+            <h1 className='grow'>Tanks!</h1>
+            {nameId.name !== '' &&
+                <Button className='PlayerInfo-Reset' onClick={() => setNameId(getNewNameId)} text='x'/>}
+        </Row>
         <ClientScreen logout={logout}/>
+        {nameId.name === '' && <JoinForm setNameId={setNameId} clientId={nameId.id}/>}
         {isLoggedIn && <Row>
             <Controls playerId={nameId.id} logout={logout}/>
-            <PlayerInfo playerId={nameId.id} logout={logout} reset={() => setNameId(getNewNameId)}/>
+            <PlayerInfo playerId={nameId.id} logout={logout}/>
             <Scoreboard/>
         </Row>
         }

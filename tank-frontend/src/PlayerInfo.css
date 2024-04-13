@@ -1,9 +1,4 @@
-.PlayerInfo {
-    border: 2px solid rgb(76, 76, 76);
-    border-radius: 4px;
-}
-
-.Elems {
+    .Elems {
     padding: 8px 8px;
     margin: 8px 8px;
 }

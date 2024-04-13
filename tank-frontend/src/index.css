@@ -21,10 +21,22 @@ body {
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: 100vw;
-    height: 100vh;
+    width: 95vw;
+    height: 95vh;
 }
 
 .grow {
     flex-grow: 1;
+}
+
+@font-face {
+    font-family: 'CCCBFont';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/public/CCCBFont.woff') format('woff');
+}
+
+* {
+    font-family: CCCBFont, monospace;
 }
