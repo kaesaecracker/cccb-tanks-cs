@@ -1,4 +1,16 @@
+.TankWelcome {
+    display: flex;
+    flex-direction: column;
+}
+
 .JoinForm {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    border: 2px solid rgb(76, 76, 76);
+    border-radius: 4px;
+}
+
+.JoinElems {
+    padding: 8px 8px;
+    margin: 8px 8px;
 }
