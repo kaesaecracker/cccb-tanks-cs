@@ -2,12 +2,18 @@
     box-sizing: border-box;
 }
 
-html, body {
-    height: 100%;
+@font-face {
+    font-family: 'CCCBFont';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/CCCBFont.ttf') format('ttf'), url('/CCCBFont.woff') format('woff');
 }
 
-body {
-    font-family: sans-serif;
+html, body {
+    height: 100%;
+
+    font-family: CCCBFont, monospace;
     margin: 0;
     display: flex;
     align-items: center;
@@ -29,14 +35,7 @@ body {
     flex-grow: 1;
 }
 
-@font-face {
-    font-family: 'CCCBFont';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('/public/CCCBFont.woff') format('woff');
-}
-
-* {
-    font-family: CCCBFont, monospace;
+.GadgetRows {
+    justify-content: space-evenly;
+    margin-top: 24px;
 }

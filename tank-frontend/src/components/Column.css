@@ -1,7 +1,6 @@
 .Column {
     display: flex;
     flex-direction: column;
-    flex: auto;
     max-height: 100%;
     align-items: stretch;
     gap: 8px;

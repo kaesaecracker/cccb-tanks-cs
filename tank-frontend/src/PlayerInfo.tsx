@@ -3,7 +3,6 @@ import './PlayerInfo.css'
 import {PlayerResponse, getPlayer} from './serverCalls';
 import {Guid} from "./Guid.ts";
 import Column from "./components/Column.tsx";
-import Row from "./components/Row.tsx";
 
 export default function PlayerInfo({playerId, logout}: {
     playerId: Guid,
@@ -27,15 +26,19 @@ export default function PlayerInfo({playerId, logout}: {
 
     return <Column className='PlayerInfo'>
         <h3>
-            {player ? `Playing as "${player?.name}"` : 'loading...'}
+            {player ? `Playing as ${player?.name}` : 'loading...'}
         </h3>
-        <Row>
-            <p className='Elems'> kills: </p>
-            <p className='Elems'>{player?.scores.kills}</p>
-        </Row>
-        <Row>
-            <p className='Elems'>deaths: </p>
-            <p className='Elems'>{player?.scores.deaths}</p>
-        </Row>
+        <table>
+            <tbody>
+            <tr>
+                <td>kills:</td>
+                <td>{player?.scores.kills}</td>
+            </tr>
+            <tr>
+                <td>deaths:</td>
+                <td>{player?.scores.deaths}</td>
+            </tr>
+            </tbody>
+        </table>
     </Column>;
 }

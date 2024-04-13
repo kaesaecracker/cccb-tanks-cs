@@ -1,7 +1,6 @@
 .Row {
     display: flex;
     flex-direction: row;
-    flex: auto;
     max-width: 100%;
     align-items: stretch;
     gap: 8px;

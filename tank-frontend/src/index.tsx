@@ -38,7 +38,7 @@ function App() {
         </Row>
         <ClientScreen logout={logout}/>
         {nameId.name === '' && <JoinForm setNameId={setNameId} clientId={nameId.id}/>}
-        {isLoggedIn && <Row>
+        {isLoggedIn && <Row className='GadgetRows'>
             <Controls playerId={nameId.id} logout={logout}/>
             <PlayerInfo playerId={nameId.id} logout={logout}/>
             <Scoreboard/>

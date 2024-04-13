@@ -32,17 +32,15 @@ kbd:active {
     box-shadow: 0 1px rgba(0, 0, 0, .13) inset;
 }
 
-.controls {
+.Controls {
     display: flex;
     color: lightgray;
+    text-align: center;
+    align-items: center !important;
 }
 
 .control {
     margin: 0 1em;
-}
-
-.control h3 {
-    text-align: center;
 }
 
 .row {

@@ -59,23 +59,21 @@ export default function Controls({playerId, logout}: {
         };
     }, [sendMessage]);
 
-    return <>
-        <Column className="Controls">
-            <div className="control">
-                <div className="row">
-                    <kbd className="up">▲</kbd>
-                </div>
-                <div className="row">
-                    <kbd>◀</kbd>
-                    <kbd>▼</kbd>
-                    <kbd>▶</kbd>
-                </div>
+    return <Column className="Controls">
+        <div className="control">
+            <div className="row">
+                <kbd className="up">↑</kbd>
             </div>
-            <h3>Move</h3>
-            <div className="control">
-                <kbd className="space">Space</kbd>
+            <div className="row">
+                <kbd>←</kbd>
+                <kbd>↓</kbd>
+                <kbd>→</kbd>
             </div>
-            <h3>Fire</h3>
-        </Column>
-    </>;
+        </div>
+        <h3>Move</h3>
+
+        <kbd className="space control">Space</kbd>
+
+        <h3>Fire</h3>
+    </Column>;
 }
