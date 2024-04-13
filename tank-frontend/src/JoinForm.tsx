@@ -47,7 +47,7 @@ export default function JoinForm({ onDone }: { onDone: (id: string) => void }) {
         </h1>
         <p className='JoinElems' style={{ "color": "white" }}> Welcome and have fun!</p>
         <div className="JoinForm">
-            <p className='JoinElems' style={{ "color": "white" }}>
+        <p className='JoinElems' style={{ "color": "white" }}>
                 Enter your name to join the game!
             </p>
             <input className="JoinElems"
