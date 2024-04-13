@@ -1,7 +1,6 @@
 import useWebSocket from 'react-use-websocket';
 import {useEffect, useRef} from 'react';
 import './ClientScreen.css';
-import {statusTextForReadyState} from './statusTextForReadyState.tsx';
 
 const pixelsPerRow = 352;
 const pixelsPerCol = 160;
@@ -41,11 +40,10 @@ function drawPixelsToCanvas(pixels: Uint8Array, canvas: HTMLCanvasElement) {
     drawContext.putImageData(imageData, 0, 0);
 }
 
-export default function ClientScreen({logout}: {logout: () => void}) {
+export default function ClientScreen({logout}: { logout: () => void }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const {
-        readyState,
         lastMessage,
         sendMessage,
         getWebSocket
@@ -67,8 +65,5 @@ export default function ClientScreen({logout}: {logout: () => void}) {
         sendMessage('');
     }, [lastMessage, canvasRef.current]);
 
-    return <>
-        <span>The screen is currently {statusTextForReadyState[readyState]}</span>
-        <canvas ref={canvasRef} id="screen" width={pixelsPerRow} height={pixelsPerCol}/>
-    </>;
+    return <canvas ref={canvasRef} id="screen" width={pixelsPerRow} height={pixelsPerCol}/>;
 }

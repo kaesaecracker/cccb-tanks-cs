@@ -3,5 +3,7 @@
     aspect-ratio: calc(352 / 160);
     flex-grow: 1;
     object-fit: contain;
-    max-width: 100%;
+    max-width: 100vw;
+    max-height: 100vh;
+    flex-shrink: 0;
 }

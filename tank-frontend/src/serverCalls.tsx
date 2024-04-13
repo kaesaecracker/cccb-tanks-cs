@@ -2,7 +2,7 @@ import {Guid} from './Guid.ts';
 
 export type PlayerResponse = {
     readonly name: string;
-    readonly id: string;
+    readonly id: Guid;
     readonly scores: {
         readonly kills: number;
         readonly deaths: number;
@@ -29,7 +29,7 @@ export function postPlayer({name, id}: NameId) {
     return fetchTyped<NameId>({url, method: 'POST'});
 }
 
-export function getPlayer(id: string) {
+export function getPlayer(id: Guid) {
     const url = new URL(import.meta.env.VITE_TANK_PLAYER_URL);
     url.searchParams.set('id', id);
 

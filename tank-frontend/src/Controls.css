@@ -1,3 +1,7 @@
+.Controls * {
+    box-sizing: content-box;
+}
+
 kbd {
     background: hsl(0, 0%, 96%);
     padding: 10px;

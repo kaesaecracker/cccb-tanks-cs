@@ -7,12 +7,17 @@ import {createRoot} from 'react-dom/client';
 import PlayerInfo from './PlayerInfo.tsx';
 import {useStoredObjectState} from './useStoredState.ts';
 import {NameId, postPlayer} from './serverCalls.tsx';
+import Column from "./components/Column.tsx";
+import Row from "./components/Row.tsx";
+import Scoreboard from "./Scoreboard.tsx";
+
+const getNewNameId = () => ({
+    id: crypto.randomUUID(),
+    name: ''
+});
 
 function App() {
-    const [nameId, setNameId] = useStoredObjectState<NameId>('access', () => ({
-        id: crypto.randomUUID(),
-        name: ''
-    }));
+    const [nameId, setNameId] = useStoredObjectState<NameId>('access', getNewNameId);
 
     const [isLoggedIn, setLoggedIn] = useState<boolean>(false);
     const logout = () => setLoggedIn(false);
@@ -24,12 +29,17 @@ function App() {
         setLoggedIn(result !== null);
     }, [nameId, isLoggedIn])();
 
-    return <>
+    return <Column className='grow'>
+        <h1>Tanks!</h1>
         {nameId.name === '' && <JoinForm setNameId={setNameId} clientId={nameId.id}/>}
-        {isLoggedIn && <PlayerInfo playerId={nameId.id} logout={logout}/>}
         <ClientScreen logout={logout}/>
-        {isLoggedIn && <Controls playerId={nameId.id} logout={logout}/>}
-    </>;
+        {isLoggedIn && <Row>
+            <Controls playerId={nameId.id} logout={logout}/>
+            <PlayerInfo playerId={nameId.id} logout={logout} reset={() => setNameId(getNewNameId)}/>
+            <Scoreboard/>
+        </Row>
+        }
+    </Column>;
 }
 
 createRoot(document.getElementById('root')!).render(

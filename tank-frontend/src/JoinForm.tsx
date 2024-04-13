@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import './JoinForm.css';
 import {NameId, PlayerResponse, postPlayer} from './serverCalls';
 import {Guid} from './Guid.ts';
+import Column from "./components/Column.tsx";
 
 export default function JoinForm({setNameId, clientId}: {
     setNameId: (mutator: (oldState: NameId) => NameId) => void,
@@ -30,27 +31,25 @@ export default function JoinForm({setNameId, clientId}: {
     }, [clicked, setData, data, clientId, setClicked, setNameId]);
 
     const disableButtons = clicked || name.trim() === '';
-    return <div className="TankWelcome">
-        <h1 className="JoinElems" style={{'color': 'white'}}>
-            Tanks
-        </h1>
-        <p className="JoinElems" style={{'color': 'white'}}> Welcome and have fun!</p>
-        <div className="JoinForm">
-            <p className="JoinElems" style={{'color': 'white'}}>
-                Enter your name to join the game!
-            </p>
-            <input className="JoinElems"
-                   type="text"
-                   value={name}
-                   placeholder="player name"
-                   onChange={e => setName(e.target.value)}
-            />
-            <button className="JoinElems"
-                    onClick={() => setClicked(true)}
-                    disabled={disableButtons}
-            >
-                join
-            </button>
-        </div>
-    </div>;
+    return <Column className='JoinForm'>
+        <p className="JoinElems"> Enter your name to join the game! </p>
+        <input
+            className="JoinElems"
+            type="text"
+            value={name}
+            placeholder="player name"
+            onChange={e => setName(e.target.value)}
+            onKeyUp={event => {
+                if (event.key === 'Enter')
+                    setClicked(true);
+            }}
+        />
+        <button
+            className="JoinElems"
+            onClick={() => setClicked(true)}
+            disabled={disableButtons}
+        >
+            join
+        </button>
+    </Column>;
 }
