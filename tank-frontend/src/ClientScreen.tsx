@@ -41,7 +41,7 @@ function drawPixelsToCanvas(pixels: Uint8Array, canvas: HTMLCanvasElement) {
     drawContext.putImageData(imageData, 0, 0);
 }
 
-export default function ClientScreen({}: {}) {
+export default function ClientScreen({logout}: {logout: () => void}) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const {
@@ -50,7 +50,7 @@ export default function ClientScreen({}: {}) {
         sendMessage,
         getWebSocket
     } = useWebSocket(import.meta.env.VITE_TANK_SCREEN_URL, {
-        shouldReconnect: () => true,
+        onError: logout
     });
 
     const socket = getWebSocket();

@@ -11,6 +11,8 @@ using TanksServer.Interactivity;
 
 namespace TanksServer;
 
+internal sealed record class NameId(string Name, Guid Id);
+
 public static class Program
 {
     public static void Main(string[] args)
@@ -29,7 +31,7 @@ public static class Program
         {
             var player = playerService.GetOrAdd(name, id);
             return player != null
-                ? Results.Ok(player.Id)
+                ? Results.Ok(new NameId(name, id))
                 : Results.Unauthorized();
         });
         app.MapGet("/player", ([FromQuery] Guid id) =>

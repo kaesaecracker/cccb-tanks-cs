@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import './JoinForm.css';
-import { PlayerResponse, postPlayer } from './serverCalls';
+import {NameId, PlayerResponse, postPlayer} from './serverCalls';
+import {Guid} from './Guid.ts';
 
-export default function JoinForm({ onDone }: { onDone: (id: string) => void }) {
+export default function JoinForm({setNameId, clientId}: {
+    setNameId: (mutator: (oldState: NameId) => NameId) => void,
+    clientId: Guid
+}) {
     const [name, setName] = useState('');
     const [clicked, setClicked] = useState(false);
     const [data, setData] = useState<PlayerResponse | null>(null);
@@ -12,10 +16,10 @@ export default function JoinForm({ onDone }: { onDone: (id: string) => void }) {
             return;
 
         try {
-            postPlayer(name)
-                .then((value: PlayerResponse | null) => {
+            postPlayer({name, id: clientId})
+                .then(value => {
                     if (value)
-                        onDone(value.id);
+                        setNameId(prev => ({...prev, ...value}));
                     else
                         setClicked(false);
                 });
@@ -23,27 +27,27 @@ export default function JoinForm({ onDone }: { onDone: (id: string) => void }) {
             console.log(e);
             alert(e);
         }
-    }, [clicked, setData, data]);
+    }, [clicked, setData, data, clientId, setClicked, setNameId]);
 
     const disableButtons = clicked || name.trim() === '';
-    return <div className='TankWelcome'>
-        <h1 className='JoinElems' style={{ "color": "white" }}>
+    return <div className="TankWelcome">
+        <h1 className="JoinElems" style={{'color': 'white'}}>
             Tanks
         </h1>
-        <p className='JoinElems' style={{ "color": "white" }}> Welcome and have fun!</p>
+        <p className="JoinElems" style={{'color': 'white'}}> Welcome and have fun!</p>
         <div className="JoinForm">
-            <p className='JoinElems' style={{ "color": "white" }}>
+            <p className="JoinElems" style={{'color': 'white'}}>
                 Enter your name to join the game!
             </p>
             <input className="JoinElems"
-                type="text"
-                value={name}
-                placeholder='player name'
-                onChange={e => setName(e.target.value)}
+                   type="text"
+                   value={name}
+                   placeholder="player name"
+                   onChange={e => setName(e.target.value)}
             />
             <button className="JoinElems"
-                onClick={() => setClicked(true)}
-                disabled={disableButtons}
+                    onClick={() => setClicked(true)}
+                    disabled={disableButtons}
             >
                 join
             </button>

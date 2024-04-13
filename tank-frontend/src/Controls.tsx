@@ -3,8 +3,9 @@ import useWebSocket from 'react-use-websocket';
 import {useEffect} from 'react';
 import {statusTextForReadyState} from './statusTextForReadyState.tsx';
 
-export default function Controls({playerId}: {
-    playerId: string
+export default function Controls({playerId, logout}: {
+    playerId: string,
+    logout: () => void
 }) {
     const url = new URL(import.meta.env.VITE_TANK_CONTROLS_URL);
     url.searchParams.set('playerId', playerId);
@@ -13,7 +14,7 @@ export default function Controls({playerId}: {
         getWebSocket,
         readyState
     } = useWebSocket(url.toString(), {
-        shouldReconnect: () => true,
+        onError: logout
     });
 
     const socket = getWebSocket();
