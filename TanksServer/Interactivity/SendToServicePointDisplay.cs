@@ -71,13 +71,13 @@ internal sealed class SendToServicePointDisplay : ITickStep
     private void RefreshScores()
     {
         var playersToDisplay = _players.GetAll()
-            .OrderByDescending(p => p.Kills)
+            .OrderByDescending(p => p.Scores.Kills)
             .Take(ScoresPlayerRows);
 
         ushort row = 2;
         foreach (var p in playersToDisplay)
         {
-            var score = p.Kills.ToString();
+            var score = p.Scores.Kills.ToString();
             var nameLength = Math.Min(p.Name.Length, ScoresWidth - score.Length - 1);
 
             var name = p.Name[..nameLength];

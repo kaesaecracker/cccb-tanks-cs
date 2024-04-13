@@ -2,17 +2,15 @@ using System.Text.Json.Serialization;
 
 namespace TanksServer.Models;
 
-internal sealed class Player(string name)
+internal sealed class Player(string name, Guid id)
 {
     public string Name => name;
 
-    public Guid Id { get; } = Guid.NewGuid();
+    [JsonIgnore] public Guid Id => id;
 
     [JsonIgnore] public PlayerControls Controls { get; } = new();
 
-    public int Kills { get; set; }
-
-    public int Deaths { get; set; }
+    public Scores Scores { get; } = new();
 
     public DateTime LastInput { get; set; } = DateTime.Now;
 }

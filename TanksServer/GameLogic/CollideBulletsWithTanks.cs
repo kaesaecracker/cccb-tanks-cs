@@ -22,8 +22,8 @@ internal sealed class CollideBulletsWithTanks(
                 continue;
 
             if (bullet.Owner != tank.Owner)
-                bullet.Owner.Kills++;
-            tank.Owner.Deaths++;
+                bullet.Owner.Scores.Kills++;
+            tank.Owner.Scores.Deaths++;
 
             tanks.Remove(tank);
             spawnQueue.EnqueueForDelayedSpawn(tank.Owner);

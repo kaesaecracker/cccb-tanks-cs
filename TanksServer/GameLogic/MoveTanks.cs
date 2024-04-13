@@ -36,7 +36,7 @@ internal sealed class MoveTanks(
                 return false;
         }
 
-        var angle = tank.Rotation * 2d * Math.PI;
+        var angle = tank.Orientation / 16d * 2d * Math.PI;
         var newX = tank.Position.X + Math.Sin(angle) * speed;
         var newY = tank.Position.Y - Math.Cos(angle) * speed;
 

@@ -25,18 +25,29 @@ public static class Program
         app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = clientFileProvider });
         app.UseStaticFiles(new StaticFileOptions { FileProvider = clientFileProvider });
 
-        app.MapGet("/player", playerService.GetOrAdd);
+        app.MapPost("/player", (string name, Guid id) =>
+        {
+            var player = playerService.GetOrAdd(name, id);
+            return player != null
+                ? Results.Ok(player.Id)
+                : Results.Unauthorized();
+        });
+        app.MapGet("/player", ([FromQuery] Guid id) =>
+            playerService.TryGet(id, out var foundPlayer)
+                ? Results.Ok((object?)foundPlayer)
+                : Results.NotFound()
+        );
 
-        app.Map("/screen", async context =>
+        app.MapGet("/scores", () => playerService.GetAll());
+
+        app.Map("/screen", async (HttpContext context) =>
         {
             if (!context.WebSockets.IsWebSocketRequest)
-            {
-                context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                return;
-            }
+                return Results.BadRequest();
 
             using var ws = await context.WebSockets.AcceptWebSocketAsync();
             await clientScreenServer.HandleClient(ws);
+            return null;
         });
 
         app.Map("/controls", async (HttpContext context, [FromQuery] Guid playerId) =>
@@ -49,7 +60,7 @@ public static class Program
 
             using var ws = await context.WebSockets.AcceptWebSocketAsync();
             await controlsServer.HandleClient(ws, player);
-            return Results.Ok();
+            return null;
         });
 
         app.Run();

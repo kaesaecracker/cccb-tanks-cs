@@ -7,9 +7,19 @@ internal sealed class PlayerServer(ILogger<PlayerServer> logger, SpawnQueue spaw
 {
     private readonly ConcurrentDictionary<string, Player> _players = new();
 
-    public Player GetOrAdd(string name)
+    public Player? GetOrAdd(string name, Guid id)
     {
-        var player = _players.GetOrAdd(name, AddAndSpawn);
+        Player AddAndSpawn()
+        {
+            var player = new Player(name, id);
+            spawnQueue.EnqueueForImmediateSpawn(player);
+            return player;
+        }
+
+        var player = _players.GetOrAdd(name, _ => AddAndSpawn());
+        if (player.Id != id)
+            return null;
+
         logger.LogInformation("player {} (re)joined", player.Id);
         return player;
     }
@@ -29,11 +39,4 @@ internal sealed class PlayerServer(ILogger<PlayerServer> logger, SpawnQueue spaw
     }
 
     public IEnumerable<Player> GetAll() => _players.Values;
-
-    private Player AddAndSpawn(string name)
-    {
-        var player = new Player(name);
-        spawnQueue.EnqueueForImmediateSpawn(player);
-        return player;
-    }
 }

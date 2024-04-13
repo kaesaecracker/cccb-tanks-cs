@@ -1,0 +1,8 @@
+POST localhost/player?name=test&id=a31d35c2-1d9e-4a34-93e5-680195c6a9d2
+
+###
+
+GET localhost/scores
+
+###
+

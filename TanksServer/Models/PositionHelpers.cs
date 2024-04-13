@@ -23,8 +23,8 @@ internal static class PositionHelpers
     public static FloatPosition ToFloatPosition(this PixelPosition position) => new(position.X, position.Y);
 
 
-    public static double Distance(this FloatPosition p1, FloatPosition p2) =>
-        Math.Sqrt(
+    public static double Distance(this FloatPosition p1, FloatPosition p2)
+        => Math.Sqrt(
             Math.Pow(p1.X - p2.X, 2) +
             Math.Pow(p1.Y - p2.Y, 2)
         );

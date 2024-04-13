@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using TanksServer.GameLogic;
 
 namespace TanksServer.Models;
 
@@ -28,12 +27,14 @@ internal sealed class Tank(Player player, FloatPosition spawnPosition) : IMapEnt
 
     public PixelBounds Bounds => GetBoundsForCenter(Position);
 
+    public int Orientation => (int)Math.Round(Rotation * 16) % 16;
+
     public static PixelBounds GetBoundsForCenter(FloatPosition position)
     {
         var pixelPosition = position.ToPixelPosition();
         return new PixelBounds(
-            pixelPosition.GetPixelRelative(-3, -3),
-            pixelPosition.GetPixelRelative(4, 4)
+            pixelPosition.GetPixelRelative(-4, -4),
+            pixelPosition.GetPixelRelative(3, 3)
         );
     }
 }

@@ -32,12 +32,11 @@ internal sealed class DrawTanksStep : IDrawStep
         foreach (var tank in _tanks)
         {
             var tankPosition = tank.Bounds.TopLeft;
-            var orientation = (int)Math.Round(tank.Rotation * 16d) % 16;
 
             for (byte dy = 0; dy < MapService.TileSize; dy++)
             for (byte dx = 0; dx < MapService.TileSize; dx++)
             {
-                if (!TankSpriteAt(dx, dy, orientation))
+                if (!TankSpriteAt(dx, dy, tank.Orientation))
                     continue;
 
                 var (x, y) = tankPosition.GetPixelRelative(dx, dy);
