@@ -34,7 +34,7 @@ export default function App() {
     return <Column className='flex-grow'>
         <Row>
             <h1 className='flex-grow'>CCCB-Tanks!</h1>
-            <Button text='change colors' onClick={() => setTheme(getRandomTheme())} />
+            <Button text='change colors' onClick={() => setTheme(_ => getRandomTheme())}/>
             <Button
                 onClick={() => window.open('https://github.com/kaesaecracker/cccb-tanks-cs', '_blank')?.focus()}
                 text='GitHub'/>

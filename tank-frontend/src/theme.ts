@@ -50,10 +50,9 @@ function angle(a: number) {
     return ((a % 360.0) + 360) % 360;
 }
 
-const goldenAngle = 180 * (3 - Math.sqrt(5));
-
-
 export function getRandomTheme(): Theme {
+    const goldenAngle = 180 * (3 - Math.sqrt(5));
+
     const background = getRandomHsl({maxSaturation: 50, minLightness: 10, maxLightness: 40});
 
     const primary = getRandomHsl({minSaturation: background.s * 1.2, minLightness: background.l + 20});
@@ -65,16 +64,16 @@ export function getRandomTheme(): Theme {
     return {background, primary, secondary};
 }
 
-export function useStoredTheme(): [Theme, (theme: Theme) => void] {
-    const [theme, setSavedTheme] = useStoredObjectState<Theme>('theme', getRandomTheme);
+function applyTheme(theme: Theme) {
+    console.log('apply theme', theme);
+    rootStyle.setProperty('--color-primary', hslToString(theme.primary));
+    rootStyle.setProperty('--color-secondary', hslToString(theme.secondary));
+    rootStyle.setProperty('--color-background', hslToString(theme.background));
+}
 
-    function setTheme(theme: Theme) {
-        console.log('set theme', theme);
-        rootStyle.setProperty('--color-primary', hslToString(theme.primary));
-        rootStyle.setProperty('--color-secondary', hslToString(theme.secondary));
-        rootStyle.setProperty('--color-background', hslToString(theme.background));
-        setSavedTheme(_ => theme);
-    }
-
-    return [theme, setTheme];
+export function useStoredTheme() {
+    return useStoredObjectState<Theme>('theme', getRandomTheme, {
+        load: applyTheme,
+        save: applyTheme
+    });
 }

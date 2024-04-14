@@ -13,23 +13,37 @@ export function useStoredState(storageKey: string, initialState: () => string): 
 
 export function useStoredObjectState<T>(
     storageKey: string,
-    initialState: () => T
+    initialState: () => T,
+    options?: {
+        load?: (value: T) => void;
+        save?: (value: T) => void;
+    }
 ): [T, (mutator: (oldState: T) => T) => void] {
     const getInitialState = () => {
         const localStorageJson = localStorage.getItem(storageKey);
-        if (localStorageJson !== null && localStorageJson !== '') {
-            return JSON.parse(localStorageJson) as T;
-        }
 
-        return initialState();
+        let result = (localStorageJson !== null && localStorageJson !== '')
+            ? JSON.parse(localStorageJson) as T
+            : initialState();
+
+        if (options?.load)
+            options.load(result);
+
+        return result;
     };
 
     const [state, setState] = useState<T>(getInitialState);
 
     const setSavedState = (mut: (oldState: T) => T) => {
-        const newState = mut(state);
-        localStorage.setItem(storageKey, JSON.stringify(newState));
-        setState(newState);
+        setState(prevState => {
+            const newState = mut(prevState);
+
+            if (options?.save)
+                options.save(newState);
+
+            localStorage.setItem(storageKey, JSON.stringify(newState));
+            return newState;
+        });
     };
 
     return [state, setSavedState];
