@@ -5,9 +5,6 @@ import './ClientScreen.css';
 const pixelsPerRow = 352;
 const pixelsPerCol = 160;
 
-const onColor = [0, 180, 0, 255];
-const offColor = [0, 0, 0, 255];
-
 function getIndexes(bitIndex: number) {
     return {
         byteIndex: Math.floor(bitIndex / 8),
@@ -15,10 +12,23 @@ function getIndexes(bitIndex: number) {
     };
 }
 
+// @ts-ignore
+const rootElement = document.querySelector(':root')!;
+
+function normalizeColor(context: CanvasRenderingContext2D, color: string) {
+    context.fillStyle = color;
+    context.fillRect(0, 0, 1, 1);
+    return context.getImageData(0, 0, 1, 1).data;
+}
+
 function drawPixelsToCanvas(pixels: Uint8Array, canvas: HTMLCanvasElement) {
     const drawContext = canvas.getContext('2d');
     if (!drawContext)
         throw new Error('could not get draw context');
+
+    const rootStyle = getComputedStyle(rootElement);
+    const colorPrimary = normalizeColor(drawContext, rootStyle.getPropertyValue('--color-primary'));
+    const colorBackground = normalizeColor(drawContext, rootStyle.getPropertyValue('--color-background'));
 
     const imageData = drawContext.getImageData(0, 0, canvas.width, canvas.height, {colorSpace: 'srgb'});
     const data = imageData.data;
@@ -30,7 +40,7 @@ function drawPixelsToCanvas(pixels: Uint8Array, canvas: HTMLCanvasElement) {
             const {byteIndex, bitInByteIndex} = getIndexes(pixelIndex);
             const mask = (1 << bitInByteIndex);
             const isOn = (pixels[byteIndex] & mask) !== 0;
-            const color = isOn ? onColor : offColor;
+            const color = isOn ? colorPrimary : colorBackground;
 
             for (let colorChannel of [0, 1, 2, 3])
                 data[pixelIndex * 4 + colorChannel] = color[colorChannel];
