@@ -10,6 +10,7 @@ import Row from "./components/Row.tsx";
 import Scoreboard from "./Scoreboard.tsx";
 import Button from "./components/Button.tsx";
 import './App.css';
+import {getRandomTheme, useStoredTheme} from "./theme.ts";
 
 const getNewNameId = () => ({
     id: crypto.randomUUID(),
@@ -17,6 +18,7 @@ const getNewNameId = () => ({
 });
 
 export default function App() {
+    const [theme, setTheme] = useStoredTheme();
     const [nameId, setNameId] = useStoredObjectState<NameId>('access', getNewNameId);
 
     const [isLoggedIn, setLoggedIn] = useState<boolean>(false);
@@ -32,13 +34,14 @@ export default function App() {
     return <Column className='flex-grow'>
         <Row>
             <h1 className='flex-grow'>CCCB-Tanks!</h1>
+            <Button text='change colors' onClick={() => setTheme(getRandomTheme())} />
             <Button
                 onClick={() => window.open('https://github.com/kaesaecracker/cccb-tanks-cs', '_blank')?.focus()}
                 text='GitHub'/>
             {nameId.name !== '' &&
                 <Button onClick={() => setNameId(getNewNameId)} text='logout'/>}
         </Row>
-        <ClientScreen logout={logout}/>
+        <ClientScreen logout={logout} theme={theme}/>
         {nameId.name === '' && <JoinForm setNameId={setNameId} clientId={nameId.id}/>}
         {isLoggedIn && <Row className='GadgetRows'>
             <Controls playerId={nameId.id} logout={logout}/>

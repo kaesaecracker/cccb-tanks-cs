@@ -1,7 +1,7 @@
 import useWebSocket from 'react-use-websocket';
 import {useEffect, useRef} from 'react';
 import './ClientScreen.css';
-import {getTheme} from "./theme.ts";
+import {hslToString, Theme} from "./theme.ts";
 
 const pixelsPerRow = 352;
 const pixelsPerCol = 160;
@@ -19,14 +19,13 @@ function normalizeColor(context: CanvasRenderingContext2D, color: string) {
     return context.getImageData(0, 0, 1, 1).data;
 }
 
-function drawPixelsToCanvas(pixels: Uint8Array, canvas: HTMLCanvasElement) {
+function drawPixelsToCanvas(pixels: Uint8Array, canvas: HTMLCanvasElement, theme: Theme) {
     const drawContext = canvas.getContext('2d');
     if (!drawContext)
         throw new Error('could not get draw context');
 
-    const theme = getTheme();
-    const colorPrimary = normalizeColor(drawContext, theme.primary);
-    const colorBackground = normalizeColor(drawContext, theme.background);
+    const colorPrimary = normalizeColor(drawContext, hslToString(theme.primary));
+    const colorBackground = normalizeColor(drawContext, hslToString(theme.background));
 
     const imageData = drawContext.getImageData(0, 0, canvas.width, canvas.height, {colorSpace: 'srgb'});
     const data = imageData.data;
@@ -48,7 +47,7 @@ function drawPixelsToCanvas(pixels: Uint8Array, canvas: HTMLCanvasElement) {
     drawContext.putImageData(imageData, 0, 0);
 }
 
-export default function ClientScreen({logout}: { logout: () => void }) {
+export default function ClientScreen({logout, theme}: { logout: () => void, theme: Theme }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const {
@@ -69,9 +68,9 @@ export default function ClientScreen({logout}: { logout: () => void }) {
         if (canvasRef.current === null)
             throw new Error('canvas null');
 
-        drawPixelsToCanvas(new Uint8Array(lastMessage.data), canvasRef.current);
+        drawPixelsToCanvas(new Uint8Array(lastMessage.data), canvasRef.current, theme);
         sendMessage('');
-    }, [lastMessage, canvasRef.current]);
+    }, [lastMessage, canvasRef.current, theme]);
 
     return <canvas ref={canvasRef} id="screen" width={pixelsPerRow} height={pixelsPerCol}/>;
 }

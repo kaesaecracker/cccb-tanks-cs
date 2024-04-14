@@ -22,8 +22,8 @@ export default function Scoreboard({}: {}) {
         className='flex-grow'
         columns={[
             {field: 'name'},
-            {field: 'kills', visualize: p => p.scores.kills},
-            {field: 'deaths', visualize: p => p.scores.deaths},
-            {field: 'k/d', visualize: p => p.scores.kills / p.scores.deaths}
+            {field: 'kills', visualize: p => p.scores.kills.toString()},
+            {field: 'deaths', visualize: p => p.scores.deaths.toString()},
+            {field: 'k/d', visualize: p => (p.scores.kills / p.scores.deaths).toString()}
         ]}/>
 }
