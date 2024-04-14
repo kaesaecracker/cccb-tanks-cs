@@ -18,7 +18,7 @@ export function useStoredObjectState<T>(
     const getInitialState = () => {
         const localStorageJson = localStorage.getItem(storageKey);
         if (localStorageJson !== null && localStorageJson !== '') {
-            return JSON.parse(localStorageJson);
+            return JSON.parse(localStorageJson) as T;
         }
 
         return initialState();
@@ -27,8 +27,9 @@ export function useStoredObjectState<T>(
     const [state, setState] = useState<T>(getInitialState);
 
     const setSavedState = (mut: (oldState: T) => T) => {
-        localStorage.setItem(storageKey, JSON.stringify(mut(state)));
-        setState(mut);
+        const newState = mut(state);
+        localStorage.setItem(storageKey, JSON.stringify(newState));
+        setState(newState);
     };
 
     return [state, setSavedState];

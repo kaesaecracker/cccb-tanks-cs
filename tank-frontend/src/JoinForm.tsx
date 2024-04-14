@@ -3,6 +3,8 @@ import './JoinForm.css';
 import {NameId, PlayerResponse, postPlayer} from './serverCalls';
 import {Guid} from './Guid.ts';
 import Column from "./components/Column.tsx";
+import Button from "./components/Button.tsx";
+import TextInput from "./components/TextInput.tsx";
 
 export default function JoinForm({setNameId, clientId}: {
     setNameId: (mutator: (oldState: NameId) => NameId) => void,
@@ -31,25 +33,19 @@ export default function JoinForm({setNameId, clientId}: {
     }, [clicked, setData, data, clientId, setClicked, setNameId]);
 
     const disableButtons = clicked || name.trim() === '';
+    const setClickedTrue = () => setClicked(true);
+
     return <Column className='JoinForm'>
-        <p className="JoinElems"> Enter your name to join the game! </p>
-        <input
-            className="JoinElems"
-            type="text"
+        <h3> Enter your name to play </h3>
+        <TextInput
             value={name}
             placeholder="player name"
             onChange={e => setName(e.target.value)}
-            onKeyUp={event => {
-                if (event.key === 'Enter')
-                    setClicked(true);
-            }}
+            onEnter={setClickedTrue}
         />
-        <button
-            className="JoinElems"
-            onClick={() => setClicked(true)}
+        <Button
+            onClick={setClickedTrue}
             disabled={disableButtons}
-        >
-            join
-        </button>
+            text='INSERT COIN'/>
     </Column>;
 }

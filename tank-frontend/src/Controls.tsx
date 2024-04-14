@@ -62,12 +62,12 @@ export default function Controls({playerId, logout}: {
     return <Column className="Controls">
         <div className="control">
             <div className="row">
-                <kbd className="up">↑</kbd>
+                <kbd className="up">▲</kbd>
             </div>
             <div className="row">
-                <kbd>←</kbd>
-                <kbd>↓</kbd>
-                <kbd>→</kbd>
+                <kbd>◄</kbd>
+                <kbd>▼</kbd>
+                <kbd>►</kbd>
             </div>
         </div>
         <h3>Move</h3>

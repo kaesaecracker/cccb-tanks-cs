@@ -1,7 +1,14 @@
 .Button {
-    border: solid 1px green;
-    border-radius: 12px;
+    border: solid 4px green;
+    padding: 8px;
 
     color: green;
     background: transparent;
 }
+
+.Button:hover, .Button:active {
+    background-color: green;
+    color: black;
+    cursor: pointer;
+}
+
