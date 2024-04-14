@@ -9,13 +9,14 @@ internal sealed class GeneratePixelsTickStep(
 ) : ITickStep
 {
     private readonly List<IDrawStep> _drawSteps = drawSteps.ToList();
+    private readonly PixelGrid _drawGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
 
     public Task TickAsync()
     {
-        var drawGrid = new PixelGrid(MapService.PixelsPerRow, MapService.PixelsPerColumn);
+        _drawGrid.Clear();
         foreach (var step in _drawSteps)
-            step.Draw(drawGrid);
-        lastFrameProvider.LastFrame = drawGrid;
+            step.Draw(_drawGrid);
+        lastFrameProvider.LastFrame = _drawGrid;
         return Task.CompletedTask;
     }
 }

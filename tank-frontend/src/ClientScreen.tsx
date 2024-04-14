@@ -55,7 +55,8 @@ export default function ClientScreen({logout, theme}: { logout: () => void, them
         sendMessage,
         getWebSocket
     } = useWebSocket(import.meta.env.VITE_TANK_SCREEN_URL, {
-        onError: logout
+        onError: logout,
+        shouldReconnect: () => true,
     });
 
     const socket = getWebSocket();

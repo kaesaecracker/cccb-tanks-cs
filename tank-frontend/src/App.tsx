@@ -28,7 +28,7 @@ export default function App() {
         if (isLoggedIn)
             return;
         const result = await postPlayer(nameId);
-        setLoggedIn(result !== null);
+        setLoggedIn(result.ok);
     }, [nameId, isLoggedIn])();
 
     return <Column className='flex-grow'>
@@ -43,11 +43,10 @@ export default function App() {
         </Row>
         <ClientScreen logout={logout} theme={theme}/>
         {nameId.name === '' && <JoinForm setNameId={setNameId} clientId={nameId.id}/>}
-        {isLoggedIn && <Row className='GadgetRows'>
-            <Controls playerId={nameId.id} logout={logout}/>
-            <PlayerInfo playerId={nameId.id} logout={logout}/>
+        <Row className='GadgetRows'>
+            {isLoggedIn && <Controls playerId={nameId.id} logout={logout}/>}
+            {isLoggedIn && <PlayerInfo playerId={nameId.id} logout={logout}/>}
             <Scoreboard/>
         </Row>
-        }
     </Column>;
 }

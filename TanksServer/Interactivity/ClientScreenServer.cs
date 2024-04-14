@@ -56,7 +56,6 @@ internal sealed class ClientScreenServer(
         private readonly ILogger<ClientScreenServerConnection> _logger;
         private readonly ClientScreenServer _server;
         private readonly SemaphoreSlim _wantedFrames = new(1);
-        private PixelGrid? _lastSentPixels;
 
         public ClientScreenServerConnection(WebSocket webSocket,
             ILogger<ClientScreenServerConnection> logger,
@@ -78,9 +77,6 @@ internal sealed class ClientScreenServer(
 
         public async Task SendAsync(PixelGrid pixels)
         {
-            if (_lastSentPixels == pixels)
-                return;
-
             if (!await _wantedFrames.WaitAsync(TimeSpan.Zero))
             {
                 _logger.LogTrace("client does not want a frame yet");
@@ -91,7 +87,6 @@ internal sealed class ClientScreenServer(
             try
             {
                 await _channel.SendAsync(pixels.Data);
-                _lastSentPixels = pixels;
             }
             catch (WebSocketException ex)
             {

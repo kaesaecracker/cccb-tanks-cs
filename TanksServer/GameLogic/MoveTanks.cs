@@ -63,14 +63,16 @@ internal sealed class MoveTanks(
 
     private bool HitsWall(FloatPosition newPosition)
     {
-        var (topLeft, bottomRight) = Tank.GetBoundsForCenter(newPosition);
-        TilePosition[] positions =
-        [
-            topLeft.ToTilePosition(),
-            new PixelPosition(bottomRight.X, topLeft.Y).ToTilePosition(),
-            new PixelPosition(topLeft.X, bottomRight.Y).ToTilePosition(),
-            bottomRight.ToTilePosition()
-        ];
-        return positions.Any(map.IsCurrentlyWall);
+        var (topLeft, _) = Tank.GetBoundsForCenter(newPosition);
+
+        for (short y = 0; y < MapService.TileSize; y++)
+        for (short x = 0; x < MapService.TileSize; x++)
+        {
+            var pixelToCheck = topLeft.GetPixelRelative(x, y);
+            if (map.Current.IsCurrentlyWall(pixelToCheck))
+                return true;
+        }
+
+        return false;
     }
 }

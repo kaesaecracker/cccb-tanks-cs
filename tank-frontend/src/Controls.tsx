@@ -13,7 +13,8 @@ export default function Controls({playerId, logout}: {
         getWebSocket,
         readyState
     } = useWebSocket(url.toString(), {
-        onError: logout
+        onError: logout,
+        shouldReconnect: () => true,
     });
 
     const socket = getWebSocket();

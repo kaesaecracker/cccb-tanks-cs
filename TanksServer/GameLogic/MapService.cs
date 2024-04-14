@@ -1,4 +1,6 @@
 using System.IO;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace TanksServer.GameLogic;
 
@@ -9,35 +11,65 @@ internal sealed class MapService
     public const ushort TileSize = 8;
     public const ushort PixelsPerRow = TilesPerRow * TileSize;
     public const ushort PixelsPerColumn = TilesPerColumn * TileSize;
-    private readonly string _map;
-    private readonly ILogger<MapService> _logger;
 
-    private string[] LoadMaps() => Directory.EnumerateFiles("./assets/maps/", "*.txt")
-        .Select(LoadMap)
-        .Where(s => s != null)
-        .Select(s => s!)
-        .ToArray();
+    public Map Current { get; }
 
-    private string? LoadMap(string file)
+    public MapService()
     {
-        var text = File.ReadAllText(file).ReplaceLineEndings(string.Empty).Trim();
-        if (text.Length != TilesPerColumn * TilesPerRow)
+        var textMaps = Directory.EnumerateFiles("./assets/maps/", "*.txt").Select(LoadMapString);
+        var pngMaps = Directory.EnumerateFiles("./assets/maps/", "*.png").Select(LoadMapPng);
+
+        var maps = textMaps.Concat(pngMaps).ToList();
+        Current = maps[Random.Shared.Next(maps.Count)];
+    }
+
+    private static Map LoadMapPng(string file)
+    {
+        var dict = new Dictionary<PixelPosition, bool>();
+        using var image = Image.Load<Rgba32>(file);
+
+        if (image.Width != PixelsPerRow || image.Height != PixelsPerColumn)
+            throw new FileLoadException($"invalid image size in file {file}");
+
+        var whitePixel = new Rgba32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
+        for (var y = 0; y < image.Height; y++)
+        for (var x = 0; x < image.Width; x++)
         {
-            _logger.LogWarning("cannot load map {}: invalid length", file);
-            return null;
+            if (image[x, y] == whitePixel)
+                dict[new PixelPosition(x, y)] = true;
         }
 
-        return text;
+        return new Map(dict);
     }
 
-    public MapService(ILogger<MapService> logger)
+    private static Map LoadMapString(string file)
     {
-        _logger = logger;
-        var maps = LoadMaps();
-        _map = maps[Random.Shared.Next(0, maps.Length)];
+        var map = File.ReadAllText(file).ReplaceLineEndings(string.Empty).Trim();
+        if (map.Length != TilesPerColumn * TilesPerRow)
+            throw new FileLoadException($"cannot load map {file}: invalid length");
+
+        var dict = new Dictionary<PixelPosition, bool>();
+
+        for (ushort tileY = 0; tileY < MapService.TilesPerColumn; tileY++)
+        for (ushort tileX = 0; tileX < MapService.TilesPerRow; tileX++)
+        {
+            var tile = new TilePosition(tileX, tileY);
+            if (map[tileX + tileY * TilesPerRow] != '#')
+                continue;
+
+            for (byte pixelInTileY = 0; pixelInTileY < MapService.TileSize; pixelInTileY++)
+            for (byte pixelInTileX = 0; pixelInTileX < MapService.TileSize; pixelInTileX++)
+            {
+                var pixel = tile.ToPixelPosition().GetPixelRelative(pixelInTileX, pixelInTileY);
+                dict[pixel] = true;
+            }
+        }
+
+        return new Map(dict);
     }
+}
 
-    private char this[int tileX, int tileY] => _map[tileX + tileY * TilesPerRow];
-
-    public bool IsCurrentlyWall(TilePosition position) => this[position.X, position.Y] == '#';
+internal sealed class Map(IReadOnlyDictionary<PixelPosition, bool> walls)
+{
+    public bool IsCurrentlyWall(PixelPosition position) => walls.TryGetValue(position, out var value) && value;
 }
