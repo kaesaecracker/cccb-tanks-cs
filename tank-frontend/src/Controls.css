@@ -14,7 +14,7 @@
 kbd {
     --kbd-key-size: 2em;
 
-    background: var(--color-secondary);
+    background: var(--color-primary);
     padding: var(--padding-normal);
     display: block;
 

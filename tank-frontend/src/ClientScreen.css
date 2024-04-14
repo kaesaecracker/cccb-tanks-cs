@@ -6,4 +6,7 @@
     max-width: 100vw;
     max-height: 100vh;
     flex-shrink: 0;
+
+    border: solid var(--border-size-thick);
+    border-color: var(--color-primary);
 }
