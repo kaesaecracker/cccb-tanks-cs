@@ -1,5 +1,22 @@
+
+@keyframes BlinkJoinForm {
+    from {
+        font-weight: normal;
+        border-color: rgb(76, 76, 76);
+    }
+
+    50% {
+        border-color: black;
+    }
+
+    to {
+        font-weight: bold;
+        border-color: green;
+    }
+}
+
 .JoinForm {
-    border: 4px solid rgb(76, 76, 76);
+    border: 8px solid rgb(76, 76, 76);
 
     position: absolute;
     top: 50%;
@@ -10,4 +27,10 @@
 
     gap: 16px;
     padding: 16px;
+
+    animation-duration: 1s;
+    animation-name: BlinkJoinForm;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    animation-timing-function: ease-in-out;
 }
