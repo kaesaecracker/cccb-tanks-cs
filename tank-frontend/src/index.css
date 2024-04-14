@@ -12,6 +12,18 @@
     text-transform: uppercase;
 }
 
+:root {
+    --color-background: black;
+    --color-primary: green;
+    --color-secondary: rgb(76, 76, 76);
+    --color-text: white;
+
+    --border-size-thin: 4px;
+    --border-size-thick: 8px;
+
+    --padding-normal: 8px;
+}
+
 html, body {
     height: 100%;
 
@@ -20,8 +32,8 @@ html, body {
     align-items: center;
     justify-content: center;
 
-    background-color: black;
-    color: white;
+    background-color: var(--color-background);
+    color: var(--color-text);
 }
 
 #root {
@@ -32,6 +44,17 @@ html, body {
     height: 95vh;
 }
 
-.grow {
+.flex-grow {
+    display: flex;
     flex-grow: 1;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
 }

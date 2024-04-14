@@ -60,20 +60,19 @@ export default function Controls({playerId, logout}: {
     }, [sendMessage]);
 
     return <Column className="Controls">
-        <div className="control">
-            <div className="row">
-                <kbd className="up">▲</kbd>
-            </div>
-            <div className="row">
+        <div className='flex-column Controls-Container'>
+            <h3>Move</h3>
+            <kbd>▲</kbd>
+            <div className='flex-row Controls-Container'>
                 <kbd>◄</kbd>
                 <kbd>▼</kbd>
                 <kbd>►</kbd>
             </div>
         </div>
-        <h3>Move</h3>
 
-        <kbd className="space control">Space</kbd>
-
-        <h3>Fire</h3>
+        <div className='flex-column Controls-Container'>
+            <h3>Fire</h3>
+            <kbd className="space">Space</kbd>
+        </div>
     </Column>;
 }

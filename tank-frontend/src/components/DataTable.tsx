@@ -39,14 +39,17 @@ function DataTableRow({rowData, columns}: {
     </tr>;
 }
 
-export default function DataTable<T>({data, columns}: {
+export default function DataTable<T>({data, columns, className}: {
     data: T[],
-    columns: DataTableColumnDefinition<any>[]
+    columns: DataTableColumnDefinition<any>[],
+    className?: string
 }) {
-    return <table className='DataTable'>
-        <TableHead columns={columns}/>
-        <tbody>
-        {data.map((element, index) => <DataTableRow key={index} rowData={element} columns={columns}/>)}
-        </tbody>
-    </table>
+    return <div className={'DataTable ' + (className ?? '')}>
+        <table>
+            <TableHead columns={columns}/>
+            <tbody>
+            {data.map((element, index) => <DataTableRow key={index} rowData={element} columns={columns}/>)}
+            </tbody>
+        </table>
+    </div>;
 }

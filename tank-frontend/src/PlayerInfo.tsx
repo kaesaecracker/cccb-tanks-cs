@@ -1,5 +1,4 @@
 import {useEffect, useState} from 'react';
-import './PlayerInfo.css'
 import {PlayerResponse, getPlayer} from './serverCalls';
 import {Guid} from "./Guid.ts";
 import Column from "./components/Column.tsx";
@@ -24,7 +23,7 @@ export default function PlayerInfo({playerId, logout}: {
         return () => clearInterval(timer);
     }, [playerId]);
 
-    return <Column className='PlayerInfo'>
+    return <Column className='PlayerInfo flex-grow'>
         <h3>
             {player ? `Playing as ${player?.name}` : 'loading...'}
         </h3>

@@ -1,7 +1,5 @@
 .Row {
-    display: flex;
-    flex-direction: row;
     max-width: 100%;
     align-items: stretch;
-    gap: 8px;
+    gap: var(--padding-normal);
 }

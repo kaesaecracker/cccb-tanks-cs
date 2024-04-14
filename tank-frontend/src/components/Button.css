@@ -1,14 +1,13 @@
 .Button {
-    border: solid 4px green;
-    padding: 8px;
+    border: solid var(--border-size-thin) var(--color-primary);
+    padding: var(--padding-normal);
 
-    color: green;
-    background: transparent;
+    color: var(--color-primary);
+    background: var(--color-background);
 }
 
 .Button:hover, .Button:active {
-    background-color: green;
-    color: black;
+    background-color: var(--color-primary);
+    color: var(--color-background);
     cursor: pointer;
 }
-

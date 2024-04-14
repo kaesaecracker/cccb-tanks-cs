@@ -6,7 +6,7 @@ export default function Column({children, className}: {
     children: ReactNode,
     className?: string
 }) {
-    return <div className={'Column ' + (className ?? '')}>
+    return <div className={'Column flex-column ' + (className ?? '')}>
         {children}
     </div>
 }

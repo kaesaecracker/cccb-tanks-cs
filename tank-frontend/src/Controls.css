@@ -1,65 +1,30 @@
-.Controls * {
+.Controls {
+    display: flex;
+    text-align: center;
+    flex-grow: 1;
+}
+
+.Controls-Container {
     box-sizing: content-box;
+    justify-content: center;
+    align-items: center;
+    gap: var(--padding-normal);
 }
 
 kbd {
-    background: hsl(0, 0%, 96%);
-    padding: 10px;
+    --kbd-key-size: 2em;
+
+    background: var(--color-secondary);
+    padding: var(--padding-normal);
     display: block;
 
-    margin: 5px;
-    width: 1.6em;
-    height: 1.3em;
+    width: var(--kbd-key-size);
+    height: var(--kbd-key-size);
     text-align: center;
-    box-shadow: 0 1px rgba(0, 0, 0, .21);
     user-select: none;
     color: black;
 }
 
-kbd.up {
-    margin-left: calc(1.6em + 35px);
-}
-
 kbd.space {
-    margin-top: calc(1.3em + 35px);
-    width: 14em;
-}
-
-kbd:active {
-    position: relative;
-    top: 2px;
-    background: hsl(0, 0%, 94%);
-    box-shadow: 0 1px rgba(0, 0, 0, .13) inset;
-}
-
-.Controls {
-    display: flex;
-    color: lightgray;
-    text-align: center;
-    align-items: center !important;
-}
-
-.control {
-    margin: 0 1em;
-}
-
-.row {
-    display: flex;
-}
-
-.splash {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(transparent, red);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 500ms;
-}
-
-.was-killed .splash {
-    opacity: 1;
-    transition: opacity 120ms;
+    width: calc(3 * var(--kbd-key-size) + 2 * var(--padding-normal));
 }

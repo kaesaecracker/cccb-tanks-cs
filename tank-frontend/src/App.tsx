@@ -29,11 +29,14 @@ export default function App() {
         setLoggedIn(result !== null);
     }, [nameId, isLoggedIn])();
 
-    return <Column className='grow'>
+    return <Column className='flex-grow'>
         <Row>
-            <h1 className='grow'>Tanks!</h1>
+            <h1 className='flex-grow'>CCCB-Tanks!</h1>
+            <Button
+                onClick={() => window.open('https://github.com/kaesaecracker/cccb-tanks-cs', '_blank')?.focus()}
+                text='GitHub'/>
             {nameId.name !== '' &&
-                <Button className='PlayerInfo-Reset' onClick={() => setNameId(getNewNameId)} text='logout'/>}
+                <Button onClick={() => setNameId(getNewNameId)} text='logout'/>}
         </Row>
         <ClientScreen logout={logout}/>
         {nameId.name === '' && <JoinForm setNameId={setNameId} clientId={nameId.id}/>}

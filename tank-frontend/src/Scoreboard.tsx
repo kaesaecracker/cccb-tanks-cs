@@ -17,10 +17,13 @@ export default function Scoreboard({}: {}) {
         return () => clearInterval(timer);
     }, [players]);
 
-    return <DataTable<PlayerResponse> data={players} columns={[
-        {field: 'name'},
-        {field: 'kills', visualize: p => p.scores.kills},
-        {field: 'deaths', visualize: p => p.scores.deaths},
-        {field: 'k/d', visualize: p => p.scores.kills / p.scores.deaths}
-    ]}/>
+    return <DataTable
+        data={players}
+        className='flex-grow'
+        columns={[
+            {field: 'name'},
+            {field: 'kills', visualize: p => p.scores.kills},
+            {field: 'deaths', visualize: p => p.scores.deaths},
+            {field: 'k/d', visualize: p => p.scores.kills / p.scores.deaths}
+        ]}/>
 }

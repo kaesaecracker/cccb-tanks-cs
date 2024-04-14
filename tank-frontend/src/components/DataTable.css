@@ -1,3 +1,3 @@
-.DataTable {
+.DataTable > table {
     table-layout: auto;
 }
