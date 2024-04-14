@@ -1,6 +1,7 @@
 import useWebSocket from 'react-use-websocket';
 import {useEffect, useRef} from 'react';
 import './ClientScreen.css';
+import {getTheme} from "./theme.ts";
 
 const pixelsPerRow = 352;
 const pixelsPerCol = 160;
@@ -11,9 +12,6 @@ function getIndexes(bitIndex: number) {
         bitInByteIndex: 7 - bitIndex % 8
     };
 }
-
-// @ts-ignore
-const rootElement = document.querySelector(':root')!;
 
 function normalizeColor(context: CanvasRenderingContext2D, color: string) {
     context.fillStyle = color;
@@ -26,9 +24,9 @@ function drawPixelsToCanvas(pixels: Uint8Array, canvas: HTMLCanvasElement) {
     if (!drawContext)
         throw new Error('could not get draw context');
 
-    const rootStyle = getComputedStyle(rootElement);
-    const colorPrimary = normalizeColor(drawContext, rootStyle.getPropertyValue('--color-primary'));
-    const colorBackground = normalizeColor(drawContext, rootStyle.getPropertyValue('--color-background'));
+    const theme = getTheme();
+    const colorPrimary = normalizeColor(drawContext, theme.primary);
+    const colorBackground = normalizeColor(drawContext, theme.background);
 
     const imageData = drawContext.getImageData(0, 0, canvas.width, canvas.height, {colorSpace: 'srgb'});
     const data = imageData.data;
