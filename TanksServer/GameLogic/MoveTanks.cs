@@ -69,7 +69,7 @@ internal sealed class MoveTanks(
         for (short x = 0; x < MapService.TileSize; x++)
         {
             var pixelToCheck = topLeft.GetPixelRelative(x, y);
-            if (map.Current.IsCurrentlyWall(pixelToCheck))
+            if (map.Current.IsWall(pixelToCheck))
                 return true;
         }
 

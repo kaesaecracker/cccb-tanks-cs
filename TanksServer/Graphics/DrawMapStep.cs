@@ -11,7 +11,7 @@ internal sealed class DrawMapStep(MapService map) : IDrawStep
         for (ushort x = 0; x < MapService.PixelsPerRow; x++)
         {
             var pixel = new PixelPosition(x, y);
-            if (!map.Current.IsCurrentlyWall(pixel))
+            if (!map.Current.IsWall(pixel))
                 continue;
             buffer[x, y] = true;
         }

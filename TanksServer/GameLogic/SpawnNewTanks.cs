@@ -28,9 +28,7 @@ internal sealed class SpawnNewTanks(
         for (ushort y = 1; y < MapService.TilesPerColumn - 1; y++)
         {
             var tile = new TilePosition(x, y);
-
-            // TODO: implement lookup for non tile aligned walls
-            if (map.Current.IsCurrentlyWall(tile.ToPixelPosition()))
+            if (map.Current.IsWall(tile))
                 continue;
 
             var tilePixelCenter = tile.ToPixelPosition().GetPixelRelative(4, 4).ToFloatPosition();

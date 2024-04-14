@@ -25,21 +25,19 @@ internal sealed class MapService
 
     private static Map LoadMapPng(string file)
     {
-        var dict = new Dictionary<PixelPosition, bool>();
         using var image = Image.Load<Rgba32>(file);
 
         if (image.Width != PixelsPerRow || image.Height != PixelsPerColumn)
             throw new FileLoadException($"invalid image size in file {file}");
 
         var whitePixel = new Rgba32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
+        var walls = new bool[PixelsPerRow, PixelsPerColumn];
+
         for (var y = 0; y < image.Height; y++)
         for (var x = 0; x < image.Width; x++)
-        {
-            if (image[x, y] == whitePixel)
-                dict[new PixelPosition(x, y)] = true;
-        }
+            walls[x, y] = image[x, y] == whitePixel;
 
-        return new Map(dict);
+        return new Map(walls);
     }
 
     private static Map LoadMapString(string file)
@@ -48,28 +46,44 @@ internal sealed class MapService
         if (map.Length != TilesPerColumn * TilesPerRow)
             throw new FileLoadException($"cannot load map {file}: invalid length");
 
-        var dict = new Dictionary<PixelPosition, bool>();
+        var walls = new bool[PixelsPerRow, PixelsPerColumn];
 
-        for (ushort tileY = 0; tileY < MapService.TilesPerColumn; tileY++)
-        for (ushort tileX = 0; tileX < MapService.TilesPerRow; tileX++)
+        for (ushort tileX = 0; tileX < TilesPerRow; tileX++)
+        for (ushort tileY = 0; tileY < TilesPerColumn; tileY++)
         {
             var tile = new TilePosition(tileX, tileY);
             if (map[tileX + tileY * TilesPerRow] != '#')
                 continue;
 
-            for (byte pixelInTileY = 0; pixelInTileY < MapService.TileSize; pixelInTileY++)
-            for (byte pixelInTileX = 0; pixelInTileX < MapService.TileSize; pixelInTileX++)
+            for (byte pixelInTileX = 0; pixelInTileX < TileSize; pixelInTileX++)
+            for (byte pixelInTileY = 0; pixelInTileY < TileSize; pixelInTileY++)
             {
-                var pixel = tile.ToPixelPosition().GetPixelRelative(pixelInTileX, pixelInTileY);
-                dict[pixel] = true;
+                var (x, y) = tile.ToPixelPosition().GetPixelRelative(pixelInTileX, pixelInTileY);
+                walls[x, y] = true;
             }
         }
 
-        return new Map(dict);
+        return new Map(walls);
     }
 }
 
-internal sealed class Map(IReadOnlyDictionary<PixelPosition, bool> walls)
+internal sealed class Map(bool[,] walls)
 {
-    public bool IsCurrentlyWall(PixelPosition position) => walls.TryGetValue(position, out var value) && value;
+    public bool IsWall(int x, int y) => walls[x, y];
+
+    public bool IsWall(PixelPosition position) => walls[position.X, position.Y];
+
+    public bool IsWall(TilePosition position)
+    {
+        var pixel = position.ToPixelPosition();
+
+        for (short dx = 1; dx < MapService.TilesPerRow - 1; dx++)
+        for (short dy = 1; dy < MapService.TilesPerColumn - 1; dy++)
+        {
+            if (IsWall(pixel.GetPixelRelative(dx, dy)))
+                return true;
+        }
+
+        return false;
+    }
 }
