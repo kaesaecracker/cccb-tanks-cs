@@ -29,9 +29,13 @@ public static class Program
 
         app.MapPost("/player", (string name, Guid id) =>
         {
+            name = name.Trim().ToUpperInvariant();
+            if (name == string.Empty)
+                return Results.BadRequest("name cannot be blank");
+
             var player = playerService.GetOrAdd(name, id);
             return player != null
-                ? Results.Ok(new NameId(name, id))
+                ? Results.Ok(new NameId(player.Name, player.Id))
                 : Results.Unauthorized();
         });
         app.MapGet("/player", ([FromQuery] Guid id) =>
