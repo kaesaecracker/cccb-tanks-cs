@@ -1,13 +1,22 @@
 .Button {
-    border: solid var(--border-size-thin) var(--color-primary);
+    border: solid var(--border-size-thin);
     padding: var(--padding-normal);
 
-    color: var(--color-primary);
     background: var(--color-background);
 }
 
-.Button:hover, .Button:active {
+.Button:enabled {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.Button:hover:enabled {
     background-color: var(--color-primary);
     color: var(--color-background);
     cursor: pointer;
+}
+
+.Button:disabled {
+    border-color: var(--color-text);
+    color: var(--color-text);
 }

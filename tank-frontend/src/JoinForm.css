@@ -1,16 +1,9 @@
-
-@keyframes BlinkJoinForm {
+@keyframes BlinkJoinFormBorder {
     from {
-        font-weight: normal;
         border-color: var(--color-secondary);
     }
 
-    50% {
-        border-color: var(--color-background);
-    }
-
     to {
-        font-weight: bold;
         border-color: var(--color-primary);
     }
 }
@@ -29,7 +22,7 @@
     padding: 16px;
 
     animation-duration: 1s;
-    animation-name: BlinkJoinForm;
+    animation-name: BlinkJoinFormBorder;
     animation-iteration-count: infinite;
     animation-direction: alternate;
     animation-timing-function: ease-in-out;

@@ -1,5 +1,5 @@
 import './Controls.css';
-import useWebSocket from 'react-use-websocket';
+import useWebSocket, {ReadyState} from 'react-use-websocket';
 import {useEffect} from 'react';
 import Column from "./components/Column.tsx";
 
@@ -12,6 +12,7 @@ export default function Controls({playerId, logout}: {
     const {
         sendMessage,
         getWebSocket,
+        readyState
     } = useWebSocket(url.toString(), {
         onError: logout
     });
@@ -25,7 +26,6 @@ export default function Controls({playerId, logout}: {
             return;
 
         const typeCode = type === 'input-on' ? 0x01 : 0x02;
-
         const controls = {
             'ArrowLeft': 0x03,
             'ArrowUp': 0x01,
@@ -49,6 +49,9 @@ export default function Controls({playerId, logout}: {
     };
 
     useEffect(() => {
+        if (readyState !== ReadyState.OPEN)
+            return;
+
         const up = keyEventListener('input-off');
         const down = keyEventListener('input-on');
         window.onkeyup = up;
@@ -57,7 +60,7 @@ export default function Controls({playerId, logout}: {
             window.onkeydown = null;
             window.onkeyup = null;
         };
-    }, [sendMessage]);
+    }, [readyState]);
 
     return <Column className="Controls">
         <div className='flex-column Controls-Container'>

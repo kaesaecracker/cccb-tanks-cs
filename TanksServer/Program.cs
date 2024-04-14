@@ -32,6 +32,8 @@ public static class Program
             name = name.Trim().ToUpperInvariant();
             if (name == string.Empty)
                 return Results.BadRequest("name cannot be blank");
+            if (name.Length > 12)
+                return Results.BadRequest("name too long");
 
             var player = playerService.GetOrAdd(name, id);
             return player != null
@@ -53,7 +55,7 @@ public static class Program
 
             using var ws = await context.WebSockets.AcceptWebSocketAsync();
             await clientScreenServer.HandleClient(ws);
-            return null;
+            return Results.Empty;
         });
 
         app.Map("/controls", async (HttpContext context, [FromQuery] Guid playerId) =>
@@ -66,7 +68,7 @@ public static class Program
 
             using var ws = await context.WebSockets.AcceptWebSocketAsync();
             await controlsServer.HandleClient(ws, player);
-            return null;
+            return Results.Empty;
         });
 
         app.Run();

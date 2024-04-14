@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {PlayerResponse, getPlayer} from './serverCalls';
+import {Player, getPlayer} from './serverCalls';
 import {Guid} from "./Guid.ts";
 import Column from "./components/Column.tsx";
 
@@ -7,13 +7,13 @@ export default function PlayerInfo({playerId, logout}: {
     playerId: Guid,
     logout: () => void
 }) {
-    const [player, setPlayer] = useState<PlayerResponse | null>();
+    const [player, setPlayer] = useState<Player | null>();
 
     useEffect(() => {
         const refresh = () => {
-            getPlayer(playerId).then(value => {
-                if (value)
-                    setPlayer(value);
+            getPlayer(playerId).then(response => {
+                if (response.successResult)
+                    setPlayer(response.successResult);
                 else
                     logout();
             });

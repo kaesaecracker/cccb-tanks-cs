@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import './JoinForm.css';
-import {NameId, PlayerResponse, postPlayer} from './serverCalls';
+import {NameId, Player, postPlayer} from './serverCalls';
 import {Guid} from './Guid.ts';
 import Column from "./components/Column.tsx";
 import Button from "./components/Button.tsx";
@@ -10,28 +10,32 @@ export default function JoinForm({setNameId, clientId}: {
     setNameId: (mutator: (oldState: NameId) => NameId) => void,
     clientId: Guid
 }) {
-    const [name, setName] = useState('');
     const [clicked, setClicked] = useState(false);
-    const [data, setData] = useState<PlayerResponse | null>(null);
+    const [data, setData] = useState<Player | null>(null);
+    const [errorText, setErrorText] = useState<string | null>();
 
     useEffect(() => {
         if (!clicked || data)
             return;
 
-        try {
-            postPlayer({name, id: clientId})
-                .then(value => {
-                    if (value)
-                        setNameId(prev => ({...prev, ...value}));
-                    else
-                        setClicked(false);
-                });
-        } catch (e) {
-            console.log(e);
-            alert(e);
-        }
-    }, [clicked, setData, data, clientId, setClicked, setNameId]);
+        postPlayer({name, id: clientId})
+            .then(response => {
+                if (response.ok && response.successResult) {
+                    setNameId(_ => response.successResult!);
+                    setErrorText(null);
+                    return;
+                }
 
+                if (response.additionalErrorText)
+                    setErrorText(`${response.statusCode} (${response.statusText}): ${response.additionalErrorText}`);
+                else
+                    setErrorText(`${response.statusCode} (${response.statusText})`);
+
+                setClicked(false);
+            });
+    }, [clicked, setData, data, clientId, setClicked, setNameId, errorText]);
+
+    const [name, setName] = useState('');
     const disableButtons = clicked || name.trim() === '';
     const setClickedTrue = () => setClicked(true);
 
@@ -47,5 +51,6 @@ export default function JoinForm({setNameId, clientId}: {
             onClick={setClickedTrue}
             disabled={disableButtons}
             text='INSERT COIN'/>
+        {errorText && <p>{errorText}</p>}
     </Column>;
 }
