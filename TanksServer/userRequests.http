@@ -6,3 +6,9 @@ GET localhost/scores
 
 ###
 
+GET localhost/map
+
+###
+
+POST localhost/map?index=0
+

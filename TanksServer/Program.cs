@@ -22,6 +22,7 @@ public static class Program
         var clientScreenServer = app.Services.GetRequiredService<ClientScreenServer>();
         var playerService = app.Services.GetRequiredService<PlayerServer>();
         var controlsServer = app.Services.GetRequiredService<ControlsServer>();
+        var mapService = app.Services.GetRequiredService<MapService>();
 
         var clientFileProvider = new PhysicalFileProvider(Path.Combine(app.Environment.ContentRootPath, "client"));
         app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = clientFileProvider });
@@ -40,6 +41,7 @@ public static class Program
                 ? Results.Ok(new NameId(player.Name, player.Id))
                 : Results.Unauthorized();
         });
+
         app.MapGet("/player", ([FromQuery] Guid id) =>
             playerService.TryGet(id, out var foundPlayer)
                 ? Results.Ok((object?)foundPlayer)
@@ -69,6 +71,22 @@ public static class Program
             using var ws = await context.WebSockets.AcceptWebSocketAsync();
             await controlsServer.HandleClient(ws, player);
             return Results.Empty;
+        });
+
+        app.MapGet("/map", () =>
+        {
+            var dict = mapService.All
+                .Select((m, i) => (m.Name, i))
+                .ToDictionary(pair => pair.i, pair => pair.Name);
+            return dict;
+        });
+
+        app.MapPost("/map", ([FromQuery] int index) =>
+        {
+            if (index < 0 || index >= mapService.All.Length)
+                return Results.NotFound("index does not exist");
+            mapService.Current = mapService.All[index];
+            return Results.Ok();
         });
 
         app.Run();

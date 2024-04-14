@@ -12,15 +12,17 @@ internal sealed class MapService
     public const ushort PixelsPerRow = TilesPerRow * TileSize;
     public const ushort PixelsPerColumn = TilesPerColumn * TileSize;
 
-    public Map Current { get; }
+    public Map[] All { get; }
+
+    public Map Current { get; set; }
 
     public MapService()
     {
         var textMaps = Directory.EnumerateFiles("./assets/maps/", "*.txt").Select(LoadMapString);
         var pngMaps = Directory.EnumerateFiles("./assets/maps/", "*.png").Select(LoadMapPng);
 
-        var maps = textMaps.Concat(pngMaps).ToList();
-        Current = maps[Random.Shared.Next(maps.Count)];
+        All = textMaps.Concat(pngMaps).ToArray();
+        Current = All[Random.Shared.Next(All.Length)];
     }
 
     private static Map LoadMapPng(string file)
@@ -37,7 +39,7 @@ internal sealed class MapService
         for (var x = 0; x < image.Width; x++)
             walls[x, y] = image[x, y] == whitePixel;
 
-        return new Map(walls);
+        return new Map(Path.GetFileName(file),walls);
     }
 
     private static Map LoadMapString(string file)
@@ -63,12 +65,14 @@ internal sealed class MapService
             }
         }
 
-        return new Map(walls);
+        return new Map(Path.GetFileName(file), walls);
     }
 }
 
-internal sealed class Map(bool[,] walls)
+internal sealed class Map(string name, bool[,] walls)
 {
+    public string Name => name;
+
     public bool IsWall(int x, int y) => walls[x, y];
 
     public bool IsWall(PixelPosition position) => walls[position.X, position.Y];
