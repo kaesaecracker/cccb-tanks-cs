@@ -23,7 +23,7 @@ export default function PlayerInfo({playerId, logout}: {
         return () => clearInterval(timer);
     }, [playerId]);
 
-    return <Column className='PlayerInfo flex-grow'>
+    return <Column className='PlayerInfo'>
         <h3>
             {player ? `Playing as ${player?.name}` : 'loading...'}
         </h3>

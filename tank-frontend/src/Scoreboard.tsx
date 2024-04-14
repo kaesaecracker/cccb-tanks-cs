@@ -23,7 +23,6 @@ export default function Scoreboard({}: {}) {
 
     return <DataTable
         data={players}
-        className='flex-grow'
         columns={[
             {field: 'name'},
             {

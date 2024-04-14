@@ -1,7 +1,6 @@
 .Controls {
-    display: flex;
     text-align: center;
-    flex-grow: 1;
+    gap: calc(4 * var(--padding-normal));
 }
 
 .Controls-Container {
@@ -27,4 +26,5 @@ kbd {
 
 kbd.space {
     width: calc(3 * var(--kbd-key-size) + 2 * var(--padding-normal));
+    margin-top: calc(var(--kbd-key-size) + var(--padding-normal));
 }

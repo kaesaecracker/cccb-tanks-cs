@@ -1,7 +1,6 @@
 import './Controls.css';
 import useWebSocket, {ReadyState} from 'react-use-websocket';
 import {useEffect} from 'react';
-import Column from "./components/Column.tsx";
 
 export default function Controls({playerId, logout}: {
     playerId: string,
@@ -62,7 +61,7 @@ export default function Controls({playerId, logout}: {
         };
     }, [readyState]);
 
-    return <Column className="Controls">
+    return <div className="Controls flex-row">
         <div className='flex-column Controls-Container'>
             <h3>Move</h3>
             <kbd>▲</kbd>
@@ -77,5 +76,5 @@ export default function Controls({playerId, logout}: {
             <h3>Fire</h3>
             <kbd className="space">Space</kbd>
         </div>
-    </Column>;
+    </div>;
 }
