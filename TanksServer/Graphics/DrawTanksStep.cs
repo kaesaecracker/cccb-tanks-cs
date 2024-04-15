@@ -27,7 +27,7 @@ internal sealed class DrawTanksStep : IDrawStep
         _tankSpriteWidth = tankImage.Width;
     }
 
-    public void Draw(PixelGrid buffer)
+    public void Draw(GamePixelGrid pixels)
     {
         foreach (var tank in _tanks)
         {
@@ -40,7 +40,8 @@ internal sealed class DrawTanksStep : IDrawStep
                     continue;
 
                 var (x, y) = tankPosition.GetPixelRelative(dx, dy);
-                buffer[(ushort)x, (ushort)y] = true;
+                pixels[x, y].EntityType = GamePixelEntityType.Tank;
+                pixels[x, y].BelongsTo = tank.Owner;
             }
         }
     }

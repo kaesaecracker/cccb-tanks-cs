@@ -7,8 +7,8 @@ internal sealed class ByteChannelWebSocket(WebSocket socket, ILogger logger, int
 {
     private readonly byte[] _buffer = new byte[messageSize];
 
-    public ValueTask SendAsync(ReadOnlyMemory<byte> data) =>
-        socket.SendAsync(data, WebSocketMessageType.Binary, true, CancellationToken.None);
+    public ValueTask SendAsync(ReadOnlyMemory<byte> data, bool endOfMessage = true) =>
+        socket.SendAsync(data, WebSocketMessageType.Binary, endOfMessage, CancellationToken.None);
 
     public async IAsyncEnumerable<Memory<byte>> ReadAllAsync()
     {

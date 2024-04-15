@@ -6,14 +6,13 @@ using TanksServer.Graphics;
 
 namespace TanksServer.Interactivity;
 
-internal sealed class SendToServicePointDisplay : ITickStep
+internal sealed class SendToServicePointDisplay : IFrameConsumer
 {
     private const int ScoresWidth = 12;
     private const int ScoresHeight = 20;
     private const int ScoresPlayerRows = ScoresHeight - 5;
 
     private readonly IDisplayConnection _displayConnection;
-    private readonly LastFinishedFrameProvider _lastFinishedFrameProvider;
     private readonly ILogger<SendToServicePointDisplay> _logger;
     private readonly PlayerServer _players;
     private readonly Cp437Grid _scoresBuffer;
@@ -22,13 +21,11 @@ internal sealed class SendToServicePointDisplay : ITickStep
     private DateTime _nextFailLog = DateTime.Now;
 
     public SendToServicePointDisplay(
-        LastFinishedFrameProvider lastFinishedFrameProvider,
         PlayerServer players,
         ILogger<SendToServicePointDisplay> logger,
         IDisplayConnection displayConnection
     )
     {
-        _lastFinishedFrameProvider = lastFinishedFrameProvider;
         _players = players;
         _logger = logger;
         _displayConnection = displayConnection;
@@ -45,17 +42,16 @@ internal sealed class SendToServicePointDisplay : ITickStep
         };
     }
 
-    public async Task TickAsync()
+    public async Task OnFrameDoneAsync(GamePixelGrid gamePixelGrid, PixelGrid observerPixels)
     {
         RefreshScores();
         try
         {
             await _displayConnection.SendCp437DataAsync(MapService.TilesPerRow, 0, _scoresBuffer);
 
-            var currentFrame = _lastFinishedFrameProvider.LastFrame;
-            if (_lastSentFrame == currentFrame)
+            if (_lastSentFrame == observerPixels)
                 return;
-            _lastSentFrame = currentFrame;
+            _lastSentFrame = observerPixels;
             await _displayConnection.SendBitmapLinearWindowAsync(0, 0, _lastSentFrame);
         }
         catch (SocketException ex)

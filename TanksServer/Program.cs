@@ -123,7 +123,6 @@ public static class Program
         builder.Services.AddSingleton<ControlsServer>();
         builder.Services.AddSingleton<PlayerServer>();
         builder.Services.AddSingleton<ClientScreenServer>();
-        builder.Services.AddSingleton<LastFinishedFrameProvider>();
         builder.Services.AddSingleton<SpawnQueue>();
 
         builder.Services.AddHostedService<GameTickWorker>();
@@ -138,12 +137,14 @@ public static class Program
         builder.Services.AddSingleton<ITickStep, ShootFromTanks>();
         builder.Services.AddSingleton<ITickStep, SpawnNewTanks>();
         builder.Services.AddSingleton<ITickStep, GeneratePixelsTickStep>();
-        builder.Services.AddSingleton<ITickStep, SendToServicePointDisplay>();
-        builder.Services.AddSingleton<ITickStep, SendToClientScreen>();
 
         builder.Services.AddSingleton<IDrawStep, DrawMapStep>();
         builder.Services.AddSingleton<IDrawStep, DrawTanksStep>();
         builder.Services.AddSingleton<IDrawStep, DrawBulletsStep>();
+
+        builder.Services.AddSingleton<IFrameConsumer, SendToServicePointDisplay>();
+        builder.Services.AddSingleton<IFrameConsumer, ClientScreenServer>(sp =>
+            sp.GetRequiredService<ClientScreenServer>());
 
         builder.Services.Configure<TanksConfiguration>(
             builder.Configuration.GetSection("Tanks"));

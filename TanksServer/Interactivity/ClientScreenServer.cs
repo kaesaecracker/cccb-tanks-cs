@@ -1,15 +1,15 @@
 using System.Diagnostics;
 using System.Net.WebSockets;
-using System.Threading.Channels;
 using DisplayCommands;
 using Microsoft.Extensions.Hosting;
+using TanksServer.Graphics;
 
 namespace TanksServer.Interactivity;
 
 internal sealed class ClientScreenServer(
     ILogger<ClientScreenServer> logger,
     ILoggerFactory loggerFactory
-) : IHostedLifecycleService
+) : IHostedLifecycleService, IFrameConsumer
 {
     private readonly ConcurrentDictionary<ClientScreenServerConnection, byte> _connections = new();
     private bool _closing;
@@ -37,76 +37,21 @@ internal sealed class ClientScreenServer(
         return connection.Done;
     }
 
-    private void Remove(ClientScreenServerConnection connection)
-    {
-        _connections.TryRemove(connection, out _);
-    }
+    public void Remove(ClientScreenServerConnection connection) => _connections.TryRemove(connection, out _);
 
     public IEnumerable<ClientScreenServerConnection> GetConnections() => _connections.Keys;
+
+
+    public Task OnFrameDoneAsync(GamePixelGrid gamePixelGrid, PixelGrid observerPixels)
+    {
+        var tasks = _connections.Keys
+            .Select(c => c.SendAsync(observerPixels, gamePixelGrid));
+        return Task.WhenAll(tasks);
+    }
 
     public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     public Task StartedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     public Task StartingAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     public Task StoppedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-
-    internal sealed class ClientScreenServerConnection : IDisposable
-    {
-        private readonly ByteChannelWebSocket _channel;
-        private readonly ILogger<ClientScreenServerConnection> _logger;
-        private readonly ClientScreenServer _server;
-        private readonly SemaphoreSlim _wantedFrames = new(1);
-
-        public ClientScreenServerConnection(WebSocket webSocket,
-            ILogger<ClientScreenServerConnection> logger,
-            ClientScreenServer server)
-        {
-            _server = server;
-            _logger = logger;
-            _channel = new ByteChannelWebSocket(webSocket, logger, 0);
-            Done = ReceiveAsync();
-        }
-
-        public Task Done { get; }
-
-        public void Dispose()
-        {
-            _wantedFrames.Dispose();
-            Done.Dispose();
-        }
-
-        public async Task SendAsync(PixelGrid pixels)
-        {
-            if (!await _wantedFrames.WaitAsync(TimeSpan.Zero))
-            {
-                _logger.LogTrace("client does not want a frame yet");
-                return;
-            }
-
-            _logger.LogTrace("sending");
-            try
-            {
-                await _channel.SendAsync(pixels.Data);
-            }
-            catch (WebSocketException ex)
-            {
-                _logger.LogWarning(ex, "send failed");
-            }
-        }
-
-        private async Task ReceiveAsync()
-        {
-            await foreach (var _ in _channel.ReadAllAsync())
-                _wantedFrames.Release();
-
-            _logger.LogTrace("done receiving");
-            _server.Remove(this);
-        }
-
-        public Task CloseAsync()
-        {
-            _logger.LogDebug("closing connection");
-            return _channel.CloseAsync();
-        }
-    }
 }
