@@ -25,6 +25,6 @@ kbd {
 }
 
 kbd.space {
-    width: calc(3 * var(--kbd-key-size) + 2 * var(--padding-normal));
+    width: calc(4 * var(--kbd-key-size) + 3 * var(--padding-normal));
     margin-top: calc(var(--kbd-key-size) + var(--padding-normal));
 }

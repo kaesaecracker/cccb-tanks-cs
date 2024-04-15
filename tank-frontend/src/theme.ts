@@ -53,13 +53,20 @@ function angle(a: number) {
 export function getRandomTheme(): Theme {
     const goldenAngle = 180 * (3 - Math.sqrt(5));
 
-    const background = getRandomHsl({maxSaturation: 50, minLightness: 10, maxLightness: 40});
+    const background = getRandomHsl({maxSaturation: 50, minLightness: 10, maxLightness: 30});
 
-    const primary = getRandomHsl({minSaturation: background.s * 1.2, minLightness: background.l + 20});
-    primary.h = angle(-Math.floor(1 + Math.random() * 2) * goldenAngle + primary.h);
+    const otherColorParams = {
+        minSaturation: background.s,
+        maxSaturation: 90,
+        minLightness: background.l + 20,
+        maxLightness: 90
+    };
 
-    const secondary = getRandomHsl({minSaturation: background.s * 1.2, minLightness: background.l + 20});
-    primary.h = angle(+Math.floor(1 + Math.random() * 2) * goldenAngle + primary.h);
+    const primary = getRandomHsl(otherColorParams);
+    primary.h = angle(-1 * goldenAngle + primary.h);
+
+    const secondary = getRandomHsl(otherColorParams);
+    primary.h = angle(+1 * goldenAngle + primary.h);
 
     return {background, primary, secondary};
 }
