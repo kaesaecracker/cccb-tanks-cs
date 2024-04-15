@@ -6,7 +6,7 @@ export default function Controls({playerId, logout}: {
     playerId: string,
     logout: () => void
 }) {
-    const url = new URL(import.meta.env.VITE_TANK_CONTROLS_URL);
+    const url = new URL('controls', import.meta.env.VITE_TANK_WS);
     url.searchParams.set('playerId', playerId);
     const {
         sendMessage,

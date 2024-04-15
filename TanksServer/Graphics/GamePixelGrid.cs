@@ -15,10 +15,10 @@ internal sealed class GamePixelGrid : IEnumerable<GamePixel>
         Width = width;
         Height = height;
 
-        _pixels = new GamePixel[height, width];
-        for (var row = 0; row < height; row++)
-        for (var column = 0; column < width; column++)
-            _pixels[row, column] = new GamePixel();
+        _pixels = new GamePixel[width, height];
+        for (var y = 0; y < height; y++)
+        for (var x = 0; x < width; x++)
+            this[x, y] = new GamePixel();
     }
 
     public GamePixel this[int x, int y]
@@ -26,8 +26,9 @@ internal sealed class GamePixelGrid : IEnumerable<GamePixel>
         get
         {
             Debug.Assert(y * Width + x < _pixels.Length);
-            return _pixels[y, x];
+            return _pixels[x, y];
         }
+        set => _pixels[x, y] = value;
     }
 
     public void Clear()
@@ -40,8 +41,8 @@ internal sealed class GamePixelGrid : IEnumerable<GamePixel>
 
     public IEnumerator<GamePixel> GetEnumerator()
     {
-        for (var row = 0; row < Height; row++)
-        for (var column = 0; column < Width; column++)
-            yield return _pixels[row, column];
+        for (var y = 0; y < Height; y++)
+        for (var x = 0; x < Width; x++)
+            yield return this[x, y];
     }
 }

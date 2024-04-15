@@ -41,7 +41,7 @@ export default function App() {
             {nameId.name !== '' &&
                 <Button onClick={() => setNameId(getNewNameId)} text='logout'/>}
         </Row>
-        <ClientScreen logout={logout} theme={theme}/>
+        <ClientScreen logout={logout} theme={theme} playerId={nameId.id}/>
         {nameId.name === '' && <JoinForm setNameId={setNameId} clientId={nameId.id}/>}
         <Row className='GadgetRows'>
             {isLoggedIn && <Controls playerId={nameId.id} logout={logout}/>}

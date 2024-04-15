@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Net.WebSockets;
 using DisplayCommands;
-using TanksServer.GameLogic;
 using TanksServer.Graphics;
 
 namespace TanksServer.Interactivity;
@@ -27,7 +26,7 @@ internal sealed class ClientScreenServerConnection : IDisposable
 
         _playerGuid = playerGuid;
         if (playerGuid.HasValue)
-            _playerScreenData = new PlayerScreenData();
+            _playerScreenData = new PlayerScreenData(logger);
 
         _channel = new ByteChannelWebSocket(webSocket, logger, 0);
         Done = ReceiveAsync();
@@ -55,6 +54,7 @@ internal sealed class ClientScreenServerConnection : IDisposable
         _logger.LogTrace("sending");
         try
         {
+            _logger.LogTrace("sending {} bytes of pixel data", pixels.Data.Length);
             await _channel.SendAsync(pixels.Data, _playerScreenData == null);
             if (_playerScreenData != null)
                 await _channel.SendAsync(_playerScreenData.GetPacket());
@@ -90,26 +90,5 @@ internal sealed class ClientScreenServerConnection : IDisposable
     {
         _logger.LogDebug("closing connection");
         return _channel.CloseAsync();
-    }
-}
-
-internal sealed class PlayerScreenData
-{
-    private Memory<byte> _data = new byte[MapService.PixelsPerRow * MapService.PixelsPerColumn];
-
-    public int Count { get; private set; } = 0;
-
-    public void Clear() => Count = 0;
-
-    public ReadOnlyMemory<byte> GetPacket() => _data[..Count];
-
-    public void Add(GamePixelEntityType entityKind, bool isCurrentPlayer)
-    {
-        var result = (byte)(isCurrentPlayer ? 0x1b : 0x0b);
-        var kind = (byte)entityKind;
-        Debug.Assert(kind < 3);
-        result += (byte)(kind << 2);
-        _data.Span[Count] = result;
-        Count++;
     }
 }

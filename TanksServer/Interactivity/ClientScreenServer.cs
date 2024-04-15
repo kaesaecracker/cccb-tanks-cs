@@ -21,7 +21,7 @@ internal sealed class ClientScreenServer(
         return Task.WhenAll(_connections.Keys.Select(c => c.CloseAsync()));
     }
 
-    public Task HandleClient(WebSocket socket)
+    public Task HandleClient(WebSocket socket, Guid? playerGuid)
     {
         if (_closing)
         {
@@ -30,8 +30,11 @@ internal sealed class ClientScreenServer(
         }
 
         logger.LogDebug("HandleClient");
-        var connection =
-            new ClientScreenServerConnection(socket, loggerFactory.CreateLogger<ClientScreenServerConnection>(), this);
+        var connection = new ClientScreenServerConnection(
+            socket,
+            loggerFactory.CreateLogger<ClientScreenServerConnection>(),
+            this,
+            playerGuid);
         var added = _connections.TryAdd(connection, 0);
         Debug.Assert(added);
         return connection.Done;

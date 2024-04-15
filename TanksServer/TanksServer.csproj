@@ -41,7 +41,8 @@
         </Content>
         <Content Include="../Makefile"/>
         <Content Include="../.editorconfig"/>
+        <Content Include="../README.md"/>
         <None Include="assets\maps\**" CopyToOutputDirectory="PreserveNewest"/>
     </ItemGroup>
-    
+
 </Project>

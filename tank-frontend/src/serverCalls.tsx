@@ -38,7 +38,7 @@ export async function fetchTyped<T>({url, method}: { url: URL; method: string; }
 }
 
 export function postPlayer({name, id}: NameId) {
-    const url = new URL(import.meta.env.VITE_TANK_PLAYER_URL);
+    const url = new URL('/player', import.meta.env.VITE_TANK_API);
     url.searchParams.set('name', name);
     url.searchParams.set('id', id);
 
@@ -46,7 +46,7 @@ export function postPlayer({name, id}: NameId) {
 }
 
 export function getPlayer(id: Guid) {
-    const url = new URL(import.meta.env.VITE_TANK_PLAYER_URL);
+    const url = new URL('/player', import.meta.env.VITE_TANK_API);
     url.searchParams.set('id', id);
 
     return fetchTyped<Player>({url, method: 'GET'});

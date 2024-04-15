@@ -28,7 +28,7 @@ public static class Program
         app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = clientFileProvider });
         app.UseStaticFiles(new StaticFileOptions { FileProvider = clientFileProvider });
 
-        app.MapPost("/player", (string name, Guid id) =>
+        app.MapPost("/player", (string name, Guid? id) =>
         {
             name = name.Trim().ToUpperInvariant();
             if (name == string.Empty)
@@ -36,7 +36,7 @@ public static class Program
             if (name.Length > 12)
                 return Results.BadRequest("name too long");
 
-            var player = playerService.GetOrAdd(name, id);
+            var player = playerService.GetOrAdd(name, id ?? Guid.NewGuid());
             return player != null
                 ? Results.Ok(new NameId(player.Name, player.Id))
                 : Results.Unauthorized();
@@ -50,13 +50,13 @@ public static class Program
 
         app.MapGet("/scores", () => playerService.GetAll());
 
-        app.Map("/screen", async (HttpContext context) =>
+        app.Map("/screen", async (HttpContext context, [FromQuery] Guid? player) =>
         {
             if (!context.WebSockets.IsWebSocketRequest)
                 return Results.BadRequest();
 
             using var ws = await context.WebSockets.AcceptWebSocketAsync();
-            await clientScreenServer.HandleClient(ws);
+            await clientScreenServer.HandleClient(ws, player);
             return Results.Empty;
         });
 

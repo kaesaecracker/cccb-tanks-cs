@@ -16,8 +16,6 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
     private readonly ILogger<SendToServicePointDisplay> _logger;
     private readonly PlayerServer _players;
     private readonly Cp437Grid _scoresBuffer;
-
-    private PixelGrid? _lastSentFrame;
     private DateTime _nextFailLog = DateTime.Now;
 
     public SendToServicePointDisplay(
@@ -47,12 +45,8 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
         RefreshScores();
         try
         {
+            await _displayConnection.SendBitmapLinearWindowAsync(0, 0, observerPixels);
             await _displayConnection.SendCp437DataAsync(MapService.TilesPerRow, 0, _scoresBuffer);
-
-            if (_lastSentFrame == observerPixels)
-                return;
-            _lastSentFrame = observerPixels;
-            await _displayConnection.SendBitmapLinearWindowAsync(0, 0, _lastSentFrame);
         }
         catch (SocketException ex)
         {
