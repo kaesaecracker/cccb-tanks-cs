@@ -4,6 +4,7 @@ export type Theme = {
     primary: HSL;
     secondary: HSL;
     background: HSL;
+    tertiary: HSL;
 }
 
 // @ts-ignore
@@ -68,7 +69,10 @@ export function getRandomTheme(): Theme {
     const secondary = getRandomHsl(otherColorParams);
     primary.h = angle(+1 * goldenAngle + primary.h);
 
-    return {background, primary, secondary};
+    const tertiary = getRandomHsl(otherColorParams);
+    primary.h = angle(+3 * goldenAngle + primary.h);
+
+    return {background, primary, secondary, tertiary};
 }
 
 function applyTheme(theme: Theme) {

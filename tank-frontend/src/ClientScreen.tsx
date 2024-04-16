@@ -8,9 +8,13 @@ const pixelsPerRow = 352;
 const pixelsPerCol = 160;
 const observerMessageSize = pixelsPerCol * pixelsPerRow / 8;
 
-const isPlayerMask = 1;
+enum GamePixelEntityType {
+    Wall = 0x0,
+    Tank = 0x1,
+    Bullet = 0x2
+}
 
-function getIndexes(bitIndex: number) {
+function getPixelDataIndexes(bitIndex: number) {
     return {
         byteIndex: Math.floor(bitIndex / 8),
         bitInByteIndex: 7 - bitIndex % 8
@@ -23,16 +27,31 @@ function normalizeColor(context: CanvasRenderingContext2D, color: string) {
     return context.getImageData(0, 0, 1, 1).data;
 }
 
-function drawPixelsToCanvas({context, width, height, pixels, additional, foreground, background, playerColor}: {
-    context: CanvasRenderingContext2D,
-    width: number,
-    height: number,
-    pixels: Uint8ClampedArray,
-    additional: Uint8ClampedArray | null,
-    background: Uint8ClampedArray,
-    foreground: Uint8ClampedArray,
-    playerColor: Uint8ClampedArray
-}) {
+function parseAdditionalDataNibble(nibble: number) {
+    const isPlayerMask = 1;
+    const entityTypeMask = 12;
+
+    return {
+        isCurrentPlayer: (nibble & isPlayerMask) != 0,
+        entityType: ((nibble & entityTypeMask) >> 2) as GamePixelEntityType,
+    };
+}
+
+function drawPixelsToCanvas(
+    {
+        context, width, height, pixels, additional, foreground, background, playerColor, otherTanksColor
+    }: {
+        context: CanvasRenderingContext2D,
+        width: number,
+        height: number,
+        pixels: Uint8ClampedArray,
+        additional: Uint8ClampedArray | null,
+        background: Uint8ClampedArray,
+        foreground: Uint8ClampedArray,
+        playerColor: Uint8ClampedArray,
+        otherTanksColor: Uint8ClampedArray
+    }
+) {
     let additionalDataIndex = 0;
     let additionalDataByte: number | null = null;
     const nextPixelColor = (isOn: boolean) => {
@@ -45,15 +64,17 @@ function drawPixelsToCanvas({context, width, height, pixels, additional, foregro
         if (additionalDataByte === null) {
             additionalDataByte = additional[additionalDataIndex];
             additionalDataIndex++;
-            info = additionalDataByte;
+            info = parseAdditionalDataNibble(additionalDataByte);
         } else {
-            info = additionalDataByte >> 4;
+            info = parseAdditionalDataNibble(additionalDataByte >> 4);
             additionalDataByte = null;
         }
 
-        if ((info & isPlayerMask) != 0) {
+        if (info.isCurrentPlayer)
             return playerColor;
-        }
+
+        if (info.entityType == GamePixelEntityType.Tank)
+            return otherTanksColor;
 
         return foreground;
     }
@@ -64,7 +85,7 @@ function drawPixelsToCanvas({context, width, height, pixels, additional, foregro
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             const pixelIndex = y * pixelsPerRow + x;
-            const {byteIndex, bitInByteIndex} = getIndexes(pixelIndex);
+            const {byteIndex, bitInByteIndex} = getPixelDataIndexes(pixelIndex);
             const isOn = (pixels[byteIndex] & (1 << bitInByteIndex)) !== 0;
             const color = nextPixelColor(isOn);
 
@@ -111,10 +132,6 @@ export default function ClientScreen({logout, theme, playerId}: {
         if (!drawContext)
             throw new Error('could not get draw context');
 
-        const colorBackground = normalizeColor(drawContext, hslToString(theme.background));
-        const colorPrimary = normalizeColor(drawContext, hslToString(theme.primary));
-        const colorSecondary = normalizeColor(drawContext, hslToString(theme.secondary));
-
         let pixels = new Uint8ClampedArray(lastMessage.data);
         let additionalData: Uint8ClampedArray | null = null;
         if (pixels.length > observerMessageSize) {
@@ -122,17 +139,16 @@ export default function ClientScreen({logout, theme, playerId}: {
             pixels = pixels.slice(0, observerMessageSize);
         }
 
-        console.log('', {pixelLength: pixels.length, additionalLength: additionalData?.length});
-
         drawPixelsToCanvas({
             context: drawContext,
             width: canvas.width,
             height: canvas.height,
             pixels,
             additional: additionalData,
-            background: colorBackground,
-            foreground: colorPrimary,
-            playerColor: colorSecondary
+            background: normalizeColor(drawContext, hslToString(theme.background)),
+            foreground: normalizeColor(drawContext, hslToString(theme.primary)),
+            playerColor: normalizeColor(drawContext, hslToString(theme.secondary)),
+            otherTanksColor: normalizeColor(drawContext, hslToString(theme.tertiary))
         });
         sendMessage('');
     }, [lastMessage, canvasRef.current, theme]);

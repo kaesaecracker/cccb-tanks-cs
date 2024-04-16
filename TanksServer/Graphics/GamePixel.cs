@@ -12,10 +12,3 @@ internal sealed class GamePixel
         EntityType = null;
     }
 }
-
-internal enum GamePixelEntityType : byte
-{
-    Wall = 0x0,
-    Tank = 0x1,
-    Bullet = 0x2
-}
