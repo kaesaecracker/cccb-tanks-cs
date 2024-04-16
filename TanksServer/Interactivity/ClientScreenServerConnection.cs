@@ -11,18 +11,23 @@ internal sealed class ClientScreenServerConnection : IDisposable
     private readonly ILogger<ClientScreenServerConnection> _logger;
     private readonly ClientScreenServer _server;
     private readonly SemaphoreSlim _wantedFrames = new(1);
-    private readonly Guid? _playerGuid = null;
-    private readonly PlayerScreenData? _playerScreenData = null;
+    private readonly Guid? _playerGuid;
+    private readonly PlayerScreenData? _playerScreenData;
+    private readonly TimeSpan _minFrameTime;
+
+    private DateTime _nextFrameAfter = DateTime.Now;
 
     public ClientScreenServerConnection(
         WebSocket webSocket,
         ILogger<ClientScreenServerConnection> logger,
         ClientScreenServer server,
+        TimeSpan minFrameTime,
         Guid? playerGuid = null
     )
     {
         _server = server;
         _logger = logger;
+        _minFrameTime = minFrameTime;
 
         _playerGuid = playerGuid;
         if (playerGuid.HasValue)
@@ -42,11 +47,16 @@ internal sealed class ClientScreenServerConnection : IDisposable
 
     public async Task SendAsync(PixelGrid pixels, GamePixelGrid gamePixelGrid)
     {
+        if (_nextFrameAfter > DateTime.Now)
+            return;
+
         if (!await _wantedFrames.WaitAsync(TimeSpan.Zero))
         {
             _logger.LogTrace("client does not want a frame yet");
             return;
         }
+
+        _nextFrameAfter = DateTime.Today + _minFrameTime;
 
         if (_playerScreenData != null)
             RefreshPlayerSpecificData(gamePixelGrid);

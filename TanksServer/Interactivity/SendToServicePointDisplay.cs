@@ -16,17 +16,22 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
     private readonly ILogger<SendToServicePointDisplay> _logger;
     private readonly PlayerServer _players;
     private readonly Cp437Grid _scoresBuffer;
-    private DateTime _nextFailLog = DateTime.Now;
+    private readonly TimeSpan _minFrameTime;
+
+    private DateTime _nextFailLogAfter = DateTime.Now;
+    private DateTime _nextFrameAfter = DateTime.Now;
 
     public SendToServicePointDisplay(
         PlayerServer players,
         ILogger<SendToServicePointDisplay> logger,
-        IDisplayConnection displayConnection
+        IDisplayConnection displayConnection,
+        IOptions<HostConfiguration> hostOptions
     )
     {
         _players = players;
         _logger = logger;
         _displayConnection = displayConnection;
+        _minFrameTime = TimeSpan.FromMilliseconds(hostOptions.Value.ServicePointDisplayMinFrameTimeMs);
 
         var localIp = _displayConnection.GetLocalIPv4().Split('.');
         Debug.Assert(localIp.Length == 4);
@@ -42,7 +47,12 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
 
     public async Task OnFrameDoneAsync(GamePixelGrid gamePixelGrid, PixelGrid observerPixels)
     {
+        if (DateTime.Now < _nextFrameAfter)
+            return;
+        _nextFrameAfter = DateTime.Now + _minFrameTime;
+
         RefreshScores();
+
         try
         {
             await _displayConnection.SendBitmapLinearWindowAsync(0, 0, observerPixels);
@@ -50,10 +60,10 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
         }
         catch (SocketException ex)
         {
-            if (DateTime.Now > _nextFailLog)
+            if (DateTime.Now > _nextFailLogAfter)
             {
                 _logger.LogWarning("could not send data to service point display: {}", ex.Message);
-                _nextFailLog = DateTime.Now + TimeSpan.FromSeconds(5);
+                _nextFailLogAfter = DateTime.Now + TimeSpan.FromSeconds(5);
             }
         }
     }

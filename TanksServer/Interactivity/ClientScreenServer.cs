@@ -8,10 +8,12 @@ namespace TanksServer.Interactivity;
 
 internal sealed class ClientScreenServer(
     ILogger<ClientScreenServer> logger,
-    ILoggerFactory loggerFactory
+    ILoggerFactory loggerFactory,
+    IOptions<HostConfiguration> hostConfig
 ) : IHostedLifecycleService, IFrameConsumer
 {
     private readonly ConcurrentDictionary<ClientScreenServerConnection, byte> _connections = new();
+    private readonly TimeSpan _minFrameTime = TimeSpan.FromMilliseconds(hostConfig.Value.ClientDisplayMinFrameTimeMs);
     private bool _closing;
 
     public Task StoppingAsync(CancellationToken cancellationToken)
@@ -34,6 +36,7 @@ internal sealed class ClientScreenServer(
             socket,
             loggerFactory.CreateLogger<ClientScreenServerConnection>(),
             this,
+            _minFrameTime,
             playerGuid);
         var added = _connections.TryAdd(connection, 0);
         Debug.Assert(added);

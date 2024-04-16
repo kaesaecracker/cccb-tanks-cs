@@ -3,6 +3,7 @@ using DisplayCommands;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using TanksServer.GameLogic;
@@ -73,7 +74,7 @@ public static class Program
             return Results.Empty;
         });
 
-        app.MapGet("/map", () =>mapService.MapNames);
+        app.MapGet("/map", () => mapService.MapNames);
 
         app.MapPost("/map", ([FromQuery] string name) =>
         {
@@ -112,6 +113,11 @@ public static class Program
 
         builder.Services.AddHttpLogging(_ => { });
 
+        builder.Services.Configure<HostConfiguration>(builder.Configuration.GetSection("Host"));
+        var hostConfiguration = builder.Configuration.GetSection("Host").Get<HostConfiguration>();
+        if (hostConfiguration == null)
+            throw new InvalidOperationException("'Host' configuration missing");
+
         builder.Services.AddSingleton<MapService>();
         builder.Services.AddSingleton<BulletManager>();
         builder.Services.AddSingleton<TankManager>();
@@ -137,7 +143,6 @@ public static class Program
         builder.Services.AddSingleton<IDrawStep, DrawTanksStep>();
         builder.Services.AddSingleton<IDrawStep, DrawBulletsStep>();
 
-        builder.Services.AddSingleton<IFrameConsumer, SendToServicePointDisplay>();
         builder.Services.AddSingleton<IFrameConsumer, ClientScreenServer>(sp =>
             sp.GetRequiredService<ClientScreenServer>());
 
@@ -145,7 +150,13 @@ public static class Program
             builder.Configuration.GetSection("Tanks"));
         builder.Services.Configure<PlayersConfiguration>(
             builder.Configuration.GetSection("Players"));
-        builder.Services.AddDisplay(builder.Configuration.GetSection("ServicePointDisplay"));
+        builder.Services.Configure<GameRulesConfiguration>(builder.Configuration.GetSection("GameRules"));
+
+        if (hostConfiguration.EnableServicePointDisplay)
+        {
+            builder.Services.AddSingleton<IFrameConsumer, SendToServicePointDisplay>();
+            builder.Services.AddDisplay(builder.Configuration.GetSection("ServicePointDisplay"));
+        }
 
         var app = builder.Build();
 

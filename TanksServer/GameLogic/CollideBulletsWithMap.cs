@@ -1,6 +1,10 @@
 namespace TanksServer.GameLogic;
 
-internal sealed class CollideBulletsWithMap(BulletManager bullets, MapService map) : ITickStep
+internal sealed class CollideBulletsWithMap(
+    BulletManager bullets,
+    MapService map,
+    IOptions<GameRulesConfiguration> options
+) : ITickStep
 {
     public Task TickAsync(TimeSpan _)
     {
@@ -14,7 +18,8 @@ internal sealed class CollideBulletsWithMap(BulletManager bullets, MapService ma
         if (!map.Current.IsWall(pixel))
             return false;
 
-        map.Current.DestroyWallAt(pixel);
+        if (options.Value.DestructibleWalls)
+            map.Current.DestroyWallAt(pixel);
         return true;
     }
 }
