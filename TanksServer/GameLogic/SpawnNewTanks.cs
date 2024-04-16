@@ -7,7 +7,7 @@ internal sealed class SpawnNewTanks(
     BulletManager bullets
 ) : ITickStep
 {
-    public Task TickAsync()
+    public Task TickAsync(TimeSpan _)
     {
         if (!queue.TryDequeueNext(out var player))
             return Task.CompletedTask;

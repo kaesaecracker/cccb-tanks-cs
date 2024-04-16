@@ -6,7 +6,7 @@ internal sealed class CollideBulletsWithTanks(
     SpawnQueue spawnQueue
 ) : ITickStep
 {
-    public Task TickAsync()
+    public Task TickAsync(TimeSpan _)
     {
         bullets.RemoveWhere(BulletHitsTank);
         return Task.CompletedTask;

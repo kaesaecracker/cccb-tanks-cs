@@ -8,7 +8,7 @@ internal sealed class ShootFromTanks(
 {
     private readonly TanksConfiguration _config = options.Value;
 
-    public Task TickAsync()
+    public Task TickAsync(TimeSpan _)
     {
         foreach (var tank in tanks.Where(t => !t.Moved))
             Shoot(tank);
@@ -28,8 +28,8 @@ internal sealed class ShootFromTanks(
         var rotation = tank.Orientation / 16d;
         var angle = rotation * 2d * Math.PI;
         var position = new FloatPosition(
-            tank.Position.X + Math.Sin(angle) * _config.BulletSpeed,
-            tank.Position.Y - Math.Cos(angle) * _config.BulletSpeed
+            tank.Position.X + Math.Sin(angle) * 6,
+            tank.Position.Y - Math.Cos(angle) * 6
         );
 
         bulletManager.Spawn(new Bullet(tank.Owner, position, rotation));

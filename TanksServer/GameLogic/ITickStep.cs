@@ -2,5 +2,5 @@ namespace TanksServer.GameLogic;
 
 public interface ITickStep
 {
-    Task TickAsync();
+    Task TickAsync(TimeSpan delta);
 }

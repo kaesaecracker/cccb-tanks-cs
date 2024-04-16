@@ -9,8 +9,6 @@ internal sealed class GameTickWorker(
     ILogger<GameTickWorker> logger
 ) : IHostedService, IDisposable
 {
-    private const int TicksPerSecond = 25;
-    private static readonly TimeSpan TickPacing = TimeSpan.FromMilliseconds(1000 / TicksPerSecond);
     private readonly CancellationTokenSource _cancellation = new();
     private readonly List<ITickStep> _steps = steps.ToList();
     private Task? _run;
@@ -41,14 +39,14 @@ internal sealed class GameTickWorker(
             while (!_cancellation.IsCancellationRequested)
             {
                 logger.LogTrace("since last frame: {}", sw.Elapsed);
+
+                var delta = sw.Elapsed;
                 sw.Restart();
 
                 foreach (var step in _steps)
-                    await step.TickAsync();
+                    await step.TickAsync(delta);
 
-                var wantedDelay = TickPacing - sw.Elapsed;
-                if (wantedDelay.Ticks > 0)
-                    await Task.Delay(wantedDelay);
+                await Task.Delay(1);
             }
         }
         catch (Exception ex)

@@ -14,7 +14,7 @@ internal sealed class GeneratePixelsTickStep(
     private readonly PixelGrid _observerPixelGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
     private readonly GamePixelGrid _gamePixelGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
 
-    public async Task TickAsync()
+    public async Task TickAsync(TimeSpan _)
     {
         _gamePixelGrid.Clear();
         foreach (var step in _drawSteps)

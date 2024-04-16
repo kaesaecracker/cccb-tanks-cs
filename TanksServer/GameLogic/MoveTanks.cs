@@ -8,15 +8,15 @@ internal sealed class MoveTanks(
 {
     private readonly TanksConfiguration _config = options.Value;
 
-    public Task TickAsync()
+    public Task TickAsync(TimeSpan delta)
     {
         foreach (var tank in tanks)
-            tank.Moved = TryMoveTank(tank);
+            tank.Moved = TryMoveTank(tank, delta);
 
         return Task.CompletedTask;
     }
 
-    private bool TryMoveTank(Tank tank)
+    private bool TryMoveTank(Tank tank, TimeSpan delta)
     {
         var player = tank.Owner;
 
@@ -35,6 +35,8 @@ internal sealed class MoveTanks(
             default:
                 return false;
         }
+
+        speed *= delta.TotalSeconds;
 
         var angle = tank.Orientation / 16d * 2d * Math.PI;
         var newX = tank.Position.X + Math.Sin(angle) * speed;

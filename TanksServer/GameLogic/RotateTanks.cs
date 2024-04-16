@@ -8,7 +8,7 @@ internal sealed class RotateTanks(
 {
     private readonly TanksConfiguration _config = options.Value;
 
-    public Task TickAsync()
+    public Task TickAsync(TimeSpan delta)
     {
         foreach (var tank in tanks)
         {
@@ -20,10 +20,10 @@ internal sealed class RotateTanks(
                 case { TurnRight: false, TurnLeft: false }:
                     continue;
                 case { TurnLeft: true }:
-                    tank.Rotation -= _config.TurnSpeed;
+                    tank.Rotation -= _config.TurnSpeed * delta.TotalSeconds;
                     break;
                 case { TurnRight: true }:
-                    tank.Rotation += _config.TurnSpeed;
+                    tank.Rotation += _config.TurnSpeed * delta.TotalSeconds;
                     break;
             }
 

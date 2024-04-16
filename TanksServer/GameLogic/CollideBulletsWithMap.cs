@@ -2,7 +2,7 @@ namespace TanksServer.GameLogic;
 
 internal sealed class CollideBulletsWithMap(BulletManager bullets, MapService map) : ITickStep
 {
-    public Task TickAsync()
+    public Task TickAsync(TimeSpan _)
     {
         bullets.RemoveWhere(TryHitAndDestroyWall);
         return Task.CompletedTask;
