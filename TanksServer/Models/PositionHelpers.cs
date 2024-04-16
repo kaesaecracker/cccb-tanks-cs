@@ -8,7 +8,7 @@ internal static class PositionHelpers
         => new(position.X + subX, position.Y + subY);
 
     public static PixelPosition ToPixelPosition(this FloatPosition position)
-        => new((int)position.X, (int)position.Y);
+        => new((int)Math.Round(position.X), (int)Math.Round(position.Y));
 
     public static PixelPosition ToPixelPosition(this TilePosition position) => new(
         (ushort)(position.X * MapService.TileSize),

@@ -4,7 +4,8 @@ internal sealed class BulletManager
 {
     private readonly HashSet<Bullet> _bullets = [];
 
-    public void Spawn(Bullet bullet) => _bullets.Add(bullet);
+    public void Spawn(Player tankOwner, FloatPosition position, double rotation)
+        => _bullets.Add(new Bullet(tankOwner, position, rotation));
 
     public IEnumerable<Bullet> GetAll() => _bullets;
 
