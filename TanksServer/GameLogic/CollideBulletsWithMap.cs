@@ -4,10 +4,17 @@ internal sealed class CollideBulletsWithMap(BulletManager bullets, MapService ma
 {
     public Task TickAsync()
     {
-        bullets.RemoveWhere(BulletHitsWall);
+        bullets.RemoveWhere(TryHitAndDestroyWall);
         return Task.CompletedTask;
     }
 
-    private bool BulletHitsWall(Bullet bullet) =>
-        map.Current.IsWall(bullet.Position.ToPixelPosition());
+    private bool TryHitAndDestroyWall(Bullet bullet)
+    {
+        var pixel = bullet.Position.ToPixelPosition();
+        if (!map.Current.IsWall(pixel))
+            return false;
+
+        map.Current.DestroyWallAt(pixel);
+        return true;
+    }
 }

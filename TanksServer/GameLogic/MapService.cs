@@ -12,20 +12,25 @@ internal sealed class MapService
     public const ushort PixelsPerRow = TilesPerRow * TileSize;
     public const ushort PixelsPerColumn = TilesPerColumn * TileSize;
 
-    public Map[] All { get; }
+    private readonly Dictionary<string, bool[,]> _maps = new();
 
-    public Map Current { get; set; }
+    public IEnumerable<string> MapNames => _maps.Keys;
+
+    public Map Current { get; private set; }
 
     public MapService()
     {
-        var textMaps = Directory.EnumerateFiles("./assets/maps/", "*.txt").Select(LoadMapString);
-        var pngMaps = Directory.EnumerateFiles("./assets/maps/", "*.png").Select(LoadMapPng);
+        foreach (var file in Directory.EnumerateFiles("./assets/maps/", "*.txt"))
+            LoadMapString(file);
+        foreach (var file in Directory.EnumerateFiles("./assets/maps/", "*.png"))
+            LoadMapPng(file);
 
-        All = textMaps.Concat(pngMaps).ToArray();
-        Current = All[Random.Shared.Next(All.Length)];
+        var chosenMapIndex = Random.Shared.Next(_maps.Count);
+        var chosenMapName = _maps.Keys.Skip(chosenMapIndex).First();
+        Current = new Map(chosenMapName, _maps[chosenMapName]);
     }
 
-    private static Map LoadMapPng(string file)
+    private void LoadMapPng(string file)
     {
         using var image = Image.Load<Rgba32>(file);
 
@@ -39,10 +44,10 @@ internal sealed class MapService
         for (var x = 0; x < image.Width; x++)
             walls[x, y] = image[x, y] == whitePixel;
 
-        return new Map(Path.GetFileName(file),walls);
+        _maps.Add(Path.GetFileName(file), walls);
     }
 
-    private static Map LoadMapString(string file)
+    private void LoadMapString(string file)
     {
         var map = File.ReadAllText(file).ReplaceLineEndings(string.Empty).Trim();
         if (map.Length != TilesPerColumn * TilesPerRow)
@@ -65,7 +70,15 @@ internal sealed class MapService
             }
         }
 
-        return new Map(Path.GetFileName(file), walls);
+        _maps.Add(Path.GetFileName(file), walls);
+    }
+
+    public bool TrySwitchTo(string name)
+    {
+        if (!_maps.TryGetValue(name, out var mapData))
+            return false;
+        Current = new Map(name, mapData);
+        return true;
     }
 }
 
@@ -90,4 +103,6 @@ internal sealed class Map(string name, bool[,] walls)
 
         return false;
     }
+
+    public void DestroyWallAt(PixelPosition pixel) => walls[pixel.X, pixel.Y] = false;
 }

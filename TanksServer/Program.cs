@@ -73,19 +73,14 @@ public static class Program
             return Results.Empty;
         });
 
-        app.MapGet("/map", () =>
-        {
-            var dict = mapService.All
-                .Select((m, i) => (m.Name, i))
-                .ToDictionary(pair => pair.i, pair => pair.Name);
-            return dict;
-        });
+        app.MapGet("/map", () =>mapService.MapNames);
 
-        app.MapPost("/map", ([FromQuery] int index) =>
+        app.MapPost("/map", ([FromQuery] string name) =>
         {
-            if (index < 0 || index >= mapService.All.Length)
-                return Results.NotFound("index does not exist");
-            mapService.Current = mapService.All[index];
+            if (string.IsNullOrWhiteSpace(name))
+                return Results.BadRequest("invalid map name");
+            if (!mapService.TrySwitchTo(name))
+                return Results.NotFound("map with name not found");
             return Results.Ok();
         });
 
