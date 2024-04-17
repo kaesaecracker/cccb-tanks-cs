@@ -1,43 +1,40 @@
-import {useEffect, useState} from 'react';
-import {Player, getPlayer} from './serverCalls';
+import {useQuery} from '@tanstack/react-query'
+import {Player} from './serverCalls';
 import {Guid} from "./Guid.ts";
 import Column from "./components/Column.tsx";
 
-export default function PlayerInfo({playerId, logout}: {
-    playerId: Guid,
-    logout: () => void
-}) {
-    const [player, setPlayer] = useState<Player | null>();
+export default function PlayerInfo({playerId}: { playerId: Guid }) {
+    const query = useQuery({
+        queryKey: ['player'],
+        refetchInterval: 1000,
+        queryFn: async () => {
+            const url = new URL('/player', import.meta.env.VITE_TANK_API);
+            url.searchParams.set('id', playerId);
 
-    useEffect(() => {
-        const refresh = () => {
-            getPlayer(playerId).then(response => {
-                if (response.successResult)
-                    setPlayer(response.successResult);
-                else
-                    logout();
-            });
-        };
-
-        const timer = setInterval(refresh, 5000);
-        return () => clearInterval(timer);
-    }, [playerId]);
+            const response = await fetch(url, {method: 'GET'});
+            if (!response.ok)
+                throw new Error(`response failed with code ${response.status} (${response.status})${await response.text()}`)
+            return await response.json() as Player;
+        }
+    });
 
     return <Column className='PlayerInfo'>
         <h3>
-            {player ? `Playing as ${player?.name}` : 'loading...'}
+            {query.isPending && 'loading...'}
+            {query.isSuccess && `Playing as ${query.data.name}`}
         </h3>
-        <table>
+        {query.isError && <p>{query.error.message}</p>}
+        {query.isSuccess && <table>
             <tbody>
             <tr>
                 <td>kills:</td>
-                <td>{player?.scores.kills}</td>
+                <td>{query.data?.scores?.kills ?? '?'}</td>
             </tr>
             <tr>
                 <td>deaths:</td>
-                <td>{player?.scores.deaths}</td>
+                <td>{query.data?.scores?.deaths ?? '?'}</td>
             </tr>
             </tbody>
-        </table>
+        </table>}
     </Column>;
 }

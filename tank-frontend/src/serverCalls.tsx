@@ -44,15 +44,3 @@ export function postPlayer({name, id}: NameId) {
 
     return fetchTyped<NameId>({url, method: 'POST'});
 }
-
-export function getPlayer(id: Guid) {
-    const url = new URL('/player', import.meta.env.VITE_TANK_API);
-    url.searchParams.set('id', id);
-
-    return fetchTyped<Player>({url, method: 'GET'});
-}
-
-export function getScores() {
-    const url = new URL('/scores', import.meta.env.VITE_TANK_API);
-    return fetchTyped<Player[]>({url, method: 'GET'});
-}

@@ -1,19 +1,17 @@
 import './Controls.css';
 import useWebSocket, {ReadyState} from 'react-use-websocket';
 import {useEffect} from 'react';
+import {Guid} from "./Guid.ts";
 
-export default function Controls({playerId, logout}: {
-    playerId: string,
-    logout: () => void
-}) {
+export default function Controls({playerId}: { playerId: Guid }) {
     const url = new URL('controls', import.meta.env.VITE_TANK_WS);
     url.searchParams.set('playerId', playerId);
+
     const {
         sendMessage,
         getWebSocket,
         readyState
     } = useWebSocket(url.toString(), {
-        onError: logout,
         shouldReconnect: () => true,
     });
 

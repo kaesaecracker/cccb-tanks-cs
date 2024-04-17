@@ -44,8 +44,8 @@ export default function App() {
         <ClientScreen logout={logout} theme={theme} playerId={nameId.id}/>
         {nameId.name === '' && <JoinForm setNameId={setNameId} clientId={nameId.id}/>}
         <Row className='GadgetRows'>
-            {isLoggedIn && <Controls playerId={nameId.id} logout={logout}/>}
-            {isLoggedIn && <PlayerInfo playerId={nameId.id} logout={logout}/>}
+            {isLoggedIn && <Controls playerId={nameId.id}/>}
+            {isLoggedIn && <PlayerInfo playerId={nameId.id}/>}
             <Scoreboard/>
         </Row>
     </Column>;
