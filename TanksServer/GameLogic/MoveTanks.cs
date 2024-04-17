@@ -1,7 +1,7 @@
 namespace TanksServer.GameLogic;
 
 internal sealed class MoveTanks(
-    TankManager tanks,
+    MapEntityManager entityManager,
     IOptions<TanksConfiguration> options,
     MapService map
 ) : ITickStep
@@ -10,7 +10,7 @@ internal sealed class MoveTanks(
 
     public Task TickAsync(TimeSpan delta)
     {
-        foreach (var tank in tanks)
+        foreach (var tank in entityManager.Tanks)
             tank.Moved = TryMoveTank(tank, delta);
 
         return Task.CompletedTask;
@@ -59,13 +59,13 @@ internal sealed class MoveTanks(
     }
 
     private bool HitsTank(Tank tank, FloatPosition newPosition) =>
-        tanks
+        entityManager.Tanks
             .Where(otherTank => otherTank != tank)
             .Any(otherTank => newPosition.Distance(otherTank.Position) < MapService.TileSize);
 
     private bool HitsWall(FloatPosition newPosition)
     {
-        var (topLeft, _) = Tank.GetBoundsForCenter(newPosition);
+        var (topLeft, _) = newPosition.GetBoundsForCenter(MapService.TileSize);
 
         for (short y = 0; y < MapService.TileSize; y++)
         for (short x = 0; x < MapService.TileSize; x++)

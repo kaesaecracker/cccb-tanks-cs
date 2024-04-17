@@ -1,6 +1,8 @@
 namespace TanksServer.GameLogic;
 
-public class GameRulesConfiguration
+internal sealed class GameRules
 {
     public bool DestructibleWalls { get; set; } = true;
+
+    public double PowerUpSpawnChance { get; set; }
 }

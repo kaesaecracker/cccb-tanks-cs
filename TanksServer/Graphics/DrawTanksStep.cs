@@ -6,13 +6,13 @@ namespace TanksServer.Graphics;
 
 internal sealed class DrawTanksStep : IDrawStep
 {
-    private readonly TankManager _tanks;
+    private readonly MapEntityManager _entityManager;
     private readonly bool[] _tankSprite;
     private readonly int _tankSpriteWidth;
 
-    public DrawTanksStep(TankManager tanks)
+    public DrawTanksStep(MapEntityManager entityManager)
     {
-        _tanks = tanks;
+        _entityManager = entityManager;
 
         using var tankImage = Image.Load<Rgba32>("assets/tank.png");
         _tankSprite = new bool[tankImage.Height * tankImage.Width];
@@ -28,7 +28,7 @@ internal sealed class DrawTanksStep : IDrawStep
 
     public void Draw(GamePixelGrid pixels)
     {
-        foreach (var tank in _tanks)
+        foreach (var tank in _entityManager.Tanks)
         {
             var tankPosition = tank.Bounds.TopLeft;
 

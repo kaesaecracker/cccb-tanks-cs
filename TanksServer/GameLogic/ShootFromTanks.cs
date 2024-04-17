@@ -3,16 +3,15 @@ using System.Diagnostics;
 namespace TanksServer.GameLogic;
 
 internal sealed class ShootFromTanks(
-    TankManager tanks,
     IOptions<TanksConfiguration> options,
-    BulletManager bulletManager
+    MapEntityManager entityManager
 ) : ITickStep
 {
     private readonly TanksConfiguration _config = options.Value;
 
     public Task TickAsync(TimeSpan _)
     {
-        foreach (var tank in tanks.Where(t => !t.Moved))
+        foreach (var tank in entityManager.Tanks.Where(t => !t.Moved))
             Shoot(tank);
 
         return Task.CompletedTask;
@@ -30,7 +29,7 @@ internal sealed class ShootFromTanks(
         var rotation = tank.Orientation / 16d;
         var angle = rotation * 2d * Math.PI;
 
-        /* TODO: when standing next to a wall, the bullet sometimes misses the first pixel.
+        /* When standing next to a wall, the bullet sometimes misses the first pixel.
          Spawning the bullet to close to the tank instead means the tank instantly hits itself.
          Because the tank has a float position, but hit boxes are based on pixels, this problem has been deemed complex
          enough to do later. These values mostly work. */
@@ -47,6 +46,13 @@ internal sealed class ShootFromTanks(
             tank.Position.Y - Math.Cos(angle) * distance
         );
 
-        bulletManager.Spawn(tank.Owner, position, rotation);
+        var explosive = false;
+        if (tank.ExplosiveBullets > 0)
+        {
+            tank.ExplosiveBullets--;
+            explosive = true;
+        }
+
+        entityManager.SpawnBullet(tank.Owner, position, rotation, explosive);
     }
 }

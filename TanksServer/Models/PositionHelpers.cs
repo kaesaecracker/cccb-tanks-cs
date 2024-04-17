@@ -28,4 +28,15 @@ internal static class PositionHelpers
             Math.Pow(p1.X - p2.X, 2) +
             Math.Pow(p1.Y - p2.Y, 2)
         );
+
+    public static PixelBounds GetBoundsForCenter(this FloatPosition position, ushort size)
+    {
+        var sub = (short)(-size / 2d);
+        var add = (short)(size / 2d - 1);
+        var pixelPosition = position.ToPixelPosition();
+        return new PixelBounds(
+            pixelPosition.GetPixelRelative(sub, sub),
+            pixelPosition.GetPixelRelative(add, add)
+        );
+    }
 }

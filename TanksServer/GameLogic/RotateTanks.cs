@@ -1,7 +1,7 @@
 namespace TanksServer.GameLogic;
 
 internal sealed class RotateTanks(
-    TankManager tanks,
+    MapEntityManager entityManager,
     IOptions<TanksConfiguration> options,
     ILogger<RotateTanks> logger
 ) : ITickStep
@@ -10,7 +10,7 @@ internal sealed class RotateTanks(
 
     public Task TickAsync(TimeSpan delta)
     {
-        foreach (var tank in tanks)
+        foreach (var tank in entityManager.Tanks)
         {
             var player = tank.Owner;
 

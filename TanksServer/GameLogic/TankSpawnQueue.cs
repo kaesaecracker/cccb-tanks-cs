@@ -2,9 +2,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace TanksServer.GameLogic;
 
-internal sealed class SpawnQueue(
-    IOptions<PlayersConfiguration> options
-)
+internal sealed class TankSpawnQueue(
+    IOptions<PlayersConfiguration> options,
+    MapEntityManager entityManager
+): ITickStep
 {
     private readonly ConcurrentQueue<Player> _queue = new();
     private readonly ConcurrentDictionary<Player, DateTime> _spawnTimes = new();
@@ -40,5 +41,14 @@ internal sealed class SpawnQueue(
         }
 
         return true;
+    }
+
+    public Task TickAsync(TimeSpan _)
+    {
+        if (!TryDequeueNext(out var player))
+            return Task.CompletedTask;
+
+        entityManager.SpawnTank(player);
+        return Task.CompletedTask;
     }
 }

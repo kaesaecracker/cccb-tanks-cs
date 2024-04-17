@@ -26,7 +26,7 @@ internal sealed class PlayerScreenData(ILogger logger)
     {
         var result = (byte)(isCurrentPlayer ? 0x1 : 0x0);
         var kind = (byte)entityKind;
-        Debug.Assert(kind < 3);
+        Debug.Assert(kind <= 3);
         result += (byte)(kind << 2);
 
         var index = _count / 2;

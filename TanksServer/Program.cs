@@ -1,8 +1,6 @@
 using System.IO;
 using DisplayCommands;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -20,70 +18,11 @@ public static class Program
     {
         var app = Configure(args);
 
-        var clientScreenServer = app.Services.GetRequiredService<ClientScreenServer>();
-        var playerService = app.Services.GetRequiredService<PlayerServer>();
-        var controlsServer = app.Services.GetRequiredService<ControlsServer>();
-        var mapService = app.Services.GetRequiredService<MapService>();
-
         var clientFileProvider = new PhysicalFileProvider(Path.Combine(app.Environment.ContentRootPath, "client"));
         app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = clientFileProvider });
         app.UseStaticFiles(new StaticFileOptions { FileProvider = clientFileProvider });
 
-        app.MapPost("/player", (string name, Guid? id) =>
-        {
-            name = name.Trim().ToUpperInvariant();
-            if (name == string.Empty)
-                return Results.BadRequest("name cannot be blank");
-            if (name.Length > 12)
-                return Results.BadRequest("name too long");
-
-            var player = playerService.GetOrAdd(name, id ?? Guid.NewGuid());
-            return player != null
-                ? Results.Ok(new NameId(player.Name, player.Id))
-                : Results.Unauthorized();
-        });
-
-        app.MapGet("/player", ([FromQuery] Guid id) =>
-            playerService.TryGet(id, out var foundPlayer)
-                ? Results.Ok((object?)foundPlayer)
-                : Results.NotFound()
-        );
-
-        app.MapGet("/scores", () => playerService.GetAll());
-
-        app.Map("/screen", async (HttpContext context, [FromQuery] Guid? player) =>
-        {
-            if (!context.WebSockets.IsWebSocketRequest)
-                return Results.BadRequest();
-
-            using var ws = await context.WebSockets.AcceptWebSocketAsync();
-            await clientScreenServer.HandleClient(ws, player);
-            return Results.Empty;
-        });
-
-        app.Map("/controls", async (HttpContext context, [FromQuery] Guid playerId) =>
-        {
-            if (!context.WebSockets.IsWebSocketRequest)
-                return Results.BadRequest();
-
-            if (!playerService.TryGet(playerId, out var player))
-                return Results.NotFound();
-
-            using var ws = await context.WebSockets.AcceptWebSocketAsync();
-            await controlsServer.HandleClient(ws, player);
-            return Results.Empty;
-        });
-
-        app.MapGet("/map", () => mapService.MapNames);
-
-        app.MapPost("/map", ([FromQuery] string name) =>
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                return Results.BadRequest("invalid map name");
-            if (!mapService.TrySwitchTo(name))
-                return Results.NotFound("map with name not found");
-            return Results.Ok();
-        });
+        Endpoints.MapEndpoints(app);
 
         app.Run();
     }
@@ -119,27 +58,28 @@ public static class Program
             throw new InvalidOperationException("'Host' configuration missing");
 
         builder.Services.AddSingleton<MapService>();
-        builder.Services.AddSingleton<BulletManager>();
-        builder.Services.AddSingleton<TankManager>();
+        builder.Services.AddSingleton<MapEntityManager>();
         builder.Services.AddSingleton<ControlsServer>();
         builder.Services.AddSingleton<PlayerServer>();
         builder.Services.AddSingleton<ClientScreenServer>();
-        builder.Services.AddSingleton<SpawnQueue>();
+        builder.Services.AddSingleton<TankSpawnQueue>();
 
         builder.Services.AddHostedService<GameTickWorker>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ControlsServer>());
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ClientScreenServer>());
 
         builder.Services.AddSingleton<ITickStep, MoveBullets>();
-        builder.Services.AddSingleton<ITickStep, CollideBulletsWithTanks>();
-        builder.Services.AddSingleton<ITickStep, CollideBulletsWithMap>();
+        builder.Services.AddSingleton<ITickStep, CollideBullets>();
         builder.Services.AddSingleton<ITickStep, RotateTanks>();
         builder.Services.AddSingleton<ITickStep, MoveTanks>();
         builder.Services.AddSingleton<ITickStep, ShootFromTanks>();
-        builder.Services.AddSingleton<ITickStep, SpawnNewTanks>();
+        builder.Services.AddSingleton<ITickStep, CollectPowerUp>();
+        builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<TankSpawnQueue>());
+        builder.Services.AddSingleton<ITickStep, SpawnPowerUp>();
         builder.Services.AddSingleton<ITickStep, GeneratePixelsTickStep>();
 
         builder.Services.AddSingleton<IDrawStep, DrawMapStep>();
+        builder.Services.AddSingleton<IDrawStep, DrawPowerUpsStep>();
         builder.Services.AddSingleton<IDrawStep, DrawTanksStep>();
         builder.Services.AddSingleton<IDrawStep, DrawBulletsStep>();
 
@@ -150,7 +90,7 @@ public static class Program
             builder.Configuration.GetSection("Tanks"));
         builder.Services.Configure<PlayersConfiguration>(
             builder.Configuration.GetSection("Players"));
-        builder.Services.Configure<GameRulesConfiguration>(builder.Configuration.GetSection("GameRules"));
+        builder.Services.Configure<GameRules>(builder.Configuration.GetSection("GameRules"));
 
         if (hostConfiguration.EnableServicePointDisplay)
         {

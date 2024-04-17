@@ -1,10 +1,13 @@
 namespace TanksServer.GameLogic;
 
-internal sealed class MoveBullets(BulletManager bullets, IOptions<TanksConfiguration> config) : ITickStep
+internal sealed class MoveBullets(
+    MapEntityManager entityManager,
+    IOptions<TanksConfiguration> config
+) : ITickStep
 {
     public Task TickAsync(TimeSpan delta)
     {
-        foreach (var bullet in bullets.GetAll())
+        foreach (var bullet in entityManager.Bullets)
             MoveBullet(bullet, delta);
 
         return Task.CompletedTask;
