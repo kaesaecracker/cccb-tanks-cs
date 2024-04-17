@@ -13,6 +13,11 @@ internal sealed class MapEntityManager(
     public IEnumerable<Tank> Tanks => _tanks;
     public IEnumerable<PowerUp> PowerUps => _powerUps;
 
+    public IEnumerable<IMapEntity> AllEntities => Bullets
+        .Cast<IMapEntity>()
+        .Concat(Tanks)
+        .Concat(PowerUps);
+
     public void SpawnBullet(Player tankOwner, FloatPosition position, double rotation, bool isExplosive)
         => _bullets.Add(new Bullet(tankOwner, position, rotation, isExplosive));
 
@@ -50,9 +55,7 @@ internal sealed class MapEntityManager(
 
             var tilePixelCenter = tile.ToPixelPosition().GetPixelRelative(4, 4).ToFloatPosition();
 
-            var minDistance = Bullets
-                .Cast<IMapEntity>()
-                .Concat(Tanks)
+            var minDistance = AllEntities
                 .Select(entity => entity.Position.Distance(tilePixelCenter))
                 .Aggregate(double.MaxValue, Math.Min);
 
