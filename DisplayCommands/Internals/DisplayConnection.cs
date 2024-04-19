@@ -15,6 +15,7 @@ internal sealed class DisplayConnection(IOptions<DisplayConfiguration> options) 
     public ValueTask SendClearAsync()
     {
         var header = new HeaderWindow { Command = DisplayCommand.Clear };
+
         return SendAsync(header, Memory<byte>.Empty);
     }
 
@@ -28,6 +29,7 @@ internal sealed class DisplayConnection(IOptions<DisplayConfiguration> options) 
             PosX = x,
             PosY = y
         };
+
         return SendAsync(header, grid.Data);
     }
 
@@ -81,7 +83,7 @@ internal sealed class DisplayConnection(IOptions<DisplayConfiguration> options) 
         {
             Command = DisplayCommand.BitmapLinearWin,
             PosX = x, PosY = y,
-            Width = pixels.Width,
+            Width = (ushort)(pixels.Width / 8),
             Height = pixels.Height
         };
 
@@ -111,6 +113,7 @@ internal sealed class DisplayConnection(IOptions<DisplayConfiguration> options) 
         var buffer = _arrayPool.Rent(messageSize);
         var message = buffer.AsMemory(0, messageSize);
 
+        header.ChangeToNetworkOrder();
         MemoryMarshal.Write(message.Span, header);
         payload.CopyTo(message[headerSize..]);
 

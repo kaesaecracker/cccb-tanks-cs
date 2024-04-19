@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Runtime.InteropServices;
 
 namespace DisplayCommands.Internals;
@@ -14,4 +15,15 @@ internal struct HeaderWindow
     public ushort Width;
 
     public ushort Height;
+
+    public void ChangeToNetworkOrder()
+    {
+        if (!BitConverter.IsLittleEndian)
+            return;
+        Command = (DisplayCommand)BinaryPrimitives.ReverseEndianness((ushort)Command);
+        PosX = BinaryPrimitives.ReverseEndianness(PosX);
+        PosY = BinaryPrimitives.ReverseEndianness(PosY);
+        Width = BinaryPrimitives.ReverseEndianness(Width);
+        Height = BinaryPrimitives.ReverseEndianness(Height);
+    }
 }
