@@ -14,6 +14,7 @@ export type Player = {
     readonly scores: {
         readonly kills: number;
         readonly deaths: number;
+        readonly wallsDestroyed: number;
     };
 };
 

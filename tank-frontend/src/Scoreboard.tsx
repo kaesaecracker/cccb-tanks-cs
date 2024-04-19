@@ -42,6 +42,11 @@ export default function Scoreboard({}: {}) {
                 field: 'ratio',
                 visualize: p => p.scores.ratio.toString(),
                 sorter: (a, b) => numberSorter(a.scores.ratio, b.scores.ratio)
+            },
+            {
+                field: 'walls',
+                visualize: p => p.scores.wallsDestroyed.toString(),
+                sorter: (a, b) => numberSorter(a.scores.wallsDestroyed, b.scores.wallsDestroyed)
             }
         ]}/>
 }

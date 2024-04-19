@@ -77,7 +77,11 @@ internal sealed class CollideBullets(
         {
             var offsetPixel = new PixelPosition(x, y);
             if (options.Value.DestructibleWalls)
+            {
                 map.Current.DestroyWallAt(offsetPixel);
+                owner.Scores.WallsDestroyed++;
+            }
+
             TryHitTankAt(offsetPixel.ToFloatPosition(), owner);
         }
     }

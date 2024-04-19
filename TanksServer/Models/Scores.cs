@@ -17,4 +17,6 @@ internal sealed record class Scores(int Kills = 0, int Deaths = 0)
             return Kills / (double)Deaths;
         }
     }
+
+    public int WallsDestroyed { get; set; }
 }
