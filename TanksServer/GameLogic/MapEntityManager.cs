@@ -2,12 +2,14 @@ namespace TanksServer.GameLogic;
 
 internal sealed class MapEntityManager(
     ILogger<MapEntityManager> logger,
-    MapService map
+    MapService map,
+    IOptions<GameRules> options
 )
 {
     private readonly HashSet<Bullet> _bullets = [];
     private readonly HashSet<Tank> _tanks = [];
     private readonly HashSet<PowerUp> _powerUps = [];
+    private readonly TimeSpan _bulletTimeout = TimeSpan.FromMilliseconds(options.Value.BulletTimeoutMs);
 
     public IEnumerable<Bullet> Bullets => _bullets;
     public IEnumerable<Tank> Tanks => _tanks;
@@ -19,7 +21,7 @@ internal sealed class MapEntityManager(
         .Concat(PowerUps);
 
     public void SpawnBullet(Player tankOwner, FloatPosition position, double rotation, bool isExplosive)
-        => _bullets.Add(new Bullet(tankOwner, position, rotation, isExplosive));
+        => _bullets.Add(new Bullet(tankOwner, position, rotation, isExplosive, DateTime.Now + _bulletTimeout));
 
     public void RemoveBulletsWhere(Predicate<Bullet> predicate) => _bullets.RemoveWhere(predicate);
 

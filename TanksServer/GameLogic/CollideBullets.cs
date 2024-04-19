@@ -13,7 +13,18 @@ internal sealed class CollideBullets(
     {
         entityManager.RemoveBulletsWhere(BulletHitsTank);
         entityManager.RemoveBulletsWhere(TryHitAndDestroyWall);
+        entityManager.RemoveBulletsWhere(TimeoutBullet);
         return Task.CompletedTask;
+    }
+
+    private bool TimeoutBullet(Bullet bullet)
+    {
+        if (bullet.Timeout > DateTime.Now)
+            return false;
+
+        var radius = bullet.IsExplosive ? ExplosionRadius : 0;
+        ExplodeAt(bullet.Position.ToPixelPosition(), radius, bullet.Owner);
+        return true;
     }
 
     private bool TryHitAndDestroyWall(Bullet bullet)
