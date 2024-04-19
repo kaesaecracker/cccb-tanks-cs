@@ -3,6 +3,16 @@ import {Player} from './serverCalls';
 import {Guid} from "./Guid.ts";
 import Column from "./components/Column.tsx";
 
+function ScoreRow({name, value}: {
+    name: string;
+    value?: any;
+}) {
+    return <tr>
+        <td>{name}</td>
+        <td>{value ?? '?'}</td>
+    </tr>;
+}
+
 export default function PlayerInfo({playerId}: { playerId: Guid }) {
     const query = useQuery({
         queryKey: ['player'],
@@ -26,14 +36,9 @@ export default function PlayerInfo({playerId}: { playerId: Guid }) {
         {query.isError && <p>{query.error.message}</p>}
         {query.isSuccess && <table>
             <tbody>
-            <tr>
-                <td>kills:</td>
-                <td>{query.data?.scores?.kills ?? '?'}</td>
-            </tr>
-            <tr>
-                <td>deaths:</td>
-                <td>{query.data?.scores?.deaths ?? '?'}</td>
-            </tr>
+            <ScoreRow name='kills' value={query.data?.scores?.kills}/>
+            <ScoreRow name='deaths' value={query.data?.scores?.deaths}/>
+            <ScoreRow name='walls' value={query.data?.scores?.wallsDestroyed}/>
             </tbody>
         </table>}
     </Column>;
