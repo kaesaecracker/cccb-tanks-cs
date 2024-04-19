@@ -9,4 +9,16 @@ internal sealed class GameRules
     public int MaxPowerUpCount { get; set; } = int.MaxValue;
 
     public int BulletTimeoutMs { get; set; } = int.MaxValue;
+
+    public double MoveSpeed { get; set; }
+
+    public double TurnSpeed { get; set; }
+
+    public double ShootDelayMs { get; set; }
+
+    public double BulletSpeed { get; set; }
+
+    public int SpawnDelayMs { get; set; }
+
+    public int IdleTimeoutMs { get; set; }
 }

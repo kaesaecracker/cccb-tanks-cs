@@ -2,7 +2,7 @@ namespace TanksServer.GameLogic;
 
 internal sealed class MoveBullets(
     MapEntityManager entityManager,
-    IOptions<TanksConfiguration> config
+    IOptions<GameRules> config
 ) : ITickStep
 {
     public Task TickAsync(TimeSpan delta)

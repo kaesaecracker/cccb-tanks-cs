@@ -86,10 +86,6 @@ public static class Program
         builder.Services.AddSingleton<IFrameConsumer, ClientScreenServer>(sp =>
             sp.GetRequiredService<ClientScreenServer>());
 
-        builder.Services.Configure<TanksConfiguration>(
-            builder.Configuration.GetSection("Tanks"));
-        builder.Services.Configure<PlayersConfiguration>(
-            builder.Configuration.GetSection("Players"));
         builder.Services.Configure<GameRules>(builder.Configuration.GetSection("GameRules"));
 
         if (hostConfiguration.EnableServicePointDisplay)

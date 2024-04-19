@@ -3,11 +3,11 @@ using System.Diagnostics;
 namespace TanksServer.GameLogic;
 
 internal sealed class ShootFromTanks(
-    IOptions<TanksConfiguration> options,
+    IOptions<GameRules> options,
     MapEntityManager entityManager
 ) : ITickStep
 {
-    private readonly TanksConfiguration _config = options.Value;
+    private readonly GameRules _config = options.Value;
 
     public Task TickAsync(TimeSpan _)
     {

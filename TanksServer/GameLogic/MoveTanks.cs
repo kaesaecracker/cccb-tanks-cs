@@ -2,11 +2,11 @@ namespace TanksServer.GameLogic;
 
 internal sealed class MoveTanks(
     MapEntityManager entityManager,
-    IOptions<TanksConfiguration> options,
+    IOptions<GameRules> options,
     MapService map
 ) : ITickStep
 {
-    private readonly TanksConfiguration _config = options.Value;
+    private readonly GameRules _config = options.Value;
 
     public Task TickAsync(TimeSpan delta)
     {

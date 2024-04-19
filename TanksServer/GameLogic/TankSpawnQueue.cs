@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace TanksServer.GameLogic;
 
 internal sealed class TankSpawnQueue(
-    IOptions<PlayersConfiguration> options,
+    IOptions<GameRules> options,
     MapEntityManager entityManager
 ): ITickStep
 {
