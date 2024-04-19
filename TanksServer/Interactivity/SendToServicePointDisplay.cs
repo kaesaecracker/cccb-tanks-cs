@@ -10,9 +10,10 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
 {
     private const int ScoresWidth = 12;
     private const int ScoresHeight = 20;
-    private const int ScoresPlayerRows = ScoresHeight - 5;
+    private const int ScoresPlayerRows = ScoresHeight - 6;
 
     private readonly IDisplayConnection _displayConnection;
+    private readonly MapService _mapService;
     private readonly ILogger<SendToServicePointDisplay> _logger;
     private readonly PlayerServer _players;
     private readonly Cp437Grid _scoresBuffer;
@@ -25,12 +26,14 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
         PlayerServer players,
         ILogger<SendToServicePointDisplay> logger,
         IDisplayConnection displayConnection,
-        IOptions<HostConfiguration> hostOptions
+        IOptions<HostConfiguration> hostOptions,
+        MapService mapService
     )
     {
         _players = players;
         _logger = logger;
         _displayConnection = displayConnection;
+        _mapService = mapService;
         _minFrameTime = TimeSpan.FromMilliseconds(hostOptions.Value.ServicePointDisplayMinFrameTimeMs);
 
         var localIp = _displayConnection.GetLocalIPv4().Split('.');
@@ -87,7 +90,9 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
             row++;
         }
 
-        for (; row < 17; row++)
+        for (; row < 16; row++)
             _scoresBuffer[row] = string.Empty;
+
+        _scoresBuffer[16] = _mapService.Current.Name[..(Math.Min(ScoresWidth, _mapService.Current.Name.Length) - 1)];
     }
 }
