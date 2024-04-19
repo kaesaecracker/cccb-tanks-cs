@@ -77,7 +77,7 @@ internal sealed class MapService
     {
         if (!_maps.TryGetValue(name, out var mapData))
             return false;
-        Current = new Map(name, mapData);
+        Current = new Map(name, (bool[,]) mapData.Clone());
         return true;
     }
 }
