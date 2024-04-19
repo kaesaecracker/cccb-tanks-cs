@@ -11,9 +11,10 @@ import Scoreboard from "./Scoreboard.tsx";
 import Button from "./components/Button.tsx";
 import './App.css';
 import {getRandomTheme, useStoredTheme} from "./theme.ts";
+import {EmptyGuid} from "./Guid.ts";
 
 const getNewNameId = () => ({
-    id: crypto.randomUUID(),
+    id: EmptyGuid,
     name: ''
 });
 

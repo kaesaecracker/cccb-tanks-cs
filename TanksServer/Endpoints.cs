@@ -24,7 +24,10 @@ internal static class Endpoints
             if (name.Length > 12)
                 return Results.BadRequest("name too long");
 
-            var player = playerService.GetOrAdd(name, id ?? Guid.NewGuid());
+            if (!id.HasValue || id.Value == Guid.Empty)
+                id = Guid.NewGuid();
+
+            var player = playerService.GetOrAdd(name, id.Value);
             return player != null
                 ? Results.Ok(new NameId(player.Name, player.Id))
                 : Results.Unauthorized();
