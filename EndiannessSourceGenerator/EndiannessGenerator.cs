@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace EndiannessSourceGenerator;
 
@@ -33,23 +34,12 @@ public class StructEndiannessSourceGenerator : ISourceGenerator
           }
           """;
 
-    private const string UsingDeclarations =
-        """
-        using System;
-        using System.Buffers.Binary;
-        """;
-
     public void Initialize(GeneratorInitializationContext context)
     {
         // Register the attribute source
-        context.RegisterForPostInitialization(i => { i.AddSource($"{AttributeName}.g.cs", AttributeSourceCode); });
-        // context.RegisterForSyntaxNotifications(() => new SyntaxCon);
+        context.RegisterForPostInitialization(i => i.AddSource($"{AttributeName}.g.cs", AttributeSourceCode));
     }
 
-    private readonly SymbolDisplayFormat _namespacedNameFormat =
-        new(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
-
-    // TODO: generate syntax tree with roslyn to get rid of string wrangling and so code is properly formatted
     public void Execute(GeneratorExecutionContext context)
     {
         var treesWithStructsWithAttributes = context.Compilation.SyntaxTrees
@@ -73,25 +63,25 @@ public class StructEndiannessSourceGenerator : ISourceGenerator
             foreach (var structDeclaration in structsWithAttributes)
             {
                 var foundAttribute = GetEndiannessAttribute(structDeclaration, semanticModel);
-                // not my type
                 if (foundAttribute == null)
-                    continue;
+                    continue; // not my type
 
-                HandleStruct(context, structDeclaration, semanticModel, foundAttribute);
+                var structIsLittleEndian = GetStructIsLittleEndian(foundAttribute);
+                HandleStruct(context, structDeclaration, semanticModel, structIsLittleEndian);
             }
         }
     }
 
-    private static void HandleStruct(GeneratorExecutionContext context, StructDeclarationSyntax structDeclaration,
-        SemanticModel semanticModel, AttributeSyntax foundAttribute)
+    private static void HandleStruct(GeneratorExecutionContext context, TypeDeclarationSyntax structDeclaration,
+        SemanticModel semanticModel, bool structIsLittleEndian)
     {
         var isPartial = structDeclaration.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword));
         if (!isPartial)
             throw new InvalidUsageException("struct is not marked partial");
 
         var accessibilityModifier = structDeclaration.Modifiers.Any(m => m.IsKind(SyntaxKind.InternalKeyword))
-            ? "internal"
-            : "public";
+            ? Token(SyntaxKind.InternalKeyword)
+            : Token(SyntaxKind.PublicKeyword);
 
         var structType = semanticModel.GetDeclaredSymbol(structDeclaration);
         if (structType == null)
@@ -101,32 +91,36 @@ public class StructEndiannessSourceGenerator : ISourceGenerator
         if (structNamespace == null)
             throw new InvalidUsageException("struct has to be contained in a namespace");
 
-        var structIsLittleEndian = GetStructIsLittleEndian(foundAttribute);
-
-        var generatedCode = new StringBuilder();
-        generatedCode.AppendLine(UsingDeclarations);
-
-        generatedCode.AppendLine($"namespace {structNamespace};");
-        generatedCode.AppendLine($$"""{{accessibilityModifier}} partial struct {{structType.Name}} {""");
-
-        var hasProperties = structDeclaration.Members
-            .Any(m => m.IsKind(SyntaxKind.PropertyDeclaration));
-        if (hasProperties)
+        if (structDeclaration.Members.Any(m => m.IsKind(SyntaxKind.PropertyDeclaration)))
             throw new InvalidUsageException("struct cannot have properties");
 
         var fieldDeclarations = structDeclaration.Members
             .Where(m => m.IsKind(SyntaxKind.FieldDeclaration)).OfType<FieldDeclarationSyntax>();
-        GenerateStructProperties(generatedCode, fieldDeclarations, semanticModel, structIsLittleEndian);
 
-        generatedCode.AppendLine("}"); // end of struct
+        var generatedCode = CompilationUnit()
+            .WithUsings(List<UsingDirectiveSyntax>([
+                UsingDirective(IdentifierName("System")),
+                UsingDirective(IdentifierName("System.Buffers.Binary"))
+            ]))
+            .WithMembers(List<MemberDeclarationSyntax>([
+                FileScopedNamespaceDeclaration(IdentifierName(structNamespace)),
+                StructDeclaration(structType.Name)
+                    .WithModifiers(TokenList([accessibilityModifier, Token(SyntaxKind.PartialKeyword)]))
+                    .WithMembers(GenerateStructProperties(fieldDeclarations, semanticModel, structIsLittleEndian))
+            ]))
+            .NormalizeWhitespace()
+            .ToFullString();
 
-        context.AddSource($"{structNamespace}.{structType.Name}.g.cs",
-            SourceText.From(generatedCode.ToString(), Encoding.UTF8));
+        context.AddSource(
+            $"{structNamespace}.{structType.Name}.g.cs",
+            SourceText.From(generatedCode, Encoding.UTF8)
+        );
     }
 
-    private static void GenerateStructProperties(StringBuilder generatedCode,
+    private static SyntaxList<MemberDeclarationSyntax> GenerateStructProperties(
         IEnumerable<FieldDeclarationSyntax> fieldDeclarations, SemanticModel semanticModel, bool structIsLittleEndian)
     {
+        var result = new List<MemberDeclarationSyntax>();
         foreach (var field in fieldDeclarations)
         {
             if (!field.Modifiers.Any(m => m.IsKind(SyntaxKind.PrivateKeyword)))
@@ -144,32 +138,69 @@ public class StructEndiannessSourceGenerator : ISourceGenerator
 
             var typeName = variableTypeInfo.ToDisplayString();
             var fieldName = variableDeclaration.Variables.First().Identifier.ToString();
-            var propertyName = GeneratePropertyName(fieldName);
 
-            GenerateProperty(generatedCode, typeName, propertyName, structIsLittleEndian, fieldName);
+            result.Add(GenerateProperty(typeName, structIsLittleEndian, fieldName));
         }
+
+        return new SyntaxList<MemberDeclarationSyntax>(result);
     }
 
-    private static void GenerateProperty(StringBuilder generatedCode, string typeName, string propertyName,
+    private static PropertyDeclarationSyntax GenerateProperty(string typeName,
         bool structIsLittleEndian, string fieldName)
     {
-        generatedCode.AppendLine($$"""public {{typeName}} {{propertyName}} {""");
+        var propertyName = GeneratePropertyName(fieldName);
+        var fieldIdentifier = IdentifierName(fieldName);
 
-        var maybeNegator = structIsLittleEndian ? string.Empty : "!";
-        var sameEndiannessExpression = $"{maybeNegator}BitConverter.IsLittleEndian";
+        ExpressionSyntax condition = MemberAccessExpression(
+            kind: SyntaxKind.SimpleMemberAccessExpression,
+            expression: IdentifierName("BitConverter"),
+            name: IdentifierName("IsLittleEndian")
+        );
 
-        generatedCode.AppendLine($"get => {sameEndiannessExpression}");
-        generatedCode.AppendLine($"    ? {fieldName}");
-        generatedCode.AppendLine($"    : BinaryPrimitives.ReverseEndianness({fieldName});");
+        if (!structIsLittleEndian)
+            condition = PrefixUnaryExpression(SyntaxKind.LogicalNotExpression, condition);
 
-        generatedCode.AppendLine($"set => {fieldName} = {sameEndiannessExpression}");
-        generatedCode.AppendLine("    ? value");
-        generatedCode.AppendLine("    : BinaryPrimitives.ReverseEndianness(value);");
+        var reverseEndiannessMethod = MemberAccessExpression(
+            kind: SyntaxKind.SimpleMemberAccessExpression,
+            expression: IdentifierName("BinaryPrimitives"),
+            name: IdentifierName("ReverseEndianness")
+        );
 
-        generatedCode.AppendLine("}"); // end of property
+        return PropertyDeclaration(ParseTypeName(typeName), propertyName)
+            .WithModifiers(TokenList([Token(SyntaxKind.PublicKeyword)]))
+            .WithAccessorList(AccessorList(List<AccessorDeclarationSyntax>([
+                AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                    .WithExpressionBody(ArrowExpressionClause(ConditionalExpression(
+                        condition: condition,
+                        whenTrue: fieldIdentifier,
+                        whenFalse: InvocationExpression(
+                            expression: reverseEndiannessMethod,
+                            argumentList: ArgumentList(SingletonSeparatedList(
+                                Argument(fieldIdentifier)
+                            ))
+                        )
+                    )))
+                    .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)),
+                AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                    .WithExpressionBody(ArrowExpressionClause(AssignmentExpression(
+                        kind: SyntaxKind.SimpleAssignmentExpression,
+                        left: fieldIdentifier,
+                        right: ConditionalExpression(
+                            condition: condition,
+                            whenTrue: fieldIdentifier,
+                            whenFalse: InvocationExpression(
+                                expression: reverseEndiannessMethod,
+                                argumentList: ArgumentList(SingletonSeparatedList(
+                                    Argument(IdentifierName("value"))
+                                ))
+                            )
+                        )
+                    )))
+                    .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
+            ])));
     }
 
-    private static string GeneratePropertyName(string fieldName)
+    private static SyntaxToken GeneratePropertyName(string fieldName)
     {
         var propertyName = fieldName;
         if (propertyName.StartsWith("_"))
@@ -178,11 +209,10 @@ public class StructEndiannessSourceGenerator : ISourceGenerator
             throw new InvalidUsageException("field names have to start with a lower case letter");
         propertyName = propertyName.Substring(0, 1).ToUpperInvariant()
                        + propertyName.Substring(1);
-        return propertyName;
+        return Identifier(propertyName);
     }
 
-    private static AttributeSyntax? GetEndiannessAttribute(StructDeclarationSyntax structDeclaration,
-        SemanticModel semanticModel)
+    private static AttributeSyntax? GetEndiannessAttribute(SyntaxNode structDeclaration, SemanticModel semanticModel)
     {
         AttributeSyntax? foundAttribute = null;
         foreach (var attributeSyntax in structDeclaration.DescendantNodes().OfType<AttributeSyntax>())
