@@ -1,17 +1,19 @@
 using System.Runtime.InteropServices;
+using EndiannessSourceGenerator;
 
 namespace DisplayCommands.Internals;
 
+[StructEndianness(IsLittleEndian = false)]
 [StructLayout(LayoutKind.Sequential, Pack = 16, Size = 10)]
-internal struct HeaderBitmap
+internal partial struct HeaderBitmap
 {
-    public DisplayCommand Command;
+    private ushort _command;
 
-    public ushort Offset;
+    private ushort _offset;
 
-    public ushort Length;
+    private ushort _length;
 
-    public DisplaySubCommand SubCommand;
+    private ushort _subCommand;
 
-    public ushort Reserved;
+    private ushort _reserved;
 }

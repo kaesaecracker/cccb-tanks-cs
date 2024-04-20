@@ -1,29 +1,19 @@
-using System.Buffers.Binary;
 using System.Runtime.InteropServices;
+using EndiannessSourceGenerator;
 
 namespace DisplayCommands.Internals;
 
+[StructEndianness(IsLittleEndian = false)]
 [StructLayout(LayoutKind.Sequential, Pack = 16, Size = 10)]
-internal struct HeaderWindow
+internal partial struct HeaderWindow
 {
-    public DisplayCommand Command;
+    private ushort _command;
 
-    public ushort PosX;
+    private ushort _posX;
 
-    public ushort PosY;
+    private ushort _posY;
 
-    public ushort Width;
+    private ushort _width;
 
-    public ushort Height;
-
-    public void ChangeToNetworkOrder()
-    {
-        if (!BitConverter.IsLittleEndian)
-            return;
-        Command = (DisplayCommand)BinaryPrimitives.ReverseEndianness((ushort)Command);
-        PosX = BinaryPrimitives.ReverseEndianness(PosX);
-        PosY = BinaryPrimitives.ReverseEndianness(PosY);
-        Width = BinaryPrimitives.ReverseEndianness(Width);
-        Height = BinaryPrimitives.ReverseEndianness(Height);
-    }
+    private ushort _height;
 }

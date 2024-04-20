@@ -14,7 +14,7 @@ internal sealed class DisplayConnection(IOptions<DisplayConfiguration> options) 
 
     public ValueTask SendClearAsync()
     {
-        var header = new HeaderWindow { Command = DisplayCommand.Clear };
+        var header = new HeaderWindow { Command = (ushort)DisplayCommand.Clear };
 
         return SendAsync(header, Memory<byte>.Empty);
     }
@@ -23,7 +23,7 @@ internal sealed class DisplayConnection(IOptions<DisplayConfiguration> options) 
     {
         var header = new HeaderWindow
         {
-            Command = DisplayCommand.Cp437Data,
+            Command = (ushort)DisplayCommand.Cp437Data,
             Height = grid.Height,
             Width = grid.Width,
             PosX = x,
@@ -37,7 +37,7 @@ internal sealed class DisplayConnection(IOptions<DisplayConfiguration> options) 
     {
         var header = new HeaderWindow
         {
-            Command = DisplayCommand.CharBrightness,
+            Command = (ushort)DisplayCommand.CharBrightness,
             PosX = x,
             PosY = y,
             Height = luma.Height,
@@ -49,7 +49,7 @@ internal sealed class DisplayConnection(IOptions<DisplayConfiguration> options) 
 
     public async ValueTask SendBrightnessAsync(byte brightness)
     {
-        var header = new HeaderWindow { Command = DisplayCommand.Brightness };
+        var header = new HeaderWindow { Command = (ushort)DisplayCommand.Brightness };
 
         var payloadBuffer = _arrayPool.Rent(1);
         var payload = payloadBuffer.AsMemory(0, 1);
@@ -61,13 +61,13 @@ internal sealed class DisplayConnection(IOptions<DisplayConfiguration> options) 
 
     public ValueTask SendHardResetAsync()
     {
-        var header = new HeaderWindow { Command = DisplayCommand.HardReset };
+        var header = new HeaderWindow { Command = (ushort)DisplayCommand.HardReset };
         return SendAsync(header, Memory<byte>.Empty);
     }
 
     public async ValueTask SendFadeOutAsync(byte loops)
     {
-        var header = new HeaderWindow { Command = DisplayCommand.FadeOut };
+        var header = new HeaderWindow { Command = (ushort)DisplayCommand.FadeOut };
 
         var payloadBuffer = _arrayPool.Rent(1);
         var payload = payloadBuffer.AsMemory(0, 1);
@@ -81,8 +81,9 @@ internal sealed class DisplayConnection(IOptions<DisplayConfiguration> options) 
     {
         var header = new HeaderWindow
         {
-            Command = DisplayCommand.BitmapLinearWin,
-            PosX = x, PosY = y,
+            Command = (ushort)DisplayCommand.BitmapLinearWin,
+            PosX = x,
+            PosY = y,
             Width = (ushort)(pixels.Width / 8),
             Height = pixels.Height
         };
@@ -113,7 +114,6 @@ internal sealed class DisplayConnection(IOptions<DisplayConfiguration> options) 
         var buffer = _arrayPool.Rent(messageSize);
         var message = buffer.AsMemory(0, messageSize);
 
-        header.ChangeToNetworkOrder();
         MemoryMarshal.Write(message.Span, header);
         payload.CopyTo(message[headerSize..]);
 

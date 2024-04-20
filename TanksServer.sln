@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TanksServer", "TanksServer\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisplayCommands", "DisplayCommands\DisplayCommands.csproj", "{B4B43561-7A2C-486B-99F7-E58A67BC370A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EndiannessSourceGenerator", "EndiannessSourceGenerator\EndiannessSourceGenerator.csproj", "{D77FE880-F2B8-43B6-8B33-B6FA089CC337}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{B4B43561-7A2C-486B-99F7-E58A67BC370A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B4B43561-7A2C-486B-99F7-E58A67BC370A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4B43561-7A2C-486B-99F7-E58A67BC370A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D77FE880-F2B8-43B6-8B33-B6FA089CC337}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D77FE880-F2B8-43B6-8B33-B6FA089CC337}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D77FE880-F2B8-43B6-8B33-B6FA089CC337}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D77FE880-F2B8-43B6-8B33-B6FA089CC337}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
