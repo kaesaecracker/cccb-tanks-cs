@@ -47,7 +47,7 @@ internal static class Endpoints
                 return Results.BadRequest();
 
             using var ws = await context.WebSockets.AcceptWebSocketAsync();
-            await clientScreenServer.HandleClient(ws, player);
+            await clientScreenServer.HandleClientAsync(ws, player);
             return Results.Empty;
         });
 
@@ -60,7 +60,7 @@ internal static class Endpoints
                 return Results.NotFound();
 
             using var ws = await context.WebSockets.AcceptWebSocketAsync();
-            await controlsServer.HandleClient(ws, player);
+            await controlsServer.HandleClientAsync(ws, player);
             return Results.Empty;
         });
 

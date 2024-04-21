@@ -3,7 +3,10 @@ using TanksServer.GameLogic;
 
 namespace TanksServer.Interactivity;
 
-internal sealed class PlayerServer(ILogger<PlayerServer> logger, TankSpawnQueue tankSpawnQueue)
+internal sealed class PlayerServer(
+    ILogger<PlayerServer> logger,
+    TankSpawnQueue tankSpawnQueue
+)
 {
     private readonly ConcurrentDictionary<string, Player> _players = new();
 

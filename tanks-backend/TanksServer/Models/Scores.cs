@@ -1,10 +1,10 @@
 namespace TanksServer.Models;
 
-internal sealed record class Scores(int Kills = 0, int Deaths = 0)
+internal sealed record class Scores
 {
-    public int Kills { get; set; } = Kills;
+    public int Kills { get; set; }
 
-    public int Deaths { get; set; } = Deaths;
+    public int Deaths { get; set; }
 
     public double Ratio
     {
@@ -14,7 +14,7 @@ internal sealed record class Scores(int Kills = 0, int Deaths = 0)
                 return 0;
             if (Deaths == 0)
                 return Kills;
-            return Kills / (double)Deaths;
+            return Math.Round(Kills / (double)Deaths, 3);
         }
     }
 

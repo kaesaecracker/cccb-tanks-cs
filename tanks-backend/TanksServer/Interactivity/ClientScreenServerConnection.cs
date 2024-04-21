@@ -5,11 +5,10 @@ using TanksServer.Graphics;
 
 namespace TanksServer.Interactivity;
 
-internal sealed class ClientScreenServerConnection : IDisposable
+internal sealed class ClientScreenServerConnection : IWebsocketServerConnection, IDisposable
 {
     private readonly ByteChannelWebSocket _channel;
     private readonly ILogger<ClientScreenServerConnection> _logger;
-    private readonly ClientScreenServer _server;
     private readonly SemaphoreSlim _wantedFrames = new(1);
     private readonly Guid? _playerGuid;
     private readonly PlayerScreenData? _playerScreenData;
@@ -20,12 +19,10 @@ internal sealed class ClientScreenServerConnection : IDisposable
     public ClientScreenServerConnection(
         WebSocket webSocket,
         ILogger<ClientScreenServerConnection> logger,
-        ClientScreenServer server,
         TimeSpan minFrameTime,
         Guid? playerGuid = null
     )
     {
-        _server = server;
         _logger = logger;
         _minFrameTime = minFrameTime;
 
@@ -91,9 +88,7 @@ internal sealed class ClientScreenServerConnection : IDisposable
     {
         await foreach (var _ in _channel.ReadAllAsync())
             _wantedFrames.Release();
-
         _logger.LogTrace("done receiving");
-        _server.Remove(this);
     }
 
     public Task CloseAsync()
