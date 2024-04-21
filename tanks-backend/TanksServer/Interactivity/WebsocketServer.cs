@@ -2,10 +2,10 @@ using Microsoft.Extensions.Hosting;
 
 namespace TanksServer.Interactivity;
 
-internal class WebsocketServer<T>(
+internal abstract class WebsocketServer<T>(
     ILogger logger
 ) : IHostedLifecycleService, IDisposable
-    where T : IWebsocketServerConnection
+    where T : WebsocketServerConnection
 {
     private readonly SemaphoreSlim _mutex = new(1, 1);
     private bool _closing;
@@ -56,7 +56,7 @@ internal class WebsocketServer<T>(
     protected async Task HandleClientAsync(T connection)
     {
         await AddConnection(connection);
-        await connection.Done;
+        await connection.ReceiveAsync();
         await RemoveConnection(connection);
     }
 

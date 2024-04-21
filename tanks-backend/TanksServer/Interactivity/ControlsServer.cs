@@ -13,7 +13,7 @@ internal sealed class ControlsServer(
         var clientLogger = loggerFactory.CreateLogger<ControlsServerConnection>();
         var sock = new ControlsServerConnection(ws, clientLogger, player);
         await AddConnection(sock);
-        await sock.Done;
+        await sock.ReceiveAsync();
         await RemoveConnection(sock);
     }
 }

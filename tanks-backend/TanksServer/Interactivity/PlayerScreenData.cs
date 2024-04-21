@@ -7,7 +7,7 @@ namespace TanksServer.Interactivity;
 internal sealed class PlayerScreenData(ILogger logger)
 {
     private readonly Memory<byte> _data = new byte[MapService.PixelsPerRow * MapService.PixelsPerColumn / 2];
-    private int _count = 0;
+    private int _count;
 
     public void Clear()
     {
