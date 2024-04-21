@@ -41,7 +41,7 @@ internal sealed class CollideBullets(
 
     private bool BulletHitsTank(Bullet bullet)
     {
-        if (!TryHitTankAt(bullet.Position, bullet.Owner))
+        if (!TryHitTankAt(bullet.Position, bullet.Owner, DateTime.Now > bullet.OwnerCollisionAfter))
             return false;
 
         if (bullet.IsExplosive)
@@ -49,16 +49,20 @@ internal sealed class CollideBullets(
         return true;
     }
 
-    private bool TryHitTankAt(FloatPosition position, Player owner)
+    private bool TryHitTankAt(FloatPosition position, Player owner, bool canHitOwnTank)
     {
         foreach (var tank in entityManager.Tanks)
         {
+            var hitsOwnTank = owner == tank.Owner;
+            if (hitsOwnTank && !canHitOwnTank)
+                continue;
+
             var (topLeft, bottomRight) = tank.Bounds;
             if (position.X < topLeft.X || position.X > bottomRight.X ||
                 position.Y < topLeft.Y || position.Y > bottomRight.Y)
                 continue;
 
-            if (owner != tank.Owner)
+            if (!hitsOwnTank)
                 owner.Scores.Kills++;
             tank.Owner.Scores.Deaths++;
 
@@ -79,7 +83,7 @@ internal sealed class CollideBullets(
             if (options.Value.DestructibleWalls && map.Current.TryDestroyWallAt(offsetPixel))
                 owner.Scores.WallsDestroyed++;
 
-            TryHitTankAt(offsetPixel.ToFloatPosition(), owner);
+            TryHitTankAt(offsetPixel.ToFloatPosition(), owner, true);
         }
     }
 }

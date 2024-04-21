@@ -26,33 +26,10 @@ internal sealed class ShootFromTanks(
 
         tank.NextShotAfter = DateTime.Now.AddMilliseconds(_config.ShootDelayMs);
 
-        var rotation = tank.Orientation / 16d;
-        var angle = rotation * 2d * Math.PI;
-
-        /* When standing next to a wall, the bullet sometimes misses the first pixel.
-         Spawning the bullet to close to the tank instead means the tank instantly hits itself.
-         Because the tank has a float position, but hit boxes are based on pixels, this problem has been deemed complex
-         enough to do later. These values mostly work. */
-        var distance = (tank.Orientation % 4) switch
-        {
-            0 => 4.4d,
-            1 or 3 => 5.4d,
-            2 => 6d,
-            _ => throw new UnreachableException("this should not be possible")
-        };
-
-        var position = new FloatPosition(
-            tank.Position.X + Math.Sin(angle) * distance,
-            tank.Position.Y - Math.Cos(angle) * distance
-        );
-
-        var explosive = false;
-        if (tank.ExplosiveBullets > 0)
-        {
+        var explosive = tank.ExplosiveBullets > 0;
+        if (explosive)
             tank.ExplosiveBullets--;
-            explosive = true;
-        }
 
-        entityManager.SpawnBullet(tank.Owner, position, rotation, explosive);
+        entityManager.SpawnBullet(tank.Owner, tank.Position, tank.Orientation / 16d, explosive);
     }
 }

@@ -21,7 +21,15 @@ internal sealed class MapEntityManager(
         .Concat(PowerUps);
 
     public void SpawnBullet(Player tankOwner, FloatPosition position, double rotation, bool isExplosive)
-        => _bullets.Add(new Bullet(tankOwner, position, rotation, isExplosive, DateTime.Now + _bulletTimeout));
+        => _bullets.Add(new Bullet
+        {
+            Owner = tankOwner,
+            Position = position,
+            Rotation = rotation,
+            IsExplosive = isExplosive,
+            Timeout = DateTime.Now + _bulletTimeout,
+            OwnerCollisionAfter = DateTime.Now + TimeSpan.FromSeconds(1),
+        });
 
     public void RemoveBulletsWhere(Predicate<Bullet> predicate) => _bullets.RemoveWhere(predicate);
 

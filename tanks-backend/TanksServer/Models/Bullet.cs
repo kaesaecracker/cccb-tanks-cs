@@ -1,16 +1,18 @@
 namespace TanksServer.Models;
 
-internal sealed class Bullet(Player tankOwner, FloatPosition position, double rotation, bool isExplosive, DateTime timeout) : IMapEntity
+internal sealed class Bullet : IMapEntity
 {
-    public Player Owner { get; } = tankOwner;
+    public required Player Owner { get; init; }
 
-    public double Rotation { get; } = rotation;
+    public required double Rotation { get; init; }
 
-    public FloatPosition Position { get; set; } = position;
+    public required FloatPosition Position { get; set; }
 
-    public bool IsExplosive { get; } = isExplosive;
+    public required bool IsExplosive { get; init; }
 
-    public DateTime Timeout { get; } = timeout;
+    public required DateTime Timeout { get; init; }
 
-    public PixelBounds Bounds => new (Position.ToPixelPosition(), Position.ToPixelPosition());
+    public PixelBounds Bounds => new(Position.ToPixelPosition(), Position.ToPixelPosition());
+
+    internal required DateTime OwnerCollisionAfter { get; init; }
 }
