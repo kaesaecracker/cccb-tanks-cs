@@ -1,4 +1,6 @@
 .GadgetRows {
     justify-content: space-evenly;
-    margin-top: calc(4 * var(--padding-normal));
+    margin-top: var(--padding-big);
+    flex-wrap: wrap;
+    row-gap: var(--padding-big);
 }

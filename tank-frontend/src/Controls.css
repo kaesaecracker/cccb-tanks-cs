@@ -1,6 +1,6 @@
 .Controls {
     text-align: center;
-    gap: calc(4 * var(--padding-normal));
+    gap: var(--padding-big);
 }
 
 .Controls-Container {

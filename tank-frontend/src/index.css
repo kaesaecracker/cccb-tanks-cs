@@ -10,6 +10,7 @@
     box-sizing: border-box;
     font-family: CCCBFont, monospace;
     text-transform: uppercase;
+    appearance: none;
 }
 
 :root {
@@ -22,6 +23,7 @@
     --border-size-thick: 8px;
 
     --padding-normal: 8px;
+    --padding-big: calc(4 * var(--padding-normal));
 }
 
 html, body {

@@ -33,6 +33,9 @@ export default function App() {
     }, [nameId, isLoggedIn])();
 
     return <Column className='flex-grow'>
+
+        <ClientScreen logout={logout} theme={theme} playerId={nameId.id}/>
+
         <Row>
             <h1 className='flex-grow'>CCCB-Tanks!</h1>
             <Button text='change colors' onClick={() => setTheme(_ => getRandomTheme())}/>
@@ -42,12 +45,14 @@ export default function App() {
             {nameId.name !== '' &&
                 <Button onClick={() => setNameId(getNewNameId)} text='logout'/>}
         </Row>
-        <ClientScreen logout={logout} theme={theme} playerId={nameId.id}/>
+
         {nameId.name === '' && <JoinForm setNameId={setNameId} clientId={nameId.id}/>}
+
         <Row className='GadgetRows'>
             {isLoggedIn && <Controls playerId={nameId.id}/>}
             {isLoggedIn && <PlayerInfo playerId={nameId.id}/>}
             <Scoreboard/>
         </Row>
+
     </Column>;
 }
