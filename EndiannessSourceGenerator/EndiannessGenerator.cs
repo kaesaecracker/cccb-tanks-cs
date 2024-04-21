@@ -166,6 +166,8 @@ public class StructEndiannessSourceGenerator : ISourceGenerator
             name: IdentifierName("ReverseEndianness")
         );
 
+        var valueIdentifier = IdentifierName("value");
+
         return PropertyDeclaration(ParseTypeName(typeName), propertyName)
             .WithModifiers(TokenList([Token(SyntaxKind.PublicKeyword)]))
             .WithAccessorList(AccessorList(List<AccessorDeclarationSyntax>([
@@ -187,11 +189,11 @@ public class StructEndiannessSourceGenerator : ISourceGenerator
                         left: fieldIdentifier,
                         right: ConditionalExpression(
                             condition: condition,
-                            whenTrue: fieldIdentifier,
+                            whenTrue: valueIdentifier,
                             whenFalse: InvocationExpression(
                                 expression: reverseEndiannessMethod,
                                 argumentList: ArgumentList(SingletonSeparatedList(
-                                    Argument(IdentifierName("value"))
+                                    Argument(valueIdentifier)
                                 ))
                             )
                         )
