@@ -14,7 +14,7 @@ internal sealed record class NameId(string Name, Guid Id);
 
 public static class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var app = Configure(args);
 
@@ -24,7 +24,7 @@ public static class Program
 
         Endpoints.MapEndpoints(app);
 
-        app.Run();
+        await app.RunAsync();
     }
 
     private static WebApplication Configure(string[] args)

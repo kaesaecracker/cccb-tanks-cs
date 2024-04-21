@@ -75,5 +75,4 @@ internal static class Endpoints
             return Results.Ok();
         });
     }
-
 }

@@ -1,18 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>disable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <IsAotCompatible>true</IsAotCompatible>
-        <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
-    </PropertyGroup>
+    <Import Project="../shared.props" />
 
     <PropertyGroup>
-        <AnalysisMode>Recommended</AnalysisMode>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <NoWarn>CA1805,CA1848</NoWarn>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     </PropertyGroup>
 
     <ItemGroup>

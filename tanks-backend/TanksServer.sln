@@ -6,6 +6,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisplayCommands", "DisplayC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EndiannessSourceGenerator", "EndiannessSourceGenerator\EndiannessSourceGenerator.csproj", "{D77FE880-F2B8-43B6-8B33-B6FA089CC337}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{12DB7D48-1BB2-488B-B4D9-4126087D2F8C}"
+	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
+		shared.props = shared.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

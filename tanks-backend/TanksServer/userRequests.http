@@ -10,5 +10,8 @@ GET localhost/map
 
 ###
 
-POST localhost/map?index=0
+POST localhost/map?name=chaosknoten.png
 
+###
+
+POST localhost/map?name=tanks.txt

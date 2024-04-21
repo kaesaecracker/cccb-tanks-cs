@@ -20,7 +20,7 @@ internal sealed class TankSpawnQueue(
         _spawnTimes.AddOrUpdate(player, DateTime.MinValue, (_, _) => DateTime.Now + _spawnDelay);
     }
 
-    public bool TryDequeueNext([MaybeNullWhen(false)] out Player player)
+    private bool TryDequeueNext([MaybeNullWhen(false)] out Player player)
     {
         if (!_queue.TryDequeue(out player))
             return false; // no one on queue

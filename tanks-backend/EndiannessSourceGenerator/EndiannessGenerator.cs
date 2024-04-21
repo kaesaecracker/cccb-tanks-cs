@@ -171,35 +171,36 @@ public class StructEndiannessSourceGenerator : ISourceGenerator
         return PropertyDeclaration(ParseTypeName(typeName), propertyName)
             .WithModifiers(TokenList([Token(SyntaxKind.PublicKeyword)]))
             .WithAccessorList(AccessorList(List<AccessorDeclarationSyntax>([
-                AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
-                    .WithExpressionBody(ArrowExpressionClause(ConditionalExpression(
-                        condition: condition,
-                        whenTrue: fieldIdentifier,
-                        whenFalse: InvocationExpression(
-                            expression: reverseEndiannessMethod,
-                            argumentList: ArgumentList(SingletonSeparatedList(
-                                Argument(fieldIdentifier)
-                            ))
-                        )
-                    )))
-                    .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)),
-                AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
-                    .WithExpressionBody(ArrowExpressionClause(AssignmentExpression(
-                        kind: SyntaxKind.SimpleAssignmentExpression,
-                        left: fieldIdentifier,
-                        right: ConditionalExpression(
+                    AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                        .WithExpressionBody(ArrowExpressionClause(ConditionalExpression(
                             condition: condition,
-                            whenTrue: valueIdentifier,
+                            whenTrue: fieldIdentifier,
                             whenFalse: InvocationExpression(
                                 expression: reverseEndiannessMethod,
                                 argumentList: ArgumentList(SingletonSeparatedList(
-                                    Argument(valueIdentifier)
+                                    Argument(fieldIdentifier)
                                 ))
                             )
-                        )
-                    )))
-                    .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
-            ])));
+                        )))
+                        .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)),
+                    AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                        .WithExpressionBody(ArrowExpressionClause(AssignmentExpression(
+                            kind: SyntaxKind.SimpleAssignmentExpression,
+                            left: fieldIdentifier,
+                            right: ConditionalExpression(
+                                condition: condition,
+                                whenTrue: valueIdentifier,
+                                whenFalse: InvocationExpression(
+                                    expression: reverseEndiannessMethod,
+                                    argumentList: ArgumentList(SingletonSeparatedList(
+                                        Argument(valueIdentifier)
+                                    ))
+                                )
+                            )
+                        )))
+                        .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
+                ]))
+            );
     }
 
     private static SyntaxToken GeneratePropertyName(string fieldName)
