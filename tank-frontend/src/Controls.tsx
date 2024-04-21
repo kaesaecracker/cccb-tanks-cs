@@ -2,9 +2,10 @@ import './Controls.css';
 import useWebSocket, {ReadyState} from 'react-use-websocket';
 import {useEffect} from 'react';
 import {Guid} from "./Guid.ts";
+import {makeApiUrl} from './serverCalls.tsx';
 
 export default function Controls({playerId}: { playerId: Guid }) {
-    const url = new URL('controls', import.meta.env.VITE_TANK_WS);
+    const url = makeApiUrl('/controls', 'ws');
     url.searchParams.set('playerId', playerId);
 
     const {

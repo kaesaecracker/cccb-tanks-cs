@@ -1,0 +1,13 @@
+﻿**/.dockerignore
+**/.env
+**/.gitignore
+**/.project
+**/.settings
+**/.toolstarget
+**/.vs
+**/.vscode
+**/.idea
+**/*.*proj.user
+**/bin
+**/Dockerfile*
+**/obj

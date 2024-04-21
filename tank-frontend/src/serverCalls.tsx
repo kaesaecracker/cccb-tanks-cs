@@ -1,5 +1,9 @@
 import {Guid} from './Guid.ts';
 
+export function makeApiUrl(path: string, protocol: 'http' | 'ws' = 'http') {
+        return new URL(`${protocol}://${window.location.hostname}${path}`);
+}
+
 export type ServerResponse<T> = {
     ok: boolean;
     statusCode: number;
@@ -29,7 +33,7 @@ export async function fetchTyped<T>({url, method}: { url: URL; method: string; }
         ok: response.ok,
         statusCode: response.status,
         statusText: response.statusText
-    }
+    };
 
     if (response.ok)
         result.successResult = await response.json();
@@ -39,7 +43,7 @@ export async function fetchTyped<T>({url, method}: { url: URL; method: string; }
 }
 
 export function postPlayer({name, id}: NameId) {
-    const url = new URL('/player', import.meta.env.VITE_TANK_API);
+    const url = makeApiUrl('/player');
     url.searchParams.set('name', name);
     url.searchParams.set('id', id);
 

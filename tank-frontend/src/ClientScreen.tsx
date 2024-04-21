@@ -3,6 +3,7 @@ import {useEffect, useRef} from 'react';
 import './ClientScreen.css';
 import {hslToString, Theme} from "./theme.ts";
 import {Guid} from "./Guid.ts";
+import {makeApiUrl} from './serverCalls.tsx';
 
 const pixelsPerRow = 352;
 const pixelsPerCol = 160;
@@ -104,7 +105,7 @@ export default function ClientScreen({logout, theme, playerId}: {
 }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    const url = new URL('/screen', import.meta.env.VITE_TANK_WS);
+    const url = makeApiUrl('/screen', 'ws');
     if (playerId)
         url.searchParams.set('player', playerId);
 

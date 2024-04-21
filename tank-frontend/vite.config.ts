@@ -8,7 +8,7 @@ export default defineConfig(() => {
         plugins: [react()],
 
         build: {
-            outDir: isContainer ? undefined : '../TanksServer/client',
+            outDir: isContainer ? undefined : '../tanks-backend/TanksServer/client',
             emptyOutDir: true
         }
     };

@@ -1,4 +1,4 @@
-import {Player} from "./serverCalls.tsx";
+import {makeApiUrl, Player} from './serverCalls.tsx';
 import DataTable from "./components/DataTable.tsx";
 import {useQuery} from "@tanstack/react-query";
 
@@ -11,7 +11,7 @@ export default function Scoreboard({}: {}) {
         queryKey: ['scores'],
         refetchInterval: 1000,
         queryFn: async () => {
-            const url = new URL('/scores', import.meta.env.VITE_TANK_API);
+            const url = makeApiUrl('/scores');
             const response = await fetch(url, {method: 'GET'});
             if (!response.ok)
                 throw new Error(`response failed with code ${response.status} (${response.status})${await response.text()}`)

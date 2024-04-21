@@ -4,11 +4,6 @@
 
     <PropertyGroup>
         <PublishAot>true</PublishAot>
-
-        <IlcDisableReflection>false</IlcDisableReflection>
-        <StaticExecutable>true</StaticExecutable>
-        <StripSymbols>true</StripSymbols>
-        <StaticallyLinked>true</StaticallyLinked>
     </PropertyGroup>
 
     <ItemGroup>
@@ -18,9 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="./assets/tank.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Always"/>
-        <!-- TODO include maps in release -->
-        <None Include="./assets/maps/**" CopyToOutputDirectory="PreserveNewest"/>
+        <None Include="./assets/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Always"/>
     </ItemGroup>
 
 </Project>

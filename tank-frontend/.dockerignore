@@ -14,6 +14,7 @@
 **/azds.yaml
 **/bin
 **/charts
+**/dist
 **/docker-compose*
 **/Dockerfile*
 **/node_modules
@@ -21,6 +22,3 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
-LICENSE
-README.md
-**/node_modules

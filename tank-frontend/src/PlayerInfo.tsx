@@ -1,5 +1,5 @@
 import {useQuery} from '@tanstack/react-query'
-import {Player} from './serverCalls';
+import {makeApiUrl, Player} from './serverCalls';
 import {Guid} from "./Guid.ts";
 import Column from "./components/Column.tsx";
 
@@ -18,7 +18,7 @@ export default function PlayerInfo({playerId}: { playerId: Guid }) {
         queryKey: ['player'],
         refetchInterval: 1000,
         queryFn: async () => {
-            const url = new URL('/player', import.meta.env.VITE_TANK_API);
+            const url = makeApiUrl('/player');
             url.searchParams.set('id', playerId);
 
             const response = await fetch(url, {method: 'GET'});
