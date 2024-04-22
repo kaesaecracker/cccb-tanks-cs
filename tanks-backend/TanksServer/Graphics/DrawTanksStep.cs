@@ -4,31 +4,13 @@ using TanksServer.GameLogic;
 
 namespace TanksServer.Graphics;
 
-internal sealed class DrawTanksStep : IDrawStep
+internal sealed class DrawTanksStep(MapEntityManager entityManager) : IDrawStep
 {
-    private readonly MapEntityManager _entityManager;
-    private readonly bool[] _tankSprite;
-    private readonly int _tankSpriteWidth;
-
-    public DrawTanksStep(MapEntityManager entityManager)
-    {
-        _entityManager = entityManager;
-
-        using var tankImage = Image.Load<Rgba32>("assets/tank.png");
-        _tankSprite = new bool[tankImage.Height * tankImage.Width];
-
-        var whitePixel = new Rgba32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
-        var i = 0;
-        for (var y = 0; y < tankImage.Height; y++)
-        for (var x = 0; x < tankImage.Width; x++, i++)
-            _tankSprite[i] = tankImage[x, y] == whitePixel;
-
-        _tankSpriteWidth = tankImage.Width;
-    }
+    private readonly bool[,] _tankSprite = LoadTankSprite();
 
     public void Draw(GamePixelGrid pixels)
     {
-        foreach (var tank in _entityManager.Tanks)
+        foreach (var tank in entityManager.Tanks)
         {
             var tankPosition = tank.Bounds.TopLeft;
 
@@ -49,8 +31,21 @@ internal sealed class DrawTanksStep : IDrawStep
     {
         var x = tankRotation % 4 * (MapService.TileSize + 1);
         var y = (int)Math.Floor(tankRotation / 4d) * (MapService.TileSize + 1);
-        var index = (y + dy) * _tankSpriteWidth + x + dx;
 
-        return _tankSprite[index];
+        return _tankSprite[x + dx, y + dy];
+    }
+
+    private static bool[,] LoadTankSprite()
+    {
+        using var tankImage = Image.Load<Rgba32>("assets/tank.png");
+        var tankSprite = new bool[tankImage.Width, tankImage.Height];
+
+        var whitePixel = new Rgba32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
+
+        for (var y = 0; y < tankImage.Height; y++)
+        for (var x = 0; x < tankImage.Width; x++)
+            tankSprite[x, y] = tankImage[x, y] == whitePixel;
+
+        return tankSprite;
     }
 }
