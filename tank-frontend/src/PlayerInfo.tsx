@@ -22,14 +22,6 @@ function ScoreRow({name, value}: {
     </tr>;
 }
 
-type Controls = {
-    readonly forward: boolean;
-    readonly backward: boolean;
-    readonly turnLeft: boolean;
-    readonly turnRight: boolean;
-    readonly shoot: boolean;
-}
-
 type TankInfo = {
     readonly explosiveBullets: number;
     readonly position: { x: number; y: number };
@@ -41,23 +33,8 @@ type TankInfo = {
 type PlayerInfoMessage = {
     readonly name: string;
     readonly scores: Scores;
-    readonly controls: Controls;
+    readonly controls: string;
     readonly tank?: TankInfo;
-}
-
-function controlsString(controls: Controls) {
-    let str = '';
-    if (controls.forward)
-        str += '▲';
-    if (controls.backward)
-        str += '▼';
-    if (controls.turnLeft)
-        str += '◄';
-    if (controls.turnRight)
-        str += '►';
-    if (controls.shoot)
-        str += '•';
-    return str;
 }
 
 export default function PlayerInfo({playerId}: { playerId: Guid }) {
@@ -87,7 +64,7 @@ export default function PlayerInfo({playerId}: { playerId: Guid }) {
         </h3>
         <table>
             <tbody>
-            <ScoreRow name="controls" value={controlsString(lastJsonMessage.controls)}/>
+            <ScoreRow name="controls" value={lastJsonMessage.controls}/>
             <ScoreRow name="kills" value={lastJsonMessage.scores.kills}/>
             <ScoreRow name="deaths" value={lastJsonMessage.scores.deaths}/>
             <ScoreRow name="walls" value={lastJsonMessage.scores.wallsDestroyed}/>

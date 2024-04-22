@@ -10,6 +10,6 @@ internal sealed record class TankInfo(
 internal sealed record class PlayerInfo(
     string Name,
     Scores Scores,
-    PlayerControls Controls,
+    string Controls,
     TankInfo? Tank
 );

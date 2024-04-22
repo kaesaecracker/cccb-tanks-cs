@@ -1,4 +1,5 @@
 using System.Net.WebSockets;
+using System.Text;
 using System.Text.Json;
 using TanksServer.GameLogic;
 
@@ -51,13 +52,30 @@ internal sealed class PlayerInfoConnection(
         var tankInfo = tank != null
             ? new TankInfo(tank.Orientation, tank.ExplosiveBullets, tank.Position.ToPixelPosition(), tank.Moving)
             : null;
-        var info = new PlayerInfo(player.Name, player.Scores, player.Controls, tankInfo);
+        var info = new PlayerInfo(player.Name, player.Scores, ControlsToString(player.Controls), tankInfo);
         var response = JsonSerializer.SerializeToUtf8Bytes(info, _context.PlayerInfo);
 
         if (response.SequenceEqual(_lastMessage))
             return null;
 
         return _lastMessage = response;
+    }
+
+    private static string ControlsToString(PlayerControls controls)
+    {
+        var str = new StringBuilder("[ ");
+        if (controls.Forward)
+            str.Append("▲ ");
+        if (controls.Backward)
+            str.Append("▼ ");
+        if (controls.TurnLeft)
+            str.Append("◄ ");
+        if (controls.TurnRight)
+            str.Append("► ");
+        if (controls.Shoot)
+            str.Append("• ");
+        str.Append(']');
+        return str.ToString();
     }
 
     public void Dispose() => _wantedFrames.Dispose();
