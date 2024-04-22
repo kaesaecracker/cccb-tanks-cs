@@ -30,6 +30,7 @@ internal sealed class ShootFromTanks(
         if (explosive)
             tank.ExplosiveBullets--;
 
+        tank.Owner.Scores.ShotsFired++;
         entityManager.SpawnBullet(tank.Owner, tank.Position, tank.Orientation / 16d, explosive);
     }
 }

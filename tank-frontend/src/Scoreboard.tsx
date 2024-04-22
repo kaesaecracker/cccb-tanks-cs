@@ -47,6 +47,16 @@ export default function Scoreboard({}: {}) {
                 field: 'walls',
                 visualize: p => p.scores.wallsDestroyed.toString(),
                 sorter: (a, b) => numberSorter(a.scores.wallsDestroyed, b.scores.wallsDestroyed)
+            },
+            {
+                field: 'bullets',
+                visualize: p => p.scores.shotsFired.toString(),
+                sorter: (a, b) => numberSorter(a.scores.shotsFired, b.scores.shotsFired)
+            },
+            {
+                field: 'score',
+                visualize: p => p.scores.overallScore.toString(),
+                sorter: (a, b) => numberSorter(a.scores.overallScore, b.scores.overallScore)
             }
         ]}/>
 }

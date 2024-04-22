@@ -65,13 +65,18 @@ export default function PlayerInfo({playerId}: { playerId: Guid }) {
         <table>
             <tbody>
             <ScoreRow name="controls" value={lastJsonMessage.controls}/>
-            <ScoreRow name="kills" value={lastJsonMessage.scores.kills}/>
-            <ScoreRow name="deaths" value={lastJsonMessage.scores.deaths}/>
-            <ScoreRow name="walls" value={lastJsonMessage.scores.wallsDestroyed}/>
             <ScoreRow name="explosive bullets" value={lastJsonMessage.tank?.explosiveBullets}/>
             <ScoreRow name="position" value={lastJsonMessage.tank?.position}/>
             <ScoreRow name="orientation" value={lastJsonMessage.tank?.orientation}/>
             <ScoreRow name="moving" value={lastJsonMessage.tank?.moving}/>
+
+            <ScoreRow name="kills" value={lastJsonMessage.scores.kills}/>
+            <ScoreRow name="deaths" value={lastJsonMessage.scores.deaths}/>
+
+            <ScoreRow name="walls destroyed" value={lastJsonMessage.scores.wallsDestroyed}/>
+            <ScoreRow name="bullets fired" value={lastJsonMessage.scores.shotsFired}/>
+
+            <ScoreRow name="score" value={lastJsonMessage.scores.overallScore}/>
             </tbody>
         </table>
     </Column>;
