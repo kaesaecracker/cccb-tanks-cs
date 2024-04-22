@@ -26,7 +26,7 @@ internal sealed class ClientScreenServerConnection(
 
         if (!await _wantedFrames.WaitAsync(TimeSpan.Zero))
         {
-            logger.LogTrace("client does not want a frame yet");
+            Logger.LogTrace("client does not want a frame yet");
             return;
         }
 
@@ -35,17 +35,17 @@ internal sealed class ClientScreenServerConnection(
         if (_playerScreenData != null)
             RefreshPlayerSpecificData(gamePixelGrid);
 
-        logger.LogTrace("sending");
+        Logger.LogTrace("sending");
         try
         {
-            logger.LogTrace("sending {} bytes of pixel data", pixels.Data.Length);
-            await Socket.SendAsync(pixels.Data, _playerScreenData == null);
+            Logger.LogTrace("sending {} bytes of pixel data", pixels.Data.Length);
+            await Socket.SendBinaryAsync(pixels.Data, _playerScreenData == null);
             if (_playerScreenData != null)
-                await Socket.SendAsync(_playerScreenData.GetPacket());
+                await Socket.SendBinaryAsync(_playerScreenData.GetPacket());
         }
         catch (WebSocketException ex)
         {
-            logger.LogWarning(ex, "send failed");
+            Logger.LogWarning(ex, "send failed");
         }
     }
 
@@ -61,5 +61,9 @@ internal sealed class ClientScreenServerConnection(
         }
     }
 
-    protected override void HandleMessage(Memory<byte> _) => _wantedFrames.Release();
+    protected override ValueTask HandleMessageAsync(Memory<byte> _)
+    {
+        _wantedFrames.Release();
+        return ValueTask.CompletedTask;
+    }
 }

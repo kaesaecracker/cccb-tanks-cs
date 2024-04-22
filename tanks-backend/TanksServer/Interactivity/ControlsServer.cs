@@ -7,13 +7,11 @@ internal sealed class ControlsServer(
     ILoggerFactory loggerFactory
 ) : WebsocketServer<ControlsServerConnection>(logger)
 {
-    public async Task HandleClientAsync(WebSocket ws, Player player)
+    public Task HandleClientAsync(WebSocket ws, Player player)
     {
         logger.LogDebug("control client connected {}", player.Id);
         var clientLogger = loggerFactory.CreateLogger<ControlsServerConnection>();
         var sock = new ControlsServerConnection(ws, clientLogger, player);
-        await AddConnection(sock);
-        await sock.ReceiveAsync();
-        await RemoveConnection(sock);
+        return HandleClientAsync(sock);
     }
 }

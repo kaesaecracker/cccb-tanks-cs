@@ -35,7 +35,7 @@ internal abstract class WebsocketServer<T>(
         }
     }
 
-    protected Task AddConnection(T connection) => Locked(() =>
+    private Task AddConnectionAsync(T connection) => Locked(() =>
     {
         if (_closing)
         {
@@ -47,7 +47,7 @@ internal abstract class WebsocketServer<T>(
         return Task.CompletedTask;
     }, CancellationToken.None);
 
-    protected Task RemoveConnection(T connection) => Locked(() =>
+    private Task RemoveConnectionAsync(T connection) => Locked(() =>
     {
         _connections.Remove(connection);
         return Task.CompletedTask;
@@ -55,9 +55,9 @@ internal abstract class WebsocketServer<T>(
 
     protected async Task HandleClientAsync(T connection)
     {
-        await AddConnection(connection);
+        await AddConnectionAsync(connection);
         await connection.ReceiveAsync();
-        await RemoveConnection(connection);
+        await RemoveConnectionAsync(connection);
     }
 
     private async Task Locked(Func<Task> action, CancellationToken cancellationToken)

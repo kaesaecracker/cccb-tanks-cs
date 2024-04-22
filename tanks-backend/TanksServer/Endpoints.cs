@@ -33,11 +33,18 @@ internal static class Endpoints
                 : Results.Unauthorized();
         });
 
-        app.MapGet("/player", ([FromQuery] Guid id) =>
-            playerService.TryGet(id, out var foundPlayer)
-                ? Results.Ok((object?)foundPlayer)
-                : Results.NotFound()
-        );
+        app.MapGet("/player", async (HttpContext context, [FromQuery] Guid id) =>
+        {
+            if (!playerService.TryGet(id, out var foundPlayer))
+                return Results.NotFound();
+
+            if (!context.WebSockets.IsWebSocketRequest)
+                return Results.Ok((object?)foundPlayer);
+
+            using var ws = await context.WebSockets.AcceptWebSocketAsync();
+            await playerService.HandleClientAsync(ws, foundPlayer);
+            return Results.Empty;
+        });
 
         app.MapGet("/scores", () => playerService.GetAll());
 

@@ -77,6 +77,7 @@ public static class Program
         builder.Services.AddSingleton<ITickStep>(sp => sp.GetRequiredService<TankSpawnQueue>());
         builder.Services.AddSingleton<ITickStep, SpawnPowerUp>();
         builder.Services.AddSingleton<ITickStep, GeneratePixelsTickStep>();
+        builder.Services.AddSingleton<ITickStep, PlayerServer>(sp => sp.GetRequiredService<PlayerServer>());
 
         builder.Services.AddSingleton<IDrawStep, DrawMapStep>();
         builder.Services.AddSingleton<IDrawStep, DrawPowerUpsStep>();

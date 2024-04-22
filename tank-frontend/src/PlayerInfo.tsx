@@ -1,7 +1,8 @@
-import {useQuery} from '@tanstack/react-query'
-import {makeApiUrl, Player} from './serverCalls';
-import {Guid} from "./Guid.ts";
-import Column from "./components/Column.tsx";
+import {makeApiUrl, Scores} from './serverCalls';
+import {Guid} from './Guid.ts';
+import Column from './components/Column.tsx';
+import useWebSocket, {ReadyState} from 'react-use-websocket';
+import {useEffect, useState} from 'react';
 
 function ScoreRow({name, value}: {
     name: string;
@@ -13,33 +14,66 @@ function ScoreRow({name, value}: {
     </tr>;
 }
 
-export default function PlayerInfo({playerId}: { playerId: Guid }) {
-    const query = useQuery({
-        queryKey: ['player'],
-        refetchInterval: 1000,
-        queryFn: async () => {
-            const url = makeApiUrl('/player');
-            url.searchParams.set('id', playerId);
+type Controls = {
+    readonly forward: boolean;
+    readonly backward: boolean;
+    readonly turnLeft: boolean;
+    readonly turnRight: boolean;
+    readonly shoot: boolean;
+}
 
-            const response = await fetch(url, {method: 'GET'});
-            if (!response.ok)
-                throw new Error(`response failed with code ${response.status} (${response.status})${await response.text()}`)
-            return await response.json() as Player;
-        }
+type PlayerInfoMessage = {
+    readonly name: string;
+    readonly scores: Scores;
+    readonly controls: Controls;
+}
+
+function controlsString(controls: Controls) {
+    let str = "";
+    if (controls.forward)
+        str += "▲";
+    if (controls.backward)
+        str += "▼";
+    if (controls.turnLeft)
+        str += "◄";
+    if (controls.turnRight)
+        str += "►";
+    if (controls.shoot)
+        str += "•";
+    return str;
+}
+
+export default function PlayerInfo({playerId}: { playerId: Guid }) {
+    const [shouldSendMessage, setShouldSendMessage] = useState(true);
+
+    const url = makeApiUrl('/player');
+    url.searchParams.set('id', playerId);
+
+    const {lastJsonMessage, readyState, sendMessage} = useWebSocket<PlayerInfoMessage>(url.toString(), {
+        onMessage: () => setShouldSendMessage(true)
     });
 
-    return <Column className='PlayerInfo'>
+    useEffect(() => {
+        if (!shouldSendMessage || readyState !== ReadyState.OPEN)
+            return;
+        setShouldSendMessage(false);
+        sendMessage('');
+    }, [readyState, shouldSendMessage]);
+
+    if (!lastJsonMessage)
+        return <></>;
+
+    return <Column className="PlayerInfo">
         <h3>
-            {query.isPending && 'loading...'}
-            {query.isSuccess && `Playing as ${query.data.name}`}
+            Playing as {lastJsonMessage.name}
         </h3>
-        {query.isError && <p>{query.error.message}</p>}
-        {query.isSuccess && <table>
+        <table>
             <tbody>
-            <ScoreRow name='kills' value={query.data?.scores?.kills}/>
-            <ScoreRow name='deaths' value={query.data?.scores?.deaths}/>
-            <ScoreRow name='walls' value={query.data?.scores?.wallsDestroyed}/>
+            <ScoreRow name="controls" value={controlsString(lastJsonMessage.controls)}/>
+            <ScoreRow name="kills" value={lastJsonMessage.scores.kills}/>
+            <ScoreRow name="deaths" value={lastJsonMessage.scores.deaths}/>
+            <ScoreRow name="walls" value={lastJsonMessage.scores.wallsDestroyed}/>
             </tbody>
-        </table>}
+        </table>
     </Column>;
 }

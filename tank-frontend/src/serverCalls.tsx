@@ -12,14 +12,16 @@ export type ServerResponse<T> = {
     successResult?: T;
 }
 
+export type Scores = {
+    readonly kills: number;
+    readonly deaths: number;
+    readonly wallsDestroyed: number;
+};
+
 export type Player = {
     readonly name: string;
     readonly id: Guid;
-    readonly scores: {
-        readonly kills: number;
-        readonly deaths: number;
-        readonly wallsDestroyed: number;
-    };
+    readonly scores: Scores;
 };
 
 export type NameId = {

@@ -23,12 +23,12 @@ internal sealed class ControlsServerConnection(
         Shoot = 0x05
     }
 
-    protected override void HandleMessage(Memory<byte> buffer)
+    protected override ValueTask HandleMessageAsync(Memory<byte> buffer)
     {
         var type = (MessageType)buffer.Span[0];
         var control = (InputType)buffer.Span[1];
 
-        logger.LogTrace("player input {} {} {}", player.Id, type, control);
+        Logger.LogTrace("player input {} {} {}", player.Id, type, control);
 
         var isEnable = type switch
         {
@@ -59,5 +59,7 @@ internal sealed class ControlsServerConnection(
             default:
                 throw new ArgumentException("invalid control type");
         }
+
+        return ValueTask.CompletedTask;
     }
 }
