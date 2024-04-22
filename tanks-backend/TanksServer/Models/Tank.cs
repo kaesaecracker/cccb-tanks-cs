@@ -22,7 +22,7 @@ internal sealed class Tank(Player player, FloatPosition spawnPosition) : IMapEnt
 
     public DateTime NextShotAfter { get; set; }
 
-    public bool Moved { get; set; }
+    public bool Moving { get; set; }
 
     public FloatPosition Position { get; set; } = spawnPosition;
 

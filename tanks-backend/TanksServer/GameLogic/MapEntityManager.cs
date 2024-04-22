@@ -9,6 +9,7 @@ internal sealed class MapEntityManager(
     private readonly HashSet<Bullet> _bullets = [];
     private readonly HashSet<Tank> _tanks = [];
     private readonly HashSet<PowerUp> _powerUps = [];
+    private readonly Dictionary<Player, Tank> _playerTanks = [];
     private readonly TimeSpan _bulletTimeout = TimeSpan.FromMilliseconds(options.Value.BulletTimeoutMs);
 
     public IEnumerable<Bullet> Bullets => _bullets;
@@ -31,14 +32,16 @@ internal sealed class MapEntityManager(
             OwnerCollisionAfter = DateTime.Now + TimeSpan.FromSeconds(1),
         });
 
-    public void RemoveBulletsWhere(Predicate<Bullet> predicate) => _bullets.RemoveWhere(predicate);
+    public void RemoveWhere(Predicate<Bullet> predicate) => _bullets.RemoveWhere(predicate);
 
     public void SpawnTank(Player player)
     {
-        _tanks.Add(new Tank(player, ChooseSpawnPosition())
+        var tank = new Tank(player, ChooseSpawnPosition())
         {
             Rotation = Random.Shared.NextDouble()
-        });
+        };
+        _tanks.Add(tank);
+        _playerTanks[player] = tank;
         logger.LogInformation("Tank added for player {}", player.Id);
     }
 
@@ -50,6 +53,7 @@ internal sealed class MapEntityManager(
     {
         logger.LogInformation("Tank removed for player {}", tank.Owner.Id);
         _tanks.Remove(tank);
+        _playerTanks.Remove(tank.Owner);
     }
 
     public FloatPosition ChooseSpawnPosition()
@@ -75,4 +79,6 @@ internal sealed class MapEntityManager(
         var min = candidates.MaxBy(pair => pair.Value).Key;
         return min.ToPixelPosition().GetPixelRelative(4, 4).ToFloatPosition();
     }
+
+    public Tank? GetCurrentTankOfPlayer(Player player) => _playerTanks.GetValueOrDefault(player);
 }

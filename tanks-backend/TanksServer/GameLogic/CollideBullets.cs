@@ -11,13 +11,13 @@ internal sealed class CollideBullets(
 
     public Task TickAsync(TimeSpan _)
     {
-        entityManager.RemoveBulletsWhere(BulletHitsTank);
-        entityManager.RemoveBulletsWhere(TryHitAndDestroyWall);
-        entityManager.RemoveBulletsWhere(TimeoutBullet);
+        entityManager.RemoveWhere(BulletHitsTank);
+        entityManager.RemoveWhere(BulletHitsWall);
+        entityManager.RemoveWhere(BulletTimesOut);
         return Task.CompletedTask;
     }
 
-    private bool TimeoutBullet(Bullet bullet)
+    private bool BulletTimesOut(Bullet bullet)
     {
         if (bullet.Timeout > DateTime.Now)
             return false;
@@ -27,7 +27,7 @@ internal sealed class CollideBullets(
         return true;
     }
 
-    private bool TryHitAndDestroyWall(Bullet bullet)
+    private bool BulletHitsWall(Bullet bullet)
     {
         var pixel = bullet.Position.ToPixelPosition();
         if (!map.Current.IsWall(pixel))

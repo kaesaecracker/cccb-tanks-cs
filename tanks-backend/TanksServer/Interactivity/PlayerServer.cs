@@ -7,7 +7,8 @@ namespace TanksServer.Interactivity;
 internal sealed class PlayerServer(
     ILogger<PlayerServer> logger,
     ILogger<PlayerInfoConnection> connectionLogger,
-    TankSpawnQueue tankSpawnQueue
+    TankSpawnQueue tankSpawnQueue,
+    MapEntityManager entityManager
 ) : WebsocketServer<PlayerInfoConnection>(logger), ITickStep
 {
     private readonly ConcurrentDictionary<string, Player> _players = new();
@@ -46,7 +47,7 @@ internal sealed class PlayerServer(
     public IEnumerable<Player> GetAll() => _players.Values;
 
     public Task HandleClientAsync(WebSocket webSocket, Player player)
-        => HandleClientAsync(new PlayerInfoConnection(player, connectionLogger, webSocket));
+        => HandleClientAsync(new PlayerInfoConnection(player, connectionLogger, webSocket, entityManager));
 
     public Task TickAsync(TimeSpan delta)
         => ParallelForEachConnectionAsync(connection => connection.OnGameTickAsync());

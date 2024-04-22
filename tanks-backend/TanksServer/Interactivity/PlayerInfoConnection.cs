@@ -1,12 +1,14 @@
 using System.Net.WebSockets;
 using System.Text.Json;
+using TanksServer.GameLogic;
 
 namespace TanksServer.Interactivity;
 
 internal sealed class PlayerInfoConnection(
     Player player,
     ILogger logger,
-    WebSocket rawSocket
+    WebSocket rawSocket,
+    MapEntityManager entityManager
 ) : WebsocketServerConnection(logger, new ByteChannelWebSocket(rawSocket, logger, 0)), IDisposable
 {
     private readonly SemaphoreSlim _wantedFrames = new(1);
@@ -45,7 +47,11 @@ internal sealed class PlayerInfoConnection(
 
     private byte[]? GetMessageToSend()
     {
-        var info = new PlayerInfo(player.Name, player.Scores, player.Controls);
+        var tank = entityManager.GetCurrentTankOfPlayer(player);
+        var tankInfo = tank != null
+            ? new TankInfo(tank.Orientation, tank.ExplosiveBullets, tank.Position.ToPixelPosition(), tank.Moving)
+            : null;
+        var info = new PlayerInfo(player.Name, player.Scores, player.Controls, tankInfo);
         var response = JsonSerializer.SerializeToUtf8Bytes(info, _context.PlayerInfo);
 
         if (response.SequenceEqual(_lastMessage))

@@ -11,7 +11,7 @@ internal sealed class ShootFromTanks(
 
     public Task TickAsync(TimeSpan _)
     {
-        foreach (var tank in entityManager.Tanks.Where(t => !t.Moved))
+        foreach (var tank in entityManager.Tanks.Where(t => !t.Moving))
             Shoot(tank);
 
         return Task.CompletedTask;

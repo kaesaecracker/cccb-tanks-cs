@@ -6,11 +6,19 @@ import {useEffect, useState} from 'react';
 
 function ScoreRow({name, value}: {
     name: string;
-    value?: any;
+    value?: string | any;
 }) {
+    let valueStr;
+    if (value === undefined)
+        valueStr = '?';
+    else if (typeof value === 'string' || value instanceof String)
+        valueStr = value;
+    else
+        valueStr = JSON.stringify(value);
+
     return <tr>
         <td>{name}</td>
-        <td>{value ?? '?'}</td>
+        <td>{valueStr}</td>
     </tr>;
 }
 
@@ -22,35 +30,45 @@ type Controls = {
     readonly shoot: boolean;
 }
 
+type TankInfo = {
+    readonly explosiveBullets: number;
+    readonly position: { x: number; y: number };
+    readonly orientation: number;
+    readonly moving: boolean;
+}
+
+
 type PlayerInfoMessage = {
     readonly name: string;
     readonly scores: Scores;
     readonly controls: Controls;
+    readonly tank?: TankInfo;
 }
 
 function controlsString(controls: Controls) {
-    let str = "";
+    let str = '';
     if (controls.forward)
-        str += "▲";
+        str += '▲';
     if (controls.backward)
-        str += "▼";
+        str += '▼';
     if (controls.turnLeft)
-        str += "◄";
+        str += '◄';
     if (controls.turnRight)
-        str += "►";
+        str += '►';
     if (controls.shoot)
-        str += "•";
+        str += '•';
     return str;
 }
 
 export default function PlayerInfo({playerId}: { playerId: Guid }) {
-    const [shouldSendMessage, setShouldSendMessage] = useState(true);
+    const [shouldSendMessage, setShouldSendMessage] = useState(false);
 
     const url = makeApiUrl('/player');
     url.searchParams.set('id', playerId);
 
     const {lastJsonMessage, readyState, sendMessage} = useWebSocket<PlayerInfoMessage>(url.toString(), {
-        onMessage: () => setShouldSendMessage(true)
+        onMessage: () => setShouldSendMessage(true),
+        shouldReconnect: () => true,
     });
 
     useEffect(() => {
@@ -73,6 +91,10 @@ export default function PlayerInfo({playerId}: { playerId: Guid }) {
             <ScoreRow name="kills" value={lastJsonMessage.scores.kills}/>
             <ScoreRow name="deaths" value={lastJsonMessage.scores.deaths}/>
             <ScoreRow name="walls" value={lastJsonMessage.scores.wallsDestroyed}/>
+            <ScoreRow name="explosive bullets" value={lastJsonMessage.tank?.explosiveBullets}/>
+            <ScoreRow name="position" value={lastJsonMessage.tank?.position}/>
+            <ScoreRow name="orientation" value={lastJsonMessage.tank?.orientation}/>
+            <ScoreRow name="moving" value={lastJsonMessage.tank?.moving}/>
             </tbody>
         </table>
     </Column>;

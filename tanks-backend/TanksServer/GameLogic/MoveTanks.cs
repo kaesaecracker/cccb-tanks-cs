@@ -11,7 +11,7 @@ internal sealed class MoveTanks(
     public Task TickAsync(TimeSpan delta)
     {
         foreach (var tank in entityManager.Tanks)
-            tank.Moved = TryMoveTank(tank, delta);
+            tank.Moving = TryMoveTank(tank, delta);
 
         return Task.CompletedTask;
     }
