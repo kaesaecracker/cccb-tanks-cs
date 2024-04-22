@@ -94,8 +94,8 @@ internal sealed class Map(string name, bool[,] walls)
     {
         var pixel = position.ToPixelPosition();
 
-        for (short dx = 1; dx < MapService.TilesPerRow - 1; dx++)
-        for (short dy = 1; dy < MapService.TilesPerColumn - 1; dy++)
+        for (short dx = 0; dx < MapService.TileSize; dx++)
+        for (short dy = 0; dy < MapService.TileSize; dy++)
         {
             if (IsWall(pixel.GetPixelRelative(dx, dy)))
                 return true;
