@@ -1,5 +1,4 @@
 import {makeApiUrl, Scores} from './serverCalls';
-import {Guid} from './Guid.ts';
 import Column from './components/Column.tsx';
 import useWebSocket, {ReadyState} from 'react-use-websocket';
 import {useEffect, useState} from 'react';
@@ -37,11 +36,11 @@ type PlayerInfoMessage = {
     readonly tank?: TankInfo;
 }
 
-export default function PlayerInfo({playerId}: { playerId: Guid }) {
+export default function PlayerInfo({player}: { player: string }) {
     const [shouldSendMessage, setShouldSendMessage] = useState(false);
 
     const url = makeApiUrl('/player');
-    url.searchParams.set('id', playerId);
+    url.searchParams.set('name', player);
 
     const {lastJsonMessage, readyState, sendMessage} = useWebSocket<PlayerInfoMessage>(url.toString(), {
         onMessage: () => setShouldSendMessage(true),

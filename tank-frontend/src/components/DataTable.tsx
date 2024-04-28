@@ -54,8 +54,6 @@ export default function DataTable<T>({data, columns, className}: {
 
     dataToDisplay.sort(actualSorter)
 
-    console.log('sorted', {dataToDisplay});
-
     return <div className={'DataTable ' + (className ?? '')}>
         <table>
             <thead className='DataTableHead'>

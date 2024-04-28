@@ -1,12 +1,11 @@
 import './Controls.css';
 import useWebSocket, {ReadyState} from 'react-use-websocket';
 import {useEffect} from 'react';
-import {Guid} from "./Guid.ts";
 import {makeApiUrl} from './serverCalls.tsx';
 
-export default function Controls({playerId}: { playerId: Guid }) {
+export default function Controls({player}: { player: string }) {
     const url = makeApiUrl('/controls', 'ws');
-    url.searchParams.set('playerId', playerId);
+    url.searchParams.set('playerName', player);
 
     const {
         sendMessage,
@@ -62,17 +61,17 @@ export default function Controls({playerId}: { playerId: Guid }) {
     }, [readyState]);
 
     return <div className="Controls flex-row">
-        <div className='flex-column Controls-Container'>
+        <div className="flex-column Controls-Container">
             <h3>Move</h3>
             <kbd>▲</kbd>
-            <div className='flex-row Controls-Container'>
+            <div className="flex-row Controls-Container">
                 <kbd>◄</kbd>
                 <kbd>▼</kbd>
                 <kbd>►</kbd>
             </div>
         </div>
 
-        <div className='flex-column Controls-Container'>
+        <div className="flex-column Controls-Container">
             <h3>Fire</h3>
             <kbd className="space">Space</kbd>
         </div>

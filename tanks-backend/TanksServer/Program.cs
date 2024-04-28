@@ -19,10 +19,11 @@ public static class Program
         var app = Configure(args);
 
         var clientFileProvider = new PhysicalFileProvider(Path.Combine(app.Environment.ContentRootPath, "client"));
+
         app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = clientFileProvider });
         app.UseStaticFiles(new StaticFileOptions { FileProvider = clientFileProvider });
 
-        Endpoints.MapEndpoints(app);
+        app.Services.GetRequiredService<Endpoints>().Map(app);
 
         await app.RunAsync();
     }
@@ -63,6 +64,7 @@ public static class Program
         builder.Services.AddSingleton<PlayerServer>();
         builder.Services.AddSingleton<ClientScreenServer>();
         builder.Services.AddSingleton<TankSpawnQueue>();
+        builder.Services.AddSingleton<Endpoints>();
 
         builder.Services.AddHostedService<GameTickWorker>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ControlsServer>());

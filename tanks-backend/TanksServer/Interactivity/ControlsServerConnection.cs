@@ -28,7 +28,7 @@ internal sealed class ControlsServerConnection(
         var type = (MessageType)buffer.Span[0];
         var control = (InputType)buffer.Span[1];
 
-        Logger.LogTrace("player input {} {} {}", player.Id, type, control);
+        Logger.LogTrace("player input {} {} {}", player.Name, type, control);
 
         var isEnable = type switch
         {

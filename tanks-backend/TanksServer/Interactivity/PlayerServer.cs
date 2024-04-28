@@ -11,40 +11,58 @@ internal sealed class PlayerServer(
     MapEntityManager entityManager
 ) : WebsocketServer<PlayerInfoConnection>(logger), ITickStep
 {
-    private readonly ConcurrentDictionary<string, Player> _players = new();
+    private readonly Dictionary<string, Player> _players = [];
+    private readonly SemaphoreSlim _mutex = new(1, 1);
 
-    public Player? GetOrAdd(string name, Guid id)
+    public Player? GetOrAdd(string name)
     {
-        var existingOrAddedPlayer = _players.GetOrAdd(name, _ => AddAndSpawn());
-        if (existingOrAddedPlayer.Id != id)
-            return null;
-
-        logger.LogInformation("player {} (re)joined", existingOrAddedPlayer.Id);
-        return existingOrAddedPlayer;
-
-        Player AddAndSpawn()
+        _mutex.Wait();
+        try
         {
-            var newPlayer = new Player(name, id);
+            if (_players.TryGetValue(name, out var existingPlayer))
+            {
+                logger.LogInformation("player {} rejoined", existingPlayer.Name);
+                return existingPlayer;
+            }
+
+            var newPlayer = new Player { Name = name };
+            logger.LogInformation("player {} joined", newPlayer.Name);
+            _players.Add(name, newPlayer);
             tankSpawnQueue.EnqueueForImmediateSpawn(newPlayer);
             return newPlayer;
         }
-    }
-
-    public bool TryGet(Guid? playerId, [MaybeNullWhen(false)] out Player foundPlayer)
-    {
-        foreach (var player in _players.Values)
+        finally
         {
-            if (player.Id != playerId)
-                continue;
-            foundPlayer = player;
-            return true;
+            _mutex.Release();
         }
-
-        foundPlayer = null;
-        return false;
     }
 
-    public IEnumerable<Player> GetAll() => _players.Values;
+    public bool TryGet(string name, [MaybeNullWhen(false)] out Player foundPlayer)
+    {
+        _mutex.Wait();
+        try
+        {
+            foundPlayer = _players.Values.FirstOrDefault(player => player.Name == name);
+            return foundPlayer != null;
+        }
+        finally
+        {
+            _mutex.Release();
+        }
+    }
+
+    public List<Player> GetAll()
+    {
+        _mutex.Wait();
+        try
+        {
+            return _players.Values.ToList();
+        }
+        finally
+        {
+            _mutex.Release();
+        }
+    }
 
     public Task HandleClientAsync(WebSocket webSocket, Player player)
         => HandleClientAsync(new PlayerInfoConnection(player, connectionLogger, webSocket, entityManager));

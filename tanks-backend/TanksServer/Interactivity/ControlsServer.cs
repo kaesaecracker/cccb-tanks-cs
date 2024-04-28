@@ -9,7 +9,7 @@ internal sealed class ControlsServer(
 {
     public Task HandleClientAsync(WebSocket ws, Player player)
     {
-        logger.LogDebug("control client connected {}", player.Id);
+        logger.LogDebug("control client connected {}", player.Name);
         var clientLogger = loggerFactory.CreateLogger<ControlsServerConnection>();
         var sock = new ControlsServerConnection(ws, clientLogger, player);
         return HandleClientAsync(sock);

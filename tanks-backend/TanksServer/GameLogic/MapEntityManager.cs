@@ -35,7 +35,7 @@ internal sealed class MapEntityManager(
             Rotation = Random.Shared.NextDouble()
         };
         _playerTanks[player] = tank;
-        logger.LogInformation("Tank added for player {}", player.Id);
+        logger.LogInformation("Tank added for player {}", player.Name);
     }
 
     public void SpawnPowerUp() => _powerUps.Add(new PowerUp(ChooseSpawnPosition()));
@@ -44,7 +44,7 @@ internal sealed class MapEntityManager(
 
     public void Remove(Tank tank)
     {
-        logger.LogInformation("Tank removed for player {}", tank.Owner.Id);
+        logger.LogInformation("Tank removed for player {}", tank.Owner.Name);
         _playerTanks.Remove(tank.Owner);
     }
 

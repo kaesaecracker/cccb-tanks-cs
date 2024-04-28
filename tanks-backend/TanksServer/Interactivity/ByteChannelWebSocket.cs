@@ -7,11 +7,31 @@ internal sealed class ByteChannelWebSocket(WebSocket socket, ILogger logger, int
 {
     private readonly byte[] _buffer = new byte[messageSize];
 
-    public ValueTask SendBinaryAsync(ReadOnlyMemory<byte> data, bool endOfMessage = true) =>
-        socket.SendAsync(data, WebSocketMessageType.Binary, endOfMessage, CancellationToken.None);
+    public async ValueTask SendBinaryAsync(ReadOnlyMemory<byte> data, bool endOfMessage = true)
+    {
+        try
+        {
+            await socket.SendAsync(data, WebSocketMessageType.Binary, endOfMessage, CancellationToken.None);
+        }
+        catch (WebSocketException e)
+        {
+            logger.LogError(e, "could not send binary message");
+            await CloseAsync();
+        }
+    }
 
-    public ValueTask SendTextAsync(ReadOnlyMemory<byte> data, bool endOfMessage = true) =>
-        socket.SendAsync(data, WebSocketMessageType.Text, endOfMessage, CancellationToken.None);
+    public async ValueTask SendTextAsync(ReadOnlyMemory<byte> data, bool endOfMessage = true)
+    {
+        try
+        {
+            await socket.SendAsync(data, WebSocketMessageType.Text, endOfMessage, CancellationToken.None);
+        }
+        catch (WebSocketException e)
+        {
+            logger.LogError(e, "could not send text message");
+            await CloseAsync();
+        }
+    }
 
     public async IAsyncEnumerable<Memory<byte>> ReadAllAsync()
     {
@@ -25,9 +45,12 @@ internal sealed class ByteChannelWebSocket(WebSocket socket, ILogger logger, int
             Debugger.Break();
     }
 
+    public Task CloseWithErrorAsync(string error)
+        => socket.CloseOutputAsync(WebSocketCloseStatus.InternalServerError, error, CancellationToken.None);
+
     public async Task CloseAsync()
     {
-        if (socket.State != WebSocketState.Open)
+        if (socket.State is not WebSocketState.Open and not WebSocketState.CloseReceived)
             return;
 
         try

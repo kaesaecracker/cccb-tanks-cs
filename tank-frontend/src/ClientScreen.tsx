@@ -2,7 +2,6 @@ import useWebSocket from 'react-use-websocket';
 import {useEffect, useRef} from 'react';
 import './ClientScreen.css';
 import {hslToString, Theme} from "./theme.ts";
-import {Guid} from "./Guid.ts";
 import {makeApiUrl} from './serverCalls.tsx';
 
 const pixelsPerRow = 352;
@@ -98,23 +97,21 @@ function drawPixelsToCanvas(
     context.putImageData(imageData, 0, 0);
 }
 
-export default function ClientScreen({logout, theme, playerId}: {
-    logout: () => void,
+export default function ClientScreen({theme, player}: {
     theme: Theme,
-    playerId?: Guid
+    player: string | null
 }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const url = makeApiUrl('/screen', 'ws');
-    if (playerId)
-        url.searchParams.set('player', playerId);
+    if (player && player !== '')
+        url.searchParams.set('playerName', player);
 
     const {
         lastMessage,
         sendMessage,
         getWebSocket
     } = useWebSocket(url.toString(), {
-        onError: logout,
         shouldReconnect: () => true,
     });
 

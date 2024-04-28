@@ -6,20 +6,16 @@ namespace TanksServer.Interactivity;
 
 internal sealed class ClientScreenServer(
     ILogger<ClientScreenServer> logger,
-    ILoggerFactory loggerFactory,
-    IOptions<HostConfiguration> hostConfig
+    ILoggerFactory loggerFactory
 ) : WebsocketServer<ClientScreenServerConnection>(logger), IFrameConsumer
 {
-    private readonly TimeSpan _minFrameTime = TimeSpan.FromMilliseconds(hostConfig.Value.ClientDisplayMinFrameTimeMs);
-
-    public Task HandleClientAsync(WebSocket socket, Guid? playerGuid)
+    public Task HandleClientAsync(WebSocket socket, string? player)
         => base.HandleClientAsync(new(
             socket,
             loggerFactory.CreateLogger<ClientScreenServerConnection>(),
-            _minFrameTime,
-            playerGuid
+            player
         ));
 
     public Task OnFrameDoneAsync(GamePixelGrid gamePixelGrid, PixelGrid observerPixels)
-        => ParallelForEachConnectionAsync(c => c.SendAsync(observerPixels, gamePixelGrid));
+        => ParallelForEachConnectionAsync(c => c.OnGameTickAsync(observerPixels, gamePixelGrid).AsTask());
 }

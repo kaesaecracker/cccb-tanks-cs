@@ -1,56 +1,38 @@
-import {useCallback, useState} from 'react';
 import ClientScreen from './ClientScreen';
 import Controls from './Controls.tsx';
 import JoinForm from './JoinForm.tsx';
 import PlayerInfo from './PlayerInfo.tsx';
-import {useStoredObjectState} from './useStoredState.ts';
-import {NameId, postPlayer} from './serverCalls.tsx';
-import Column from "./components/Column.tsx";
-import Row from "./components/Row.tsx";
-import Scoreboard from "./Scoreboard.tsx";
-import Button from "./components/Button.tsx";
+import Column from './components/Column.tsx';
+import Row from './components/Row.tsx';
+import Scoreboard from './Scoreboard.tsx';
+import Button from './components/Button.tsx';
 import './App.css';
-import {getRandomTheme, useStoredTheme} from "./theme.ts";
-import {EmptyGuid} from "./Guid.ts";
-
-const getNewNameId = () => ({
-    id: EmptyGuid,
-    name: ''
-});
+import {getRandomTheme, useStoredTheme} from './theme.ts';
+import {useState} from 'react';
 
 export default function App() {
     const [theme, setTheme] = useStoredTheme();
-    const [nameId, setNameId] = useStoredObjectState<NameId>('access', getNewNameId);
+    const [name, setName] = useState<string | null>(null);
 
-    const [isLoggedIn, setLoggedIn] = useState<boolean>(false);
-    const logout = () => setLoggedIn(false);
+    return <Column className="flex-grow">
 
-    useCallback(async () => {
-        if (isLoggedIn)
-            return;
-        const result = await postPlayer(nameId);
-        setLoggedIn(result.ok);
-    }, [nameId, isLoggedIn])();
-
-    return <Column className='flex-grow'>
-
-        <ClientScreen logout={logout} theme={theme} playerId={nameId.id}/>
+        <ClientScreen theme={theme} player={name}/>
 
         <Row>
-            <h1 className='flex-grow'>CCCB-Tanks!</h1>
-            <Button text='change colors' onClick={() => setTheme(_ => getRandomTheme())}/>
+            <h1 className="flex-grow">CCCB-Tanks!</h1>
+            <Button text="change colors" onClick={() => setTheme(_ => getRandomTheme())}/>
             <Button
                 onClick={() => window.open('https://github.com/kaesaecracker/cccb-tanks-cs', '_blank')?.focus()}
-                text='GitHub'/>
-            {nameId.name !== '' &&
-                <Button onClick={() => setNameId(getNewNameId)} text='logout'/>}
+                text="GitHub"/>
+            {name !== '' &&
+                <Button onClick={() => setName(_ => '')} text="logout"/>}
         </Row>
 
-        {nameId.name === '' && <JoinForm setNameId={setNameId} clientId={nameId.id}/>}
+        {name || <JoinForm onDone={name => setName(_ => name)}/>}
 
-        <Row className='GadgetRows'>
-            {isLoggedIn && <Controls playerId={nameId.id}/>}
-            {isLoggedIn && <PlayerInfo playerId={nameId.id}/>}
+        <Row className="GadgetRows">
+            {name && <Controls player={name}/>}
+            {name && <PlayerInfo player={name}/>}
             <Scoreboard/>
         </Row>
 

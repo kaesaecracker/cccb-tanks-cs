@@ -1,5 +1,3 @@
-import {Guid} from './Guid.ts';
-
 export function makeApiUrl(path: string, protocol: 'http' | 'ws' = 'http') {
     return new URL(`${protocol}://${window.location.hostname}${path}`);
 }
@@ -22,13 +20,7 @@ export type Scores = {
 
 export type Player = {
     readonly name: string;
-    readonly id: Guid;
     readonly scores: Scores;
-};
-
-export type NameId = {
-    name: string,
-    id: Guid
 };
 
 export async function fetchTyped<T>({url, method}: { url: URL; method: string; }): Promise<ServerResponse<T>> {
@@ -46,10 +38,9 @@ export async function fetchTyped<T>({url, method}: { url: URL; method: string; }
     return result;
 }
 
-export function postPlayer({name, id}: NameId) {
+export function postPlayer(name: string) {
     const url = makeApiUrl('/player');
     url.searchParams.set('name', name);
-    url.searchParams.set('id', id);
 
-    return fetchTyped<NameId>({url, method: 'POST'});
+    return fetchTyped<string>({url, method: 'POST'});
 }
