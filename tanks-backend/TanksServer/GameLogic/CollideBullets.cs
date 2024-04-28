@@ -1,3 +1,5 @@
+using TanksServer.Graphics;
+
 namespace TanksServer.GameLogic;
 
 internal sealed class CollideBullets(
@@ -7,7 +9,7 @@ internal sealed class CollideBullets(
     TankSpawnQueue tankSpawnQueue
 ) : ITickStep
 {
-    private const int ExplosionRadius = 3;
+    private readonly Sprite _explosiveSprite = Sprite.FromImageFile("assets/explosion.png");
 
     public ValueTask TickAsync(TimeSpan _)
     {
@@ -22,8 +24,7 @@ internal sealed class CollideBullets(
         if (bullet.Timeout > DateTime.Now)
             return false;
 
-        var radius = bullet.IsExplosive ? ExplosionRadius : 0;
-        ExplodeAt(bullet.Position.ToPixelPosition(), radius, bullet.Owner);
+        ExplodeAt(bullet.Position.ToPixelPosition(), bullet.IsExplosive, bullet.Owner);
         return true;
     }
 
@@ -33,23 +34,21 @@ internal sealed class CollideBullets(
         if (!map.Current.IsWall(pixel))
             return false;
 
-        var radius = bullet.IsExplosive ? ExplosionRadius : 0;
-        ExplodeAt(pixel, radius, bullet.Owner);
-
+        ExplodeAt(pixel, bullet.IsExplosive, bullet.Owner);
         return true;
     }
 
     private bool BulletHitsTank(Bullet bullet)
     {
-        if (!TryHitTankAt(bullet.Position, bullet.Owner, DateTime.Now > bullet.OwnerCollisionAfter))
+        var hitTank = GetTankAt(bullet.Position, bullet.Owner, DateTime.Now > bullet.OwnerCollisionAfter);
+        if (hitTank == null)
             return false;
 
-        if (bullet.IsExplosive)
-            ExplodeAt(bullet.Position.ToPixelPosition(), ExplosionRadius, bullet.Owner);
+        ExplodeAt(bullet.Position.ToPixelPosition(), bullet.IsExplosive, bullet.Owner);
         return true;
     }
 
-    private bool TryHitTankAt(FloatPosition position, Player owner, bool canHitOwnTank)
+    private Tank? GetTankAt(FloatPosition position, Player owner, bool canHitOwnTank)
     {
         foreach (var tank in entityManager.Tanks)
         {
@@ -62,28 +61,47 @@ internal sealed class CollideBullets(
                 position.Y < topLeft.Y || position.Y > bottomRight.Y)
                 continue;
 
-            if (!hitsOwnTank)
+            return tank;
+        }
+
+        return null;
+    }
+
+    private void ExplodeAt(PixelPosition pixel, bool isExplosive, Player owner)
+    {
+        if (!isExplosive)
+        {
+            Core(pixel);
+            return;
+        }
+
+        pixel = pixel.GetPixelRelative(-4, -4);
+        for (short dx = 0; dx < _explosiveSprite.Width; dx++)
+        for (short dy = 0; dy < _explosiveSprite.Height; dy++)
+        {
+            if (!_explosiveSprite[dx, dy].HasValue)
+                continue;
+
+            Core(pixel.GetPixelRelative(dx, dy));
+        }
+
+        return;
+
+        void Core(PixelPosition position)
+        {
+            if (options.Value.DestructibleWalls && map.Current.TryDestroyWallAt(position))
+                owner.Scores.WallsDestroyed++;
+
+            var tank = GetTankAt(position.ToFloatPosition(), owner, true);
+            if (tank == null)
+                return;
+
+            if (tank.Owner == owner)
                 owner.Scores.Kills++;
             tank.Owner.Scores.Deaths++;
 
             entityManager.Remove(tank);
             tankSpawnQueue.EnqueueForDelayedSpawn(tank.Owner);
-            return true;
-        }
-
-        return false;
-    }
-
-    private void ExplodeAt(PixelPosition pixel, int i, Player owner)
-    {
-        for (var x = pixel.X - i; x <= pixel.X + i; x++)
-        for (var y = pixel.Y - i; y <= pixel.Y + i; y++)
-        {
-            var offsetPixel = new PixelPosition(x, y);
-            if (options.Value.DestructibleWalls && map.Current.TryDestroyWallAt(offsetPixel))
-                owner.Scores.WallsDestroyed++;
-
-            TryHitTankAt(offsetPixel.ToFloatPosition(), owner, true);
         }
     }
 }
