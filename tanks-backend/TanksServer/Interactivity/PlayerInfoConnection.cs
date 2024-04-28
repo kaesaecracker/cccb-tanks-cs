@@ -10,19 +10,19 @@ internal sealed class PlayerInfoConnection(
     ILogger logger,
     WebSocket rawSocket,
     MapEntityManager entityManager
-) : WebsocketServerConnection(logger, new ByteChannelWebSocket(rawSocket, logger, 0)), IDisposable
+) : WebsocketServerConnection(logger, new ByteChannelWebSocket(rawSocket, logger, 0))
 {
-    private readonly SemaphoreSlim _wantedFrames = new(1);
     private readonly AppSerializerContext _context = new(new JsonSerializerOptions(JsonSerializerDefaults.Web));
+    private bool _wantsInfoOnTick;
     private byte[] _lastMessage = [];
 
-    protected override ValueTask HandleMessageAsync(Memory<byte> buffer)
+    protected override ValueTask HandleMessageLockedAsync(Memory<byte> buffer)
     {
         var response = GetMessageToSend();
         if (response == null)
         {
             Logger.LogTrace("cannot respond directly, increasing wanted frames");
-            _wantedFrames.Release();
+            _wantsInfoOnTick = true;
             return ValueTask.CompletedTask;
         }
 
@@ -30,21 +30,18 @@ internal sealed class PlayerInfoConnection(
         return Socket.SendTextAsync(response);
     }
 
-    public async Task OnGameTickAsync()
+    public ValueTask OnGameTickAsync() => LockedAsync(() =>
     {
-        if (!await _wantedFrames.WaitAsync(TimeSpan.Zero))
-            return;
+        if (!_wantsInfoOnTick)
+            return ValueTask.CompletedTask;
 
         var response = GetMessageToSend();
         if (response == null)
-        {
-            _wantedFrames.Release();
-            return;
-        }
+            return ValueTask.CompletedTask;
 
         Logger.LogTrace("responding indirectly");
-        await Socket.SendTextAsync(response);
-    }
+        return Socket.SendTextAsync(response);
+    });
 
     private byte[]? GetMessageToSend()
     {
@@ -77,6 +74,4 @@ internal sealed class PlayerInfoConnection(
         str.Append(']');
         return str.ToString();
     }
-
-    public void Dispose() => _wantedFrames.Dispose();
 }

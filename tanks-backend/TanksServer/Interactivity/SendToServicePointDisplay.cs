@@ -48,7 +48,7 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
         };
     }
 
-    public async Task OnFrameDoneAsync(GamePixelGrid gamePixelGrid, PixelGrid observerPixels)
+    public async ValueTask OnFrameDoneAsync(GamePixelGrid gamePixelGrid, PixelGrid observerPixels)
     {
         if (DateTime.Now < _nextFrameAfter)
             return;

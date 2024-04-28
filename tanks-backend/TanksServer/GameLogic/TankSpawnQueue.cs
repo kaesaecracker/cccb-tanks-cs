@@ -43,12 +43,12 @@ internal sealed class TankSpawnQueue(
         return true;
     }
 
-    public Task TickAsync(TimeSpan _)
+    public ValueTask TickAsync(TimeSpan _)
     {
         if (!TryDequeueNext(out var player))
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
 
         entityManager.SpawnTank(player);
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }

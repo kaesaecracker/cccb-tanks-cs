@@ -4,10 +4,10 @@ internal sealed class CollectPowerUp(
     MapEntityManager entityManager
 ) : ITickStep
 {
-    public Task TickAsync(TimeSpan delta)
+    public ValueTask TickAsync(TimeSpan delta)
     {
         entityManager.RemoveWhere(TryCollect);
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     private bool TryCollect(PowerUp obj)

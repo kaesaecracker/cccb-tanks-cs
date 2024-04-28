@@ -12,7 +12,7 @@ internal sealed class GeneratePixelsTickStep(
     private readonly List<IDrawStep> _drawSteps = drawSteps.ToList();
     private readonly List<IFrameConsumer> _consumers = consumers.ToList();
 
-    public async Task TickAsync(TimeSpan _)
+    public async ValueTask TickAsync(TimeSpan _)
     {
         PixelGrid observerPixelGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
 

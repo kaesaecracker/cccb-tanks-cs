@@ -8,12 +8,12 @@ internal sealed class MoveTanks(
 {
     private readonly GameRules _config = options.Value;
 
-    public Task TickAsync(TimeSpan delta)
+    public ValueTask TickAsync(TimeSpan delta)
     {
         foreach (var tank in entityManager.Tanks)
             tank.Moving = TryMoveTank(tank, delta);
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     private bool TryMoveTank(Tank tank, TimeSpan delta)

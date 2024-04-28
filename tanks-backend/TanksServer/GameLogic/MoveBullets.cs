@@ -5,12 +5,12 @@ internal sealed class MoveBullets(
     IOptions<GameRules> config
 ) : ITickStep
 {
-    public Task TickAsync(TimeSpan delta)
+    public ValueTask TickAsync(TimeSpan delta)
     {
         foreach (var bullet in entityManager.Bullets)
             MoveBullet(bullet, delta);
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     private void MoveBullet(Bullet bullet, TimeSpan delta)

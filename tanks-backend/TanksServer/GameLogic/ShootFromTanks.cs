@@ -9,12 +9,12 @@ internal sealed class ShootFromTanks(
 {
     private readonly GameRules _config = options.Value;
 
-    public Task TickAsync(TimeSpan _)
+    public ValueTask TickAsync(TimeSpan _)
     {
         foreach (var tank in entityManager.Tanks.Where(t => !t.Moving))
             Shoot(tank);
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     private void Shoot(Tank tank)

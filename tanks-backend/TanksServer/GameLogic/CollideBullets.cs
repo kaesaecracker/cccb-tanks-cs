@@ -9,12 +9,12 @@ internal sealed class CollideBullets(
 {
     private const int ExplosionRadius = 3;
 
-    public Task TickAsync(TimeSpan _)
+    public ValueTask TickAsync(TimeSpan _)
     {
         entityManager.RemoveWhere(BulletHitsTank);
         entityManager.RemoveWhere(BulletHitsWall);
         entityManager.RemoveWhere(BulletTimesOut);
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     private bool BulletTimesOut(Bullet bullet)

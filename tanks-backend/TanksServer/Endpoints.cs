@@ -80,8 +80,6 @@ internal sealed class Endpoints(
         if (name.Length > 12) return TypedResults.BadRequest("name too long");
 
         var player = playerService.GetOrAdd(name);
-        return player != null
-            ? TypedResults.Ok(player.Name)
-            : TypedResults.Unauthorized();
+        return TypedResults.Ok(player.Name);
     }
 }

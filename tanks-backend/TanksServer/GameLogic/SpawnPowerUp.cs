@@ -8,14 +8,14 @@ internal sealed class SpawnPowerUp(
     private readonly double _spawnChance = options.Value.PowerUpSpawnChance;
     private readonly int _maxCount = options.Value.MaxPowerUpCount;
 
-    public Task TickAsync(TimeSpan delta)
+    public ValueTask TickAsync(TimeSpan delta)
     {
         if (entityManager.PowerUps.Count() >= _maxCount)
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
         if (Random.Shared.NextDouble() > _spawnChance * delta.TotalSeconds)
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
 
         entityManager.SpawnPowerUp();
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }

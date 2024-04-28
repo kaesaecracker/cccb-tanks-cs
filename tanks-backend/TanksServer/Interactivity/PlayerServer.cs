@@ -14,7 +14,7 @@ internal sealed class PlayerServer(
     private readonly Dictionary<string, Player> _players = [];
     private readonly SemaphoreSlim _mutex = new(1, 1);
 
-    public Player? GetOrAdd(string name)
+    public Player GetOrAdd(string name)
     {
         _mutex.Wait();
         try
@@ -67,6 +67,6 @@ internal sealed class PlayerServer(
     public Task HandleClientAsync(WebSocket webSocket, Player player)
         => HandleClientAsync(new PlayerInfoConnection(player, connectionLogger, webSocket, entityManager));
 
-    public Task TickAsync(TimeSpan delta)
-        => ParallelForEachConnectionAsync(connection => connection.OnGameTickAsync());
+    public ValueTask TickAsync(TimeSpan delta)
+        => ParallelForEachConnectionAsync(connection => connection.OnGameTickAsync().AsTask());
 }

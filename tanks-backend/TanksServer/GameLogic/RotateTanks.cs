@@ -8,7 +8,7 @@ internal sealed class RotateTanks(
 {
     private readonly GameRules _config = options.Value;
 
-    public Task TickAsync(TimeSpan delta)
+    public ValueTask TickAsync(TimeSpan delta)
     {
         foreach (var tank in entityManager.Tanks)
         {
@@ -30,6 +30,6 @@ internal sealed class RotateTanks(
             logger.LogTrace("rotated tank to {}", tank.Rotation);
         }
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }

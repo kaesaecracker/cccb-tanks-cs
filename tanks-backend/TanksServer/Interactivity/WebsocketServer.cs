@@ -14,7 +14,7 @@ internal abstract class WebsocketServer<T>(
     public async Task StoppingAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("closing connections");
-        await Locked(async () =>
+        await LockedAsync(async () =>
         {
             _closing = true;
             await Task.WhenAll(_connections.Select(c => c.CloseAsync()));
@@ -22,35 +22,24 @@ internal abstract class WebsocketServer<T>(
         logger.LogInformation("closed connections");
     }
 
-    protected Task ParallelForEachConnectionAsync(Func<T, Task> body)
-    {
-        _mutex.Wait();
-        try
-        {
-            return Task.WhenAll(_connections.Select(body));
-        }
-        finally
-        {
-            _mutex.Release();
-        }
-    }
+    protected ValueTask ParallelForEachConnectionAsync(Func<T, Task> body) =>
+        LockedAsync(async () => await Task.WhenAll(_connections.Select(body)), CancellationToken.None);
 
-    private Task AddConnectionAsync(T connection) => Locked(() =>
+    private ValueTask AddConnectionAsync(T connection) => LockedAsync(async () =>
     {
         if (_closing)
         {
             logger.LogWarning("refusing connection because server is shutting down");
-            return connection.CloseAsync();
+            await connection.CloseAsync();
         }
 
         _connections.Add(connection);
-        return Task.CompletedTask;
     }, CancellationToken.None);
 
-    private Task RemoveConnectionAsync(T connection) => Locked(() =>
+    private ValueTask RemoveConnectionAsync(T connection) => LockedAsync(() =>
     {
         _connections.Remove(connection);
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }, CancellationToken.None);
 
     protected async Task HandleClientAsync(T connection)
@@ -60,7 +49,7 @@ internal abstract class WebsocketServer<T>(
         await RemoveConnectionAsync(connection);
     }
 
-    private async Task Locked(Func<Task> action, CancellationToken cancellationToken)
+    private async ValueTask LockedAsync(Func<ValueTask> action, CancellationToken cancellationToken)
     {
         await _mutex.WaitAsync(cancellationToken);
         try
