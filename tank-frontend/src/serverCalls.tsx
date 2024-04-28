@@ -44,3 +44,15 @@ export function postPlayer(name: string) {
 
     return fetchTyped<string>({url, method: 'POST'});
 }
+
+export async function getMaps() {
+    const url = makeApiUrl('/map');
+    return await fetchTyped<string[]>({url, method: 'GET'});
+}
+
+export function postMaps(map: string) {
+    const url = makeApiUrl('/map');
+    url.searchParams.set('name', map);
+
+    return fetchTyped<string>({url, method: 'POST'});
+}
