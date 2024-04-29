@@ -20,8 +20,9 @@ internal sealed class CollectPowerUp(
                 position.Y < topLeft.Y || position.Y > bottomRight.Y)
                 continue;
 
-            // this works because now the tank overlaps the power up
+            // now the tank overlaps the power up by at least 0.5 tiles
             tank.ExplosiveBullets += 10;
+            tank.Owner.Scores.PowerUpsCollected++;
             return true;
         }
 

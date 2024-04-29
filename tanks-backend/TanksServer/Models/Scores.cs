@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace TanksServer.Models;
 
 internal sealed record class Scores
@@ -22,5 +24,17 @@ internal sealed record class Scores
 
     public int ShotsFired { get; set; }
 
-    public int OverallScore => Math.Max(0, 10000 * Kills - 1000 * Deaths + 10 * ShotsFired + 10 * WallsDestroyed);
+    public int PowerUpsCollected { get; set; }
+
+    [JsonIgnore] public double DistanceMoved { get; set; }
+
+    public int PixelsMoved => (int)DistanceMoved;
+
+    public int OverallScore => Math.Max(0,
+        10000 * Kills
+        - 1000 * Deaths
+        + 100 * PowerUpsCollected
+        + 10 * (ShotsFired + WallsDestroyed)
+        + PixelsMoved
+    );
 }

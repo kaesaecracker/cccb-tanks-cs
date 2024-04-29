@@ -10,8 +10,6 @@ using TanksServer.Interactivity;
 
 namespace TanksServer;
 
-internal sealed record class NameId(string Name, Guid Id);
-
 public static class Program
 {
     public static async Task Main(string[] args)

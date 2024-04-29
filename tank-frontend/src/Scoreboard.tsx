@@ -9,7 +9,7 @@ function numberSorter(a: number, b: number) {
 export default function Scoreboard({}: {}) {
     const query = useQuery({
         queryKey: ['scores'],
-        refetchInterval: 1000,
+        refetchInterval: 5000,
         queryFn: async () => {
             const url = makeApiUrl('/scores');
             const response = await fetch(url, {method: 'GET'});
@@ -52,6 +52,16 @@ export default function Scoreboard({}: {}) {
                 field: 'bullets',
                 visualize: p => p.scores.shotsFired.toString(),
                 sorter: (a, b) => numberSorter(a.scores.shotsFired, b.scores.shotsFired)
+            },
+            {
+                field: 'powerUps',
+                visualize: p => p.scores.powerUpsCollected.toString(),
+                sorter: (a, b) => numberSorter(a.scores.powerUpsCollected, b.scores.powerUpsCollected)
+            },
+            {
+                field: 'distance',
+                visualize: p => p.scores.pixelsMoved.toString(),
+                sorter: (a, b) => numberSorter(a.scores.pixelsMoved, b.scores.pixelsMoved)
             },
             {
                 field: 'score',
