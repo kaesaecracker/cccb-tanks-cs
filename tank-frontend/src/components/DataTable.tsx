@@ -1,4 +1,4 @@
-import {ReactNode, useState} from "react";
+import { ReactNode, useState } from "react";
 import './DataTable.css';
 
 export type DataTableColumnDefinition<T> = {
@@ -9,7 +9,7 @@ export type DataTableColumnDefinition<T> = {
 };
 
 
-function DataTableRow({rowData, columns}: {
+function DataTableRow({ rowData, columns }: {
     rowData: any,
     columns: DataTableColumnDefinition<any>[]
 }) {
@@ -28,7 +28,7 @@ function DataTableRow({rowData, columns}: {
     </tr>;
 }
 
-export default function DataTable<T>({data, columns, className}: {
+export default function DataTable<T>({ data, columns, className }: {
     data: T[],
     columns: DataTableColumnDefinition<any>[],
     className?: string
@@ -57,20 +57,20 @@ export default function DataTable<T>({data, columns, className}: {
     return <div className={'DataTable ' + (className ?? '')}>
         <table>
             <thead className='DataTableHead'>
-            <tr>
-                {
-                    columns.map(column =>
-                        <th key={column.field} onClick={() => headerClick(column)}>
-                            {column.label ?? column.field}
-                        </th>)
-                }
-            </tr>
+                <tr>
+                    {
+                        columns.map(column =>
+                            <th key={column.field} onClick={() => headerClick(column)}>
+                                {column.label ?? column.field}
+                            </th>)
+                    }
+                </tr>
             </thead>
             <tbody>
-            {
-                dataToDisplay.map((element, index) =>
-                    <DataTableRow key={`${sortBy?.field}-${index}`} rowData={element} columns={columns}/>)
-            }
+                {
+                    dataToDisplay.map((element, index) =>
+                        <DataTableRow key={`${sortBy?.field}-${index}`} rowData={element} columns={columns} />)
+                }
             </tbody>
         </table>
     </div>;
