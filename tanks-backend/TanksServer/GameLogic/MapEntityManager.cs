@@ -46,7 +46,12 @@ internal sealed class MapEntityManager(
         logger.LogInformation("Tank added for player {}", player.Name);
     }
 
-    public void SpawnPowerUp() => _powerUps.Add(new PowerUp(ChooseSpawnPosition()));
+    public void SpawnPowerUp(PowerUpType type, MagazineType? magazineType) => _powerUps.Add(new PowerUp
+    {
+        Position = ChooseSpawnPosition(),
+        Type = type,
+        MagazineType = magazineType
+    });
 
     public void RemoveWhere(Predicate<PowerUp> predicate) => _powerUps.RemoveWhere(predicate);
 

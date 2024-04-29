@@ -2,7 +2,7 @@ namespace TanksServer.Models;
 
 internal interface IMapEntity
 {
-    FloatPosition Position { get; set; }
+    FloatPosition Position { get; }
 
     PixelBounds Bounds { get; }
 }
