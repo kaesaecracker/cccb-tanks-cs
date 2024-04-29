@@ -23,4 +23,6 @@ internal sealed class GameRules
     public int IdleTimeoutMs { get; set; }
 
     public byte MagazineSize { get; set; } = 5;
+
+    public int ReloadDelayMs { get; set; } = 3000;
 }

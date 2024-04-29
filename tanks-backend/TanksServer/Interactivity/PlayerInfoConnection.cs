@@ -1,5 +1,4 @@
 using System.Net.WebSockets;
-using System.Text;
 using System.Text.Json;
 using TanksServer.GameLogic;
 
@@ -46,9 +45,14 @@ internal sealed class PlayerInfoConnection(
     private byte[]? GetMessageToSend()
     {
         var tank = entityManager.GetCurrentTankOfPlayer(player);
-        TankInfo? tankInfo = tank != null
-            ? new TankInfo(tank.Orientation, tank.Magazine.ToDisplayString(), tank.Position.ToPixelPosition(), tank.Moving)
-            : null;
+
+        TankInfo? tankInfo = null;
+        if (tank != null)
+        {
+            var magazine = tank.ReloadingUntil > DateTime.Now ? "[ RELOADING ]" : tank.Magazine.ToDisplayString();
+            tankInfo = new TankInfo(tank.Orientation, magazine, tank.Position.ToPixelPosition(), tank.Moving);
+        }
+
         var info = new PlayerInfo(player.Name, player.Scores, player.Controls.ToDisplayString(), tankInfo);
         var response = JsonSerializer.SerializeToUtf8Bytes(info, _context.PlayerInfo);
 

@@ -19,12 +19,25 @@ internal sealed class ShootFromTanks(
     {
         if (!tank.Owner.Controls.Shoot)
             return;
-        if (tank.Magazine.Empty)
+
+        var now = DateTime.Now;
+        if (tank.NextShotAfter >= now)
             return;
-        if (tank.NextShotAfter >= DateTime.Now)
+        if (tank.ReloadingUntil >= now)
             return;
 
-        tank.NextShotAfter = DateTime.Now.AddMilliseconds(_config.ShootDelayMs);
+        if (tank.Magazine.Empty)
+        {
+            tank.ReloadingUntil = now.AddMilliseconds(_config.ReloadDelayMs);
+            tank.Magazine = tank.Magazine with
+            {
+                UsedBullets = 0,
+                Type = MagazineType.Basic
+            };
+            return;
+        }
+
+        tank.NextShotAfter = now.AddMilliseconds(_config.ShootDelayMs);
         tank.Magazine = tank.Magazine with
         {
             UsedBullets = (byte)(tank.Magazine.UsedBullets + 1)

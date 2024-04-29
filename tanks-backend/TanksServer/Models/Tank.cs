@@ -31,4 +31,6 @@ internal sealed class Tank : IMapEntity
     public int Orientation => (int)Math.Round(Rotation * 16) % 16;
 
     public required Magazine Magazine { get; set; }
+
+    public DateTime ReloadingUntil { get; set; }
 }
