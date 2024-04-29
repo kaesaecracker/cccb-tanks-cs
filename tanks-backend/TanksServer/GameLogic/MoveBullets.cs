@@ -1,9 +1,6 @@
 namespace TanksServer.GameLogic;
 
-internal sealed class MoveBullets(
-    MapEntityManager entityManager,
-    IOptions<GameRules> config
-) : ITickStep
+internal sealed class MoveBullets(MapEntityManager entityManager) : ITickStep
 {
     public ValueTask TickAsync(TimeSpan delta)
     {
@@ -13,9 +10,9 @@ internal sealed class MoveBullets(
         return ValueTask.CompletedTask;
     }
 
-    private void MoveBullet(Bullet bullet, TimeSpan delta)
+    private static void MoveBullet(Bullet bullet, TimeSpan delta)
     {
-        var speed = config.Value.BulletSpeed * delta.TotalSeconds;
+        var speed = bullet.Speed * delta.TotalSeconds;
         var angle = bullet.Rotation * 2 * Math.PI;
         bullet.Position = new FloatPosition(
             bullet.Position.X + Math.Sin(angle) * speed,

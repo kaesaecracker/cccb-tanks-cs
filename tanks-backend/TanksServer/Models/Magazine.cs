@@ -5,11 +5,11 @@ namespace TanksServer.Models;
 [Flags]
 internal enum MagazineType
 {
-    Basic = 1 << 0,
-    Fast = 1 << 1,
-    Explosive = 1 << 2,
-    Smart = 1 << 3,
-    Mine = 1 << 4,
+    Basic = 0,
+    Fast = 1 << 0,
+    Explosive = 1 << 1,
+    Smart = 1 << 2,
+    Mine = 1 << 3,
 }
 
 internal readonly record struct Magazine(MagazineType Type, byte UsedBullets, byte MaxBullets)

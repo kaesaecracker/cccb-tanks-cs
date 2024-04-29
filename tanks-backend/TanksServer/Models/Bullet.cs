@@ -15,4 +15,6 @@ internal sealed class Bullet : IMapEntity
     public PixelBounds Bounds => new(Position.ToPixelPosition(), Position.ToPixelPosition());
 
     internal required DateTime OwnerCollisionAfter { get; init; }
+
+    public required double Speed { get; init; }
 }

@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace TanksServer.GameLogic;
 
 internal sealed class ShootFromTanks(
@@ -32,8 +30,7 @@ internal sealed class ShootFromTanks(
             UsedBullets = (byte)(tank.Magazine.UsedBullets + 1)
         };
 
-        var explosive = tank.Magazine.Type.HasFlag(MagazineType.Explosive);
         tank.Owner.Scores.ShotsFired++;
-        entityManager.SpawnBullet(tank.Owner, tank.Position, tank.Orientation / 16d, explosive);
+        entityManager.SpawnBullet(tank.Owner, tank.Position, tank.Orientation / 16d, tank.Magazine.Type);
     }
 }

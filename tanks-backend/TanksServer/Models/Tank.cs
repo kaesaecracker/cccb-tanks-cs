@@ -3,11 +3,11 @@ using TanksServer.GameLogic;
 
 namespace TanksServer.Models;
 
-internal sealed class Tank(Player player, FloatPosition spawnPosition) : IMapEntity
+internal sealed class Tank : IMapEntity
 {
     private double _rotation;
 
-    public Player Owner { get; } = player;
+    public required Player Owner { get; init; }
 
     public double Rotation
     {
@@ -24,11 +24,11 @@ internal sealed class Tank(Player player, FloatPosition spawnPosition) : IMapEnt
 
     public bool Moving { get; set; }
 
-    public FloatPosition Position { get; set; } = spawnPosition;
+    public required FloatPosition Position { get; set; }
 
     public PixelBounds Bounds => Position.GetBoundsForCenter(MapService.TileSize);
 
     public int Orientation => (int)Math.Round(Rotation * 16) % 16;
 
-    public Magazine Magazine { get; set; } = new(MagazineType.Basic, 0, 5);
+    public required Magazine Magazine { get; set; }
 }
