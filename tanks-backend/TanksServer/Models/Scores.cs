@@ -22,5 +22,12 @@ internal sealed record class Scores
 
     public int ShotsFired { get; set; }
 
-    public int OverallScore => Math.Max(0, 10000 * Kills - 1000 * Deaths + 10 * ShotsFired + 10 * WallsDestroyed);
+    public int PowerUpsCollected { get; set; }
+
+    public int OverallScore => Math.Max(0,
+        10000 * Kills
+        - 1000 * Deaths
+        + 100 * PowerUpsCollected
+        + 10 * (ShotsFired + WallsDestroyed)
+    );
 }

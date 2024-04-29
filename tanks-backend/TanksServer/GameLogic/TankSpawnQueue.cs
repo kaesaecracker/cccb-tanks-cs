@@ -5,7 +5,7 @@ namespace TanksServer.GameLogic;
 internal sealed class TankSpawnQueue(
     IOptions<GameRules> options,
     MapEntityManager entityManager
-): ITickStep
+) : ITickStep
 {
     private readonly ConcurrentQueue<Player> _queue = new();
     private readonly ConcurrentDictionary<Player, DateTime> _spawnTimes = new();
@@ -16,31 +16,8 @@ internal sealed class TankSpawnQueue(
 
     public void EnqueueForDelayedSpawn(Player player)
     {
-        _queue.Enqueue(player);
         _spawnTimes.AddOrUpdate(player, DateTime.MinValue, (_, _) => DateTime.Now + _spawnDelay);
-    }
-
-    private bool TryDequeueNext([MaybeNullWhen(false)] out Player player)
-    {
-        if (!_queue.TryDequeue(out player))
-            return false; // no one on queue
-
-        if (player.LastInput + _idleTimeout < DateTime.Now)
-        {
-            // player idle
-            _queue.Enqueue(player);
-            return false;
-        }
-
-        var now = DateTime.Now;
-        if (_spawnTimes.GetOrAdd(player, DateTime.MinValue) > now)
-        {
-            // spawn delay
-            _queue.Enqueue(player);
-            return false;
-        }
-
-        return true;
+        _queue.Enqueue(player);
     }
 
     public ValueTask TickAsync(TimeSpan _)
@@ -50,5 +27,30 @@ internal sealed class TankSpawnQueue(
 
         entityManager.SpawnTank(player);
         return ValueTask.CompletedTask;
+    }
+
+    private bool TryDequeueNext([MaybeNullWhen(false)] out Player player)
+    {
+        if (!_queue.TryDequeue(out player))
+            return false; // no one on queue
+
+        var now = DateTime.Now;
+        if (player.LastInput + _idleTimeout < now)
+        {
+            // player idle
+            _queue.Enqueue(player);
+            player = null;
+            return false;
+        }
+
+        if (_spawnTimes.GetOrAdd(player, DateTime.MinValue) > now)
+        {
+            // spawn delay
+            _queue.Enqueue(player);
+            player = null;
+            return false;
+        }
+
+        return true;
     }
 }
