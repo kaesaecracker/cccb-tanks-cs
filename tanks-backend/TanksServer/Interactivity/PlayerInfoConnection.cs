@@ -13,7 +13,7 @@ internal sealed class PlayerInfoConnection(
 ) : WebsocketServerConnection(logger, new ByteChannelWebSocket(rawSocket, logger, 0))
 {
     private readonly AppSerializerContext _context = new(new JsonSerializerOptions(JsonSerializerDefaults.Web));
-    private bool _wantsInfoOnTick;
+    private bool _wantsInfoOnTick = true;
     private byte[] _lastMessage = [];
 
     protected override ValueTask HandleMessageLockedAsync(Memory<byte> buffer)
