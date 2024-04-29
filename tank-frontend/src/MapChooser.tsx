@@ -1,7 +1,8 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { getMaps, postMaps } from "./serverCalls";
+import './MapChooser.css'
 
-export default function MapDropDown() {
+export default function MapChooser() {
     const [mapList, setMaps] = useState<string[] | null>(null);
 
     useEffect(() => {
@@ -20,7 +21,7 @@ export default function MapDropDown() {
         event.preventDefault();
     };
 
-    return <select value="maps" className='DropDown' onChange={onChange}>
+    return <select value="maps" className='MapChooser-DropDown' onChange={onChange}>
         <option value="" defaultValue={""} >Choose map</option>
         {mapList?.map(m =>
             <option key={m} value={m}>{m}</option>)}

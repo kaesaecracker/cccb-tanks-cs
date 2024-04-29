@@ -6,7 +6,7 @@ import Column from './components/Column.tsx';
 import Row from './components/Row.tsx';
 import Scoreboard from './Scoreboard.tsx';
 import Button from './components/Button.tsx';
-import MapDropDown from './MapDropDown.tsx';
+import MapChooser from './MapChooser.tsx';
 import './App.css';
 import {getRandomTheme, useStoredTheme} from "./theme.ts";
 import { useState } from 'react';
@@ -21,7 +21,7 @@ export default function App() {
 
         <Row>
             <h1 className="flex-grow">CCCB-Tanks!</h1>
-            <MapDropDown />
+            <MapChooser />
             <Button text="change colors" onClick={() => setTheme(_ => getRandomTheme())}/>
             <Button
                 onClick={() => window.open('https://github.com/kaesaecracker/cccb-tanks-cs', '_blank')?.focus()}

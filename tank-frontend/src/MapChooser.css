@@ -1,0 +1,9 @@
+
+.MapChooser-DropDown {
+    border: solid var(--border-size-thin);
+    padding: var(--padding-normal);
+
+    background: var(--color-background);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
