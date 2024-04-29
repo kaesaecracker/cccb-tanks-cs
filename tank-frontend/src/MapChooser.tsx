@@ -1,7 +1,7 @@
 import {ChangeEvent} from 'react';
 import {makeApiUrl} from './serverCalls';
 import './MapChooser.css';
-import {useQuery} from '@tanstack/react-query';
+import {useMutation, useQuery} from '@tanstack/react-query';
 
 export default function MapChooser() {
     const query = useQuery({
@@ -15,20 +15,31 @@ export default function MapChooser() {
         }
     });
 
+    const postMap = useMutation({
+        retry: false,
+        mutationFn: async (map: string) => {
+            const url = makeApiUrl('/map');
+            url.searchParams.set('name', map);
+
+            const response = await fetch(url, {method: 'POST'});
+            if (!response.ok)
+                throw new Error(`${response.status} (${response.statusText}): ${await response.text()}`);
+        }
+    });
+
     const onChange = (event: ChangeEvent<HTMLSelectElement>) => {
         if (event.target.selectedIndex < 1)
             return;
         event.preventDefault();
 
-        const url = makeApiUrl('/map');
-        url.searchParams.set('name', event.target.options[event.target.selectedIndex].value);
-
-        fetch(url, {method: 'POST'});
+        const chosenMap = event.target.options[event.target.selectedIndex].value;
+        postMap.mutate(chosenMap);
     };
 
-    return <select value="maps" className="MapChooser-DropDown" onChange={onChange}>
+    const disabled = !query.isSuccess || postMap.isPending;
+
+    return <select className="MapChooser-DropDown" onChange={onChange} disabled={disabled}>
         <option value="" defaultValue={''}>Choose map</option>
-        {query.isSuccess && query.data.map(m =>
-            <option key={m} value={m}>{m}</option>)}
+        {query.isSuccess && query.data.map(m => <option key={m} value={m}>{m}</option>)}
     </select>;
 }
