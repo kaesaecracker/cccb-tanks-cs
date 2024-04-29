@@ -1,40 +1,33 @@
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import './JoinForm.css';
-import {makeApiUrl, Player} from './serverCalls';
+import {makeApiUrl} from './serverCalls';
 import Column from './components/Column.tsx';
 import Button from './components/Button.tsx';
 import TextInput from './components/TextInput.tsx';
+import {useMutation} from '@tanstack/react-query';
 
 export default function JoinForm({onDone}: {
     onDone: (name: string) => void;
 }) {
-    const [clicked, setClicked] = useState(false);
-    const [data, setData] = useState<Player | null>(null);
-    const [errorText, setErrorText] = useState<string | null>();
+    const postPlayer = useMutation({
+        retry: false,
+        mutationFn: async ({name}: { name: string }) => {
+            const url = makeApiUrl('/player');
+            url.searchParams.set('name', name);
 
-    useEffect(() => {
-        if (!clicked || data)
-            return;
+            const response = await fetch(url, {method: 'POST'});
 
-        const url = makeApiUrl('/player');
-        url.searchParams.set('name', name);
+            if (!response.ok)
+                throw new Error(`${response.status} (${response.statusText}): ${await response.text()}`);
 
-        fetch(url, {method: 'POST'})
-            .then(async response => {
-                if (!response.ok) {
-                    setErrorText(`${response.status} (${response.statusText}): ${await response.text()}`);
-                    setClicked(false);
-                    return;
-                }
-
-                onDone((await response.json()).trim());
-                setErrorText(null);
-            });
-    }, [clicked, setData, data, setClicked, onDone, errorText]);
+            onDone((await response.json()).trim());
+        }
+    });
 
     const [name, setName] = useState('');
-    const disableButtons = clicked || name.trim() === '';
-    const setClickedTrue = () => setClicked(true);
+    const disableButtons = postPlayer.isPending || name.trim() === '';
+
+    const confirm = () => postPlayer.mutate({name});
 
     return <Column className="JoinForm">
         <h3> Enter your name to play </h3>
@@ -42,12 +35,12 @@ export default function JoinForm({onDone}: {
             value={name}
             placeholder="player name"
             onChange={e => setName(e.target.value)}
-            onEnter={setClickedTrue}
+            onEnter={confirm}
         />
         <Button
-            onClick={setClickedTrue}
+            onClick={confirm}
             disabled={disableButtons}
             text="INSERT COIN"/>
-        {errorText && <p>{errorText}</p>}
+        {postPlayer.isError && <p>{postPlayer.error.message}</p>}
     </Column>;
 }
