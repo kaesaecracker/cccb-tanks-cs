@@ -75,6 +75,7 @@ export default function PlayerInfo({player}: { player: string }) {
             <ScoreRow name="walls destroyed" value={lastJsonMessage.scores.wallsDestroyed}/>
             <ScoreRow name="bullets fired" value={lastJsonMessage.scores.shotsFired}/>
             <ScoreRow name="power ups collected" value={lastJsonMessage.scores.powerUpsCollected}/>
+            <ScoreRow name="pixels moved" value={lastJsonMessage.scores.pixelsMoved}/>
 
             <ScoreRow name="score" value={lastJsonMessage.scores.overallScore}/>
             </tbody>

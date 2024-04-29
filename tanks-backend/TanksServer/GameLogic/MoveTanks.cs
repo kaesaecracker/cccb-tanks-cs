@@ -54,6 +54,7 @@ internal sealed class MoveTanks(
         if (HitsTank(tank, newPosition))
             return false;
 
+        tank.Owner.Scores.DistanceMoved += newPosition.Distance(tank.Position);
         tank.Position = newPosition;
         return true;
     }

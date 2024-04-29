@@ -59,6 +59,11 @@ export default function Scoreboard({}: {}) {
                 sorter: (a, b) => numberSorter(a.scores.powerUpsCollected, b.scores.powerUpsCollected)
             },
             {
+                field: 'distance',
+                visualize: p => p.scores.pixelsMoved.toString(),
+                sorter: (a, b) => numberSorter(a.scores.pixelsMoved, b.scores.pixelsMoved)
+            },
+            {
                 field: 'score',
                 visualize: p => p.scores.overallScore.toString(),
                 sorter: (a, b) => numberSorter(a.scores.overallScore, b.scores.overallScore)

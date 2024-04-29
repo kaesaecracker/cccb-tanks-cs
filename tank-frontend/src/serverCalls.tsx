@@ -9,6 +9,7 @@ export type Scores = {
     readonly shotsFired: number;
     readonly overallScore: number;
     readonly powerUpsCollected: number;
+    readonly pixelsMoved: number;
 };
 
 export type Player = {
