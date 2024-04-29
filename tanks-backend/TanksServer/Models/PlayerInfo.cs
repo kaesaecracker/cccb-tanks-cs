@@ -1,13 +1,13 @@
 namespace TanksServer.Models;
 
-internal sealed record class TankInfo(
+internal record struct TankInfo(
     int Orientation,
-    byte ExplosiveBullets,
+    string Magazine,
     PixelPosition Position,
     bool Moving
 );
 
-internal sealed record class PlayerInfo(
+internal record struct PlayerInfo(
     string Name,
     Scores Scores,
     string Controls,

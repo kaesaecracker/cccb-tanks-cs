@@ -21,15 +21,18 @@ internal sealed class ShootFromTanks(
     {
         if (!tank.Owner.Controls.Shoot)
             return;
+        if (tank.Magazine.Empty)
+            return;
         if (tank.NextShotAfter >= DateTime.Now)
             return;
 
         tank.NextShotAfter = DateTime.Now.AddMilliseconds(_config.ShootDelayMs);
+        tank.Magazine = tank.Magazine with
+        {
+            UsedBullets = (byte)(tank.Magazine.UsedBullets + 1)
+        };
 
-        var explosive = tank.ExplosiveBullets > 0;
-        if (explosive)
-            tank.ExplosiveBullets--;
-
+        var explosive = tank.Magazine.Type.HasFlag(MagazineType.Explosive);
         tank.Owner.Scores.ShotsFired++;
         entityManager.SpawnBullet(tank.Owner, tank.Position, tank.Orientation / 16d, explosive);
     }

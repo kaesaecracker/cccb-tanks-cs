@@ -21,7 +21,11 @@ internal sealed class CollectPowerUp(
                 continue;
 
             // now the tank overlaps the power up by at least 0.5 tiles
-            tank.ExplosiveBullets += 10;
+            tank.Magazine = tank.Magazine with
+            {
+                UsedBullets = 0,
+                Type = MagazineType.Explosive
+            };
             tank.Owner.Scores.PowerUpsCollected++;
             return true;
         }

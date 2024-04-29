@@ -30,5 +30,5 @@ internal sealed class Tank(Player player, FloatPosition spawnPosition) : IMapEnt
 
     public int Orientation => (int)Math.Round(Rotation * 16) % 16;
 
-    public byte ExplosiveBullets { get; set; }
+    public Magazine Magazine { get; set; } = new(MagazineType.Basic, 0, 5);
 }

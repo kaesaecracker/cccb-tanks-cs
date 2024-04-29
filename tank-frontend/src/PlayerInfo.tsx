@@ -22,7 +22,7 @@ function ScoreRow({name, value}: {
 }
 
 type TankInfo = {
-    readonly explosiveBullets: number;
+    readonly magazine: string;
     readonly position: { x: number; y: number };
     readonly orientation: number;
     readonly moving: boolean;
@@ -63,8 +63,8 @@ export default function PlayerInfo({player}: { player: string }) {
         </h3>
         <table>
             <tbody>
+            <ScoreRow name="magazine" value={lastJsonMessage.tank?.magazine}/>
             <ScoreRow name="controls" value={lastJsonMessage.controls}/>
-            <ScoreRow name="explosive bullets" value={lastJsonMessage.tank?.explosiveBullets}/>
             <ScoreRow name="position" value={lastJsonMessage.tank?.position}/>
             <ScoreRow name="orientation" value={lastJsonMessage.tank?.orientation}/>
             <ScoreRow name="moving" value={lastJsonMessage.tank?.moving}/>
