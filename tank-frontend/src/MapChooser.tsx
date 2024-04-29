@@ -1,29 +1,34 @@
-import { ChangeEvent, useEffect, useState } from "react";
-import { getMaps, postMaps } from "./serverCalls";
-import './MapChooser.css'
+import {ChangeEvent} from 'react';
+import {makeApiUrl} from './serverCalls';
+import './MapChooser.css';
+import {useQuery} from '@tanstack/react-query';
 
 export default function MapChooser() {
-    const [mapList, setMaps] = useState<string[] | null>(null);
-
-    useEffect(() => {
-        let aborted = false;
-        async function startFetch() {
-            const response = await getMaps();
-            if (!aborted && response.ok && response.successResult)
-                setMaps(response.successResult);
+    const query = useQuery({
+        queryKey: ['get-maps'],
+        queryFn: async () => {
+            const url = makeApiUrl('/map');
+            const response = await fetch(url, {method: 'GET'});
+            if (!response.ok)
+                throw new Error(`response failed with code ${response.status} (${response.status})${await response.text()}`);
+            return await response.json() as string[];
         }
-        startFetch();
-        return () => { aborted = true };
-    }, []);
+    });
 
     const onChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        postMaps(event.target.options[event.target.selectedIndex].value);
+        if (event.target.selectedIndex < 1)
+            return;
         event.preventDefault();
+
+        const url = makeApiUrl('/map');
+        url.searchParams.set('name', event.target.options[event.target.selectedIndex].value);
+
+        fetch(url, {method: 'POST'});
     };
 
-    return <select value="maps" className='MapChooser-DropDown' onChange={onChange}>
-        <option value="" defaultValue={""} >Choose map</option>
-        {mapList?.map(m =>
+    return <select value="maps" className="MapChooser-DropDown" onChange={onChange}>
+        <option value="" defaultValue={''}>Choose map</option>
+        {query.isSuccess && query.data.map(m =>
             <option key={m} value={m}>{m}</option>)}
-    </select>
+    </select>;
 }
