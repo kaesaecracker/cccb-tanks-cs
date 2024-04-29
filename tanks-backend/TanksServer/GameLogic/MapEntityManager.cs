@@ -27,7 +27,8 @@ internal sealed class MapEntityManager(
             IsExplosive = type.HasFlag(MagazineType.Explosive),
             Timeout = DateTime.Now + _bulletTimeout,
             OwnerCollisionAfter = DateTime.Now + TimeSpan.FromSeconds(1),
-            Speed = speed
+            Speed = speed,
+            IsSmart = type.HasFlag(MagazineType.Smart)
         });
     }
 

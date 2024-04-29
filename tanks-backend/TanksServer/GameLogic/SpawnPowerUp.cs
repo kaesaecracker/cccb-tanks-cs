@@ -18,18 +18,17 @@ internal sealed class SpawnPowerUp(
             return ValueTask.CompletedTask;
 
 
-        var type = Random.Shared.Next(10) < 3
+        var type = Random.Shared.Next(4) == 0
             ? PowerUpType.MagazineSizeUpgrade
             : PowerUpType.MagazineTypeUpgrade;
 
         MagazineType? magazineType = type switch
         {
-            PowerUpType.MagazineTypeUpgrade => Random.Shared.Next(0, 4) switch
+            PowerUpType.MagazineTypeUpgrade => Random.Shared.Next(0, 3) switch
             {
                 0 => MagazineType.Fast,
                 1 => MagazineType.Explosive,
                 2 => MagazineType.Smart,
-                3 => MagazineType.Mine,
                 _ => throw new UnreachableException()
             },
             _ => null

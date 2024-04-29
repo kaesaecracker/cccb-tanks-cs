@@ -25,4 +25,6 @@ internal sealed class GameRules
     public byte MagazineSize { get; set; } = 5;
 
     public int ReloadDelayMs { get; set; } = 3000;
+
+    public double SmartBulletInertia { get; set; } = 1;
 }

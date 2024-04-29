@@ -47,7 +47,7 @@ internal sealed class CollectPowerUp(
                     };
                     break;
                 default:
-                    throw new NotImplementedException();
+                    throw new UnreachableException();
             }
 
             tank.Owner.Scores.PowerUpsCollected++;

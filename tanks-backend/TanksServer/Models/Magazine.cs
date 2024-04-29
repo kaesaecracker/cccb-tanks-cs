@@ -21,16 +21,13 @@ internal readonly record struct Magazine(MagazineType Type, byte UsedBullets, by
         var sb = new StringBuilder();
 
         if (Type.HasFlag(MagazineType.Fast))
-            sb.Append('»');
+            sb.Append("» ");
         if (Type.HasFlag(MagazineType.Explosive))
-            sb.Append('*');
+            sb.Append("* ");
         if (Type.HasFlag(MagazineType.Smart))
-            sb.Append('@');
+            sb.Append("@ ");
         if (Type.HasFlag(MagazineType.Mine))
-            sb.Append('\u263c');
-
-        if (sb.Length > 0)
-            sb.Append(' ');
+            sb.Append("\u263c ");
 
         sb.Append("[ ");
         for (var i = 0; i < UsedBullets; i++)
