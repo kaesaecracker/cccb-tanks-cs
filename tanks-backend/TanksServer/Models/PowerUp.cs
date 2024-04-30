@@ -4,8 +4,8 @@ namespace TanksServer.Models;
 
 internal enum PowerUpType
 {
-    MagazineTypeUpgrade,
-    MagazineSizeUpgrade
+    MagazineType,
+    MagazineSize
 }
 
 internal sealed class PowerUp: IMapEntity

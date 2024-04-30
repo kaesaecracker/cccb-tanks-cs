@@ -9,7 +9,6 @@ internal enum MagazineType
     Fast = 1 << 0,
     Explosive = 1 << 1,
     Smart = 1 << 2,
-    Mine = 1 << 3,
 }
 
 internal readonly record struct Magazine(MagazineType Type, byte UsedBullets, byte MaxBullets)
@@ -26,8 +25,6 @@ internal readonly record struct Magazine(MagazineType Type, byte UsedBullets, by
             sb.Append("* ");
         if (Type.HasFlag(MagazineType.Smart))
             sb.Append("@ ");
-        if (Type.HasFlag(MagazineType.Mine))
-            sb.Append("\u263c ");
 
         sb.Append("[ ");
         for (var i = 0; i < UsedBullets; i++)

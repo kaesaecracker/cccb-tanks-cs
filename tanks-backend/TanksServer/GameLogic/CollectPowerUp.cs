@@ -26,7 +26,7 @@ internal sealed class CollectPowerUp(
 
             switch (obj.Type)
             {
-                case PowerUpType.MagazineTypeUpgrade:
+                case PowerUpType.MagazineType:
                     if (obj.MagazineType == null)
                         throw new UnreachableException();
 
@@ -40,7 +40,7 @@ internal sealed class CollectPowerUp(
                         tank.ReloadingUntil = DateTime.Now;
 
                     break;
-                case PowerUpType.MagazineSizeUpgrade:
+                case PowerUpType.MagazineSize:
                     tank.Magazine = tank.Magazine with
                     {
                         MaxBullets = (byte)int.Clamp(tank.Magazine.MaxBullets + 1, 1, 32)
