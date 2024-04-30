@@ -119,33 +119,49 @@ export default function ClientScreen({theme, player}: {
     useEffect(() => {
         if (lastMessage === null)
             return;
-        if (canvasRef.current === null)
-            throw new Error('canvas null');
 
-        const canvas = canvasRef.current;
-        const drawContext = canvas.getContext('2d');
-        if (!drawContext)
-            throw new Error('could not get draw context');
+        let ignore = false;
+        const start = async () => {
+            const canvas = canvasRef.current;
+            if (canvas === null)
+                throw new Error('canvas null');
 
-        let pixels = new Uint8ClampedArray(lastMessage.data);
-        let additionalData: Uint8ClampedArray | null = null;
-        if (pixels.length > observerMessageSize) {
-            additionalData = pixels.slice(observerMessageSize);
-            pixels = pixels.slice(0, observerMessageSize);
-        }
+            const drawContext = canvas.getContext('2d');
+            if (!drawContext)
+                throw new Error('could not get draw context');
 
-        drawPixelsToCanvas({
-            context: drawContext,
-            width: canvas.width,
-            height: canvas.height,
-            pixels,
-            additional: additionalData,
-            background: normalizeColor(drawContext, hslToString(theme.background)),
-            foreground: normalizeColor(drawContext, hslToString(theme.primary)),
-            playerColor: normalizeColor(drawContext, hslToString(theme.secondary)),
-            otherTanksColor: normalizeColor(drawContext, hslToString(theme.tertiary))
-        });
-        sendMessage('');
+            let pixels = new Uint8ClampedArray(lastMessage.data);
+            let additionalData: Uint8ClampedArray | null = null;
+            if (pixels.length > observerMessageSize) {
+                additionalData = pixels.slice(observerMessageSize);
+                pixels = pixels.slice(0, observerMessageSize);
+            }
+
+            if (ignore)
+                return;
+
+            drawPixelsToCanvas({
+                context: drawContext,
+                width: canvas.width,
+                height: canvas.height,
+                pixels,
+                additional: additionalData,
+                background: normalizeColor(drawContext, hslToString(theme.background)),
+                foreground: normalizeColor(drawContext, hslToString(theme.primary)),
+                playerColor: normalizeColor(drawContext, hslToString(theme.secondary)),
+                otherTanksColor: normalizeColor(drawContext, hslToString(theme.tertiary))
+            });
+
+            if (ignore)
+                return;
+
+            sendMessage('');
+        };
+
+        start();
+        return () => {
+            ignore = true;
+        };
     }, [lastMessage, canvasRef.current, theme]);
 
     return <canvas ref={canvasRef} id="screen" width={pixelsPerRow} height={pixelsPerCol}/>;
