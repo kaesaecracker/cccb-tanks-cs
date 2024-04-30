@@ -7,37 +7,19 @@ internal sealed class GameTickWorker(
     IEnumerable<ITickStep> steps,
     IHostApplicationLifetime lifetime,
     ILogger<GameTickWorker> logger
-) : IHostedService, IDisposable
+) : IHostedLifecycleService, IDisposable
 {
     private readonly CancellationTokenSource _cancellation = new();
+    private readonly TaskCompletionSource _shutdownCompletion = new();
     private readonly List<ITickStep> _steps = steps.ToList();
-    private Task? _run;
 
-    public void Dispose()
+    public async Task StartedAsync(CancellationToken cancellationToken)
     {
-        _cancellation.Dispose();
-        _run?.Dispose();
-    }
+        await Task.Yield();
 
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        _run = RunAsync();
-        return Task.CompletedTask;
-    }
-
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        await _cancellation.CancelAsync();
-        if (_run != null) await _run;
-    }
-
-    private async Task RunAsync()
-    {
         // the first tick is really short (< 0.01ms) if this line is directly above the while
         var sw = Stopwatch.StartNew();
-
-        // do not block in StartAsync
-        await Task.Delay(1).ConfigureAwait(false);
+        await Task.Delay(1, CancellationToken.None).ConfigureAwait(false);
 
         try
         {
@@ -55,5 +37,19 @@ internal sealed class GameTickWorker(
             logger.LogError(ex, "game tick service crashed");
             lifetime.StopApplication();
         }
+
+        _shutdownCompletion.SetResult();
     }
+
+    public Task StoppingAsync(CancellationToken cancellationToken) => _cancellation.CancelAsync();
+
+    public Task StopAsync(CancellationToken cancellationToken) => _shutdownCompletion.Task;
+
+    public void Dispose() => _cancellation.Dispose();
+
+    public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+    public Task StartingAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+    public Task StoppedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }

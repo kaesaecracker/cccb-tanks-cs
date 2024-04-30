@@ -16,20 +16,20 @@ internal sealed class ByteChannelWebSocket(WebSocket socket, ILogger logger, int
         catch (WebSocketException e)
         {
             logger.LogError(e, "could not send binary message");
-            await CloseAsync();
+            await CloseWithErrorAsync(e.Message);
         }
     }
 
-    public async ValueTask SendTextAsync(ReadOnlyMemory<byte> data, bool endOfMessage = true)
+    public async ValueTask SendTextAsync(ReadOnlyMemory<byte> utf8Data, bool endOfMessage = true)
     {
         try
         {
-            await socket.SendAsync(data, WebSocketMessageType.Text, endOfMessage, CancellationToken.None);
+            await socket.SendAsync(utf8Data, WebSocketMessageType.Text, endOfMessage, CancellationToken.None);
         }
         catch (WebSocketException e)
         {
             logger.LogError(e, "could not send text message");
-            await CloseAsync();
+            await CloseWithErrorAsync(e.Message);
         }
     }
 

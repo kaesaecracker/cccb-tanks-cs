@@ -4,25 +4,30 @@ using TanksServer.Graphics;
 
 namespace TanksServer.Interactivity;
 
-internal sealed class PlayerScreenData(ILogger logger)
+internal sealed class PlayerScreenData(ILogger logger, Player player)
 {
     private readonly Memory<byte> _data = new byte[MapService.PixelsPerRow * MapService.PixelsPerColumn / 2];
     private int _count;
 
-    public void Clear()
+    public ReadOnlyMemory<byte> Build(GamePixelGrid gamePixelGrid)
     {
-        _count = 0;
-        _data.Span.Clear();
-    }
+        Clear();
+        foreach (var gamePixel in gamePixelGrid)
+        {
+            if (!gamePixel.EntityType.HasValue)
+                continue;
+            Add(gamePixel.EntityType.Value, gamePixel.BelongsTo == player);
+        }
 
-    public ReadOnlyMemory<byte> GetPacket()
-    {
         var index = _count / 2 + (_count % 2 == 0 ? 0 : 1);
-        logger.LogTrace("packet length: {} (count={})", index, _count);
+
+        if (logger.IsEnabled(LogLevel.Trace))
+            logger.LogTrace("packet length: {} (count={})", index, _count);
+
         return _data[..index];
     }
 
-    public void Add(GamePixelEntityType entityKind, bool isCurrentPlayer)
+    private void Add(GamePixelEntityType entityKind, bool isCurrentPlayer)
     {
         var result = (byte)(isCurrentPlayer ? 0x1 : 0x0);
         var kind = (byte)entityKind;
@@ -35,5 +40,11 @@ internal sealed class PlayerScreenData(ILogger logger)
         else
             _data.Span[index] = result;
         _count++;
+    }
+
+    private void Clear()
+    {
+        _count = 0;
+        _data.Span.Clear();
     }
 }
