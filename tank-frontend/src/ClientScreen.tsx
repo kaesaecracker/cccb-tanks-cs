@@ -1,8 +1,7 @@
-import useWebSocket from 'react-use-websocket';
 import {useEffect, useRef} from 'react';
 import './ClientScreen.css';
-import {hslToString, Theme} from "./theme.ts";
-import {makeApiUrl} from './serverCalls.tsx';
+import {hslToString, Theme} from './theme.ts';
+import {makeApiUrl, useMyWebSocket} from './serverCalls.tsx';
 
 const pixelsPerRow = 352;
 const pixelsPerCol = 160;
@@ -77,7 +76,7 @@ function drawPixelsToCanvas(
             return otherTanksColor;
 
         return foreground;
-    }
+    };
 
     const imageData = context.getImageData(0, 0, width, height, {colorSpace: 'srgb'});
     const data = imageData.data;
@@ -111,9 +110,7 @@ export default function ClientScreen({theme, player}: {
         lastMessage,
         sendMessage,
         getWebSocket
-    } = useWebSocket(url.toString(), {
-        shouldReconnect: () => true,
-    });
+    } = useMyWebSocket(url.toString(), {});
 
     const socket = getWebSocket();
     if (socket)

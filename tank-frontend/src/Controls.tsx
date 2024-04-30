@@ -1,7 +1,7 @@
 import './Controls.css';
-import useWebSocket, {ReadyState} from 'react-use-websocket';
+import {ReadyState} from 'react-use-websocket';
 import {useEffect} from 'react';
-import {makeApiUrl} from './serverCalls.tsx';
+import {makeApiUrl, useMyWebSocket} from './serverCalls.tsx';
 
 export default function Controls({player}: { player: string }) {
     const url = makeApiUrl('/controls', 'ws');
@@ -11,9 +11,7 @@ export default function Controls({player}: { player: string }) {
         sendMessage,
         getWebSocket,
         readyState
-    } = useWebSocket(url.toString(), {
-        shouldReconnect: () => true,
-    });
+    } = useMyWebSocket(url.toString(), {});
 
     const socket = getWebSocket();
     if (socket)
