@@ -48,14 +48,18 @@ internal sealed class Endpoints(
         return TypedResults.Empty;
     }
 
-    private async Task<Results<BadRequest, EmptyHttpResult>> ConnectScreenAsync(HttpContext context,
+    private async Task<Results<BadRequest, EmptyHttpResult, NotFound>> ConnectScreenAsync(HttpContext context,
         [FromQuery] string? playerName)
     {
         if (!context.WebSockets.IsWebSocketRequest)
             return TypedResults.BadRequest();
 
+        Player? player = null;
+        if (!string.IsNullOrWhiteSpace(playerName) && !playerService.TryGet(playerName, out player))
+            return TypedResults.NotFound();
+
         using var ws = await context.WebSockets.AcceptWebSocketAsync();
-        await clientScreenServer.HandleClientAsync(ws, playerName);
+        await clientScreenServer.HandleClientAsync(ws, player);
         return TypedResults.Empty;
     }
 

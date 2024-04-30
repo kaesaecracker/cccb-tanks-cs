@@ -9,13 +9,13 @@ internal sealed class ClientScreenServer(
     ILoggerFactory loggerFactory
 ) : WebsocketServer<ClientScreenServerConnection>(logger), IFrameConsumer
 {
-    public Task HandleClientAsync(WebSocket socket, string? player)
-        => base.HandleClientAsync(new(
+    public Task HandleClientAsync(WebSocket socket, Player? player)
+        => base.HandleClientAsync(new ClientScreenServerConnection(
             socket,
             loggerFactory.CreateLogger<ClientScreenServerConnection>(),
             player
         ));
 
-    public ValueTask OnFrameDoneAsync(GamePixelGrid gamePixelGrid, PixelGrid observerPixels)
-        => ParallelForEachConnectionAsync(c => c.OnGameTickAsync(observerPixels, gamePixelGrid).AsTask());
+    public async Task OnFrameDoneAsync(GamePixelGrid gamePixelGrid, PixelGrid observerPixels)
+        => await ParallelForEachConnectionAsync(c => c.OnGameTickAsync(observerPixels, gamePixelGrid).AsTask());
 }

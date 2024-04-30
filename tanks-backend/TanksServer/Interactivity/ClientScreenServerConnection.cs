@@ -1,3 +1,5 @@
+using System.Buffers;
+using System.Diagnostics;
 using System.Net.WebSockets;
 using DisplayCommands;
 using TanksServer.Graphics;
@@ -7,67 +9,87 @@ namespace TanksServer.Interactivity;
 internal sealed class ClientScreenServerConnection(
     WebSocket webSocket,
     ILogger<ClientScreenServerConnection> logger,
-    string? playerName = null
+    Player? player
 ) : WebsocketServerConnection(logger, new ByteChannelWebSocket(webSocket, logger, 0))
 {
-    private bool _wantsFrameOnTick = true;
+    private sealed record class Package(
+        IMemoryOwner<byte> PixelsOwner,
+        Memory<byte> Pixels,
+        IMemoryOwner<byte>? PlayerDataOwner,
+        Memory<byte>? PlayerData
+    );
 
-    private PixelGrid? _lastSentPixels;
-    private PixelGrid? _nextPixels;
-    private readonly PlayerScreenData? _nextPlayerData = playerName != null ? new PlayerScreenData(logger) : null;
+    private readonly MemoryPool<byte> _memoryPool = MemoryPool<byte>.Shared;
+    private int _wantsFrameOnTick = 1;
+    private Package? _next;
 
-    protected override async ValueTask HandleMessageLockedAsync(Memory<byte> _)
+    private readonly PlayerScreenData? _playerDataBuilder = player == null
+        ? null
+        : new PlayerScreenData(logger, player);
+
+    protected override ValueTask HandleMessageLockedAsync(Memory<byte> buffer) => throw new UnreachableException();
+
+    protected override ValueTask HandleMessageAsync(Memory<byte> _)
     {
-        if (_nextPixels == null)
-        {
-            _wantsFrameOnTick = true;
-            return;
-        }
+        if (_wantsFrameOnTick != 0)
+            return ValueTask.CompletedTask;
 
-        await SendNowAsync();
+        var package = Interlocked.Exchange(ref _next, null);
+        if (package != null)
+            return SendAndDisposeAsync(package);
+
+        // the delay between one exchange and this set could be enough for another frame to complete
+        // this would mean the client simply drops a frame, so this should be fine
+        _wantsFrameOnTick = 1;
+        return ValueTask.CompletedTask;
     }
 
-    public ValueTask OnGameTickAsync(PixelGrid pixels, GamePixelGrid gamePixelGrid) => LockedAsync(async () =>
+    public async ValueTask OnGameTickAsync(PixelGrid pixels, GamePixelGrid gamePixelGrid)
     {
-        if (pixels == _lastSentPixels)
-            return;
+        await Task.Yield();
 
-        if (_nextPlayerData != null)
+        var nextPixelsOwner = _memoryPool.Rent(pixels.Data.Length);
+        var nextPixels = nextPixelsOwner.Memory[..pixels.Data.Length];
+        pixels.Data.CopyTo(nextPixels);
+
+        IMemoryOwner<byte>? nextPlayerDataOwner = null;
+        Memory<byte>? nextPlayerData = null;
+        if (_playerDataBuilder != null)
         {
-            _nextPlayerData.Clear();
-            foreach (var gamePixel in gamePixelGrid)
-            {
-                if (!gamePixel.EntityType.HasValue)
-                    continue;
-                _nextPlayerData.Add(gamePixel.EntityType.Value, gamePixel.BelongsTo?.Name == playerName);
-            }
+            var data = _playerDataBuilder.Build(gamePixelGrid);
+            nextPlayerDataOwner = _memoryPool.Rent(data.Length);
+            nextPlayerData = nextPlayerDataOwner.Memory[..data.Length];
+            data.CopyTo(nextPlayerData.Value);
         }
 
-        _nextPixels = pixels;
-        if (_wantsFrameOnTick)
-            _ = await SendNowAsync();
-    });
+        var next = new Package(nextPixelsOwner, nextPixels, nextPlayerDataOwner, nextPlayerData);
+        if (Interlocked.Exchange(ref _wantsFrameOnTick, 0) != 0)
+        {
+            await SendAndDisposeAsync(next);
+            return;
+        }
 
-    private async ValueTask<bool> SendNowAsync()
+        var oldNext = Interlocked.Exchange(ref _next, next);
+        oldNext?.PixelsOwner.Dispose();
+        oldNext?.PlayerDataOwner?.Dispose();
+    }
+
+    private async ValueTask SendAndDisposeAsync(Package package)
     {
-        var pixels = _nextPixels
-                     ?? throw new InvalidOperationException("next pixels not set");
-
         try
         {
-            await Socket.SendBinaryAsync(pixels.Data, _nextPlayerData == null);
-            if (_nextPlayerData != null)
-                await Socket.SendBinaryAsync(_nextPlayerData.GetPacket());
-
-            _lastSentPixels = _nextPixels;
-            _nextPixels = null;
-            _wantsFrameOnTick = false;
-            return true;
+            await Socket.SendBinaryAsync(package.Pixels, package.PlayerData == null);
+            if (package.PlayerData != null)
+                await Socket.SendBinaryAsync(package.PlayerData.Value);
         }
         catch (WebSocketException ex)
         {
             Logger.LogWarning(ex, "send failed");
-            return false;
+        }
+        finally
+        {
+            package.PixelsOwner.Dispose();
+            package.PlayerDataOwner?.Dispose();
         }
     }
 }

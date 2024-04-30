@@ -18,9 +18,12 @@ internal abstract class WebsocketServerConnection(
     public async Task ReceiveAsync()
     {
         await foreach (var buffer in Socket.ReadAllAsync())
-            await LockedAsync(() => HandleMessageLockedAsync(buffer));
+            await HandleMessageAsync(buffer);
         Logger.LogTrace("done receiving");
     }
+
+    protected virtual ValueTask HandleMessageAsync(Memory<byte> buffer)
+        => LockedAsync(() => HandleMessageLockedAsync(buffer));
 
     protected abstract ValueTask HandleMessageLockedAsync(Memory<byte> buffer);
 

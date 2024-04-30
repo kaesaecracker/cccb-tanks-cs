@@ -4,5 +4,5 @@ namespace TanksServer.Graphics;
 
 internal interface IFrameConsumer
 {
-    ValueTask OnFrameDoneAsync(GamePixelGrid gamePixelGrid, PixelGrid observerPixels);
+    Task OnFrameDoneAsync(GamePixelGrid gamePixelGrid, PixelGrid observerPixels);
 }
