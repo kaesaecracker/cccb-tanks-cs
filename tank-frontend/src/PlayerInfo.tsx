@@ -1,6 +1,6 @@
-import {makeApiUrl, Scores} from './serverCalls';
+import {makeApiUrl, Scores, useMyWebSocket} from './serverCalls';
 import Column from './components/Column.tsx';
-import useWebSocket, {ReadyState} from 'react-use-websocket';
+import {ReadyState} from 'react-use-websocket';
 import {useEffect, useState} from 'react';
 
 function ScoreRow({name, value}: {
@@ -42,9 +42,12 @@ export default function PlayerInfo({player}: { player: string }) {
     const url = makeApiUrl('/player');
     url.searchParams.set('name', player);
 
-    const {lastJsonMessage, readyState, sendMessage} = useWebSocket<PlayerInfoMessage>(url.toString(), {
-        onMessage: () => setShouldSendMessage(true),
-        shouldReconnect: () => true,
+    const {
+        lastJsonMessage,
+        readyState,
+        sendMessage
+    } = useMyWebSocket<PlayerInfoMessage>(url.toString(), {
+        onMessage: () => setShouldSendMessage(true)
     });
 
     useEffect(() => {
