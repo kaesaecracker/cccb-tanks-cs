@@ -11,7 +11,6 @@ internal sealed class PlayerInfoConnection(
     MapEntityManager entityManager
 ) : WebsocketServerConnection(logger, new ByteChannelWebSocket(rawSocket, logger, 0))
 {
-    private readonly AppSerializerContext _context = new(new JsonSerializerOptions(JsonSerializerDefaults.Web));
     private bool _wantsInfoOnTick = true;
     private byte[] _lastMessage = [];
 
@@ -54,7 +53,7 @@ internal sealed class PlayerInfoConnection(
         }
 
         var info = new PlayerInfo(player.Name, player.Scores, player.Controls.ToDisplayString(), tankInfo);
-        var response = JsonSerializer.SerializeToUtf8Bytes(info, _context.PlayerInfo);
+        var response = JsonSerializer.SerializeToUtf8Bytes(info, AppSerializerContext.Default.PlayerInfo);
 
         if (response.SequenceEqual(_lastMessage))
             return null;
