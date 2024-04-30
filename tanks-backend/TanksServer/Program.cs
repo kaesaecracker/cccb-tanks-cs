@@ -78,6 +78,7 @@ public static class Program
         builder.Services.AddSingleton<ITickStep, SpawnPowerUp>();
         builder.Services.AddSingleton<ITickStep, GeneratePixelsTickStep>();
         builder.Services.AddSingleton<ITickStep, PlayerServer>(sp => sp.GetRequiredService<PlayerServer>());
+        builder.Services.AddSingleton<ITickStep, UpdatesPerSecondCounter>();
 
         builder.Services.AddSingleton<IDrawStep, DrawMapStep>();
         builder.Services.AddSingleton<IDrawStep, DrawPowerUpsStep>();

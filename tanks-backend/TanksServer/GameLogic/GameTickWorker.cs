@@ -33,20 +33,19 @@ internal sealed class GameTickWorker(
 
     private async Task RunAsync()
     {
+        // do not block in StartAsync
+        await Task.Delay(1).ConfigureAwait(false);
+
         try
         {
             var sw = new Stopwatch();
             while (!_cancellation.IsCancellationRequested)
             {
-                logger.LogTrace("since last frame: {}", sw.Elapsed);
-
                 var delta = sw.Elapsed;
                 sw.Restart();
 
                 foreach (var step in _steps)
                     await step.TickAsync(delta);
-
-                await Task.Delay(1);
             }
         }
         catch (Exception ex)
