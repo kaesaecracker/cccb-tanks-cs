@@ -19,12 +19,12 @@ internal sealed class SpawnPowerUp(
 
 
         var type = Random.Shared.Next(4) == 0
-            ? PowerUpType.MagazineSizeUpgrade
-            : PowerUpType.MagazineTypeUpgrade;
+            ? PowerUpType.MagazineSize
+            : PowerUpType.MagazineType;
 
         MagazineType? magazineType = type switch
         {
-            PowerUpType.MagazineTypeUpgrade => Random.Shared.Next(0, 3) switch
+            PowerUpType.MagazineType => Random.Shared.Next(0, 3) switch
             {
                 0 => MagazineType.Fast,
                 1 => MagazineType.Explosive,
