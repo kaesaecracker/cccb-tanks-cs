@@ -33,12 +33,14 @@ internal sealed class GameTickWorker(
 
     private async Task RunAsync()
     {
+        // the first tick is really short (< 0.01ms) if this line is directly above the while
+        var sw = Stopwatch.StartNew();
+
         // do not block in StartAsync
         await Task.Delay(1).ConfigureAwait(false);
 
         try
         {
-            var sw = new Stopwatch();
             while (!_cancellation.IsCancellationRequested)
             {
                 var delta = sw.Elapsed;
