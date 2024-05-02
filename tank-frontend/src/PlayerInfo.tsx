@@ -57,7 +57,7 @@ export default function PlayerInfo({player}: { player: string }) {
         sendMessage('');
     }, [readyState, shouldSendMessage]);
 
-    if (!lastJsonMessage)
+    if (!lastJsonMessage || readyState !== ReadyState.OPEN)
         return <></>;
 
     return <Column className="PlayerInfo">
