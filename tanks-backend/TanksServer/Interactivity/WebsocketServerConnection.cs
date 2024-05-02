@@ -22,10 +22,7 @@ internal abstract class WebsocketServerConnection(
         Logger.LogTrace("done receiving");
     }
 
-    protected virtual ValueTask HandleMessageAsync(Memory<byte> buffer)
-        => LockedAsync(() => HandleMessageLockedAsync(buffer));
-
-    protected abstract ValueTask HandleMessageLockedAsync(Memory<byte> buffer);
+    protected abstract ValueTask HandleMessageAsync(Memory<byte> buffer);
 
     protected async ValueTask LockedAsync(Func<ValueTask> action)
     {

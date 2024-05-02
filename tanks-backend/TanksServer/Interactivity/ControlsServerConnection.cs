@@ -23,7 +23,7 @@ internal sealed class ControlsServerConnection(
         Shoot = 0x05
     }
 
-    protected override ValueTask HandleMessageLockedAsync(Memory<byte> buffer)
+    protected override ValueTask HandleMessageAsync(Memory<byte> buffer)
     {
         var type = (MessageType)buffer.Span[0];
         var control = (InputType)buffer.Span[1];
