@@ -27,8 +27,6 @@ internal sealed class ClientScreenServerConnection(
         ? null
         : new PlayerScreenData(logger, player);
 
-    protected override ValueTask HandleMessageLockedAsync(Memory<byte> buffer) => throw new UnreachableException();
-
     protected override ValueTask HandleMessageAsync(Memory<byte> _)
     {
         if (_wantsFrameOnTick != 0)

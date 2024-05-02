@@ -11,37 +11,37 @@ internal sealed class PlayerInfoConnection(
     MapEntityManager entityManager
 ) : WebsocketServerConnection(logger, new ByteChannelWebSocket(rawSocket, logger, 0))
 {
-    private bool _wantsInfoOnTick = true;
-    private byte[] _lastMessage = [];
+    private int _wantsInfoOnTick = 1;
+    private byte[]? _lastMessage = null;
+    private byte[]? _nextMessage = null;
 
-    protected override ValueTask HandleMessageLockedAsync(Memory<byte> buffer)
+    protected override ValueTask HandleMessageAsync(Memory<byte> buffer)
     {
-        var response = GetMessageToSend();
-        if (response == null)
-        {
-            Logger.LogTrace("cannot respond directly, increasing wanted frames");
-            _wantsInfoOnTick = true;
-            return ValueTask.CompletedTask;
-        }
+        var next = Interlocked.Exchange(ref _nextMessage, null);
+        if (next != null)
+            return SendAndDisposeAsync(next);
 
-        Logger.LogTrace("responding directly");
-        return Socket.SendTextAsync(response);
+        _wantsInfoOnTick = 1;
+        return ValueTask.CompletedTask;
     }
 
-    public ValueTask OnGameTickAsync() => LockedAsync(() =>
+    public async ValueTask OnGameTickAsync()
     {
-        if (!_wantsInfoOnTick)
-            return ValueTask.CompletedTask;
+        await Task.Yield();
 
         var response = GetMessageToSend();
-        if (response == null)
-            return ValueTask.CompletedTask;
+        var wantsNow = Interlocked.Exchange(ref _wantsInfoOnTick, 0) != 0;
 
-        Logger.LogTrace("responding indirectly");
-        return Socket.SendTextAsync(response);
-    });
+        if (wantsNow)
+        {
+            await SendAndDisposeAsync(response);
+            return;
+        }
 
-    private byte[]? GetMessageToSend()
+        Interlocked.Exchange(ref _nextMessage, response);
+    }
+
+    private byte[] GetMessageToSend()
     {
         var tank = entityManager.GetCurrentTankOfPlayer(player);
 
@@ -53,11 +53,14 @@ internal sealed class PlayerInfoConnection(
         }
 
         var info = new PlayerInfo(player.Name, player.Scores, player.Controls.ToDisplayString(), tankInfo);
-        var response = JsonSerializer.SerializeToUtf8Bytes(info, AppSerializerContext.Default.PlayerInfo);
 
-        if (response.SequenceEqual(_lastMessage))
-            return null;
+        // TODO: switch to async version with pre-allocated buffer / IMemoryOwner
+        return JsonSerializer.SerializeToUtf8Bytes(info, AppSerializerContext.Default.PlayerInfo);
+    }
 
-        return _lastMessage = response;
+    private async ValueTask SendAndDisposeAsync(byte[] data)
+    {
+        await Socket.SendTextAsync(data);
+        Interlocked.Exchange(ref _lastMessage, data);
     }
 }
