@@ -4,16 +4,23 @@ using TanksServer.GameLogic;
 
 namespace TanksServer.Interactivity;
 
-internal sealed class PlayerInfoConnection(
-    Player player,
-    ILogger logger,
-    WebSocket rawSocket,
-    MapEntityManager entityManager
-) : WebsocketServerConnection(logger, new ByteChannelWebSocket(rawSocket, logger, 0))
+internal sealed class PlayerInfoConnection : WebsocketServerConnection
 {
     private int _wantsInfoOnTick = 1;
     private byte[]? _lastMessage = null;
     private byte[]? _nextMessage = null;
+    private readonly Player _player;
+    private readonly MapEntityManager _entityManager;
+
+    public PlayerInfoConnection(Player player,
+        ILogger logger,
+        WebSocket rawSocket,
+        MapEntityManager entityManager) : base(logger, new ByteChannelWebSocket(rawSocket, logger, 0))
+    {
+        _player = player;
+        _entityManager = entityManager;
+        _player.IncrementConnectionCount();
+    }
 
     protected override ValueTask HandleMessageAsync(Memory<byte> buffer)
     {
@@ -41,9 +48,15 @@ internal sealed class PlayerInfoConnection(
         Interlocked.Exchange(ref _nextMessage, response);
     }
 
+    public override ValueTask RemovedAsync()
+    {
+        _player.DecrementConnectionCount();
+        return ValueTask.CompletedTask;
+    }
+
     private byte[] GetMessageToSend()
     {
-        var tank = entityManager.GetCurrentTankOfPlayer(player);
+        var tank = _entityManager.GetCurrentTankOfPlayer(_player);
 
         TankInfo? tankInfo = null;
         if (tank != null)
@@ -52,7 +65,12 @@ internal sealed class PlayerInfoConnection(
             tankInfo = new TankInfo(tank.Orientation, magazine, tank.Position.ToPixelPosition(), tank.Moving);
         }
 
-        var info = new PlayerInfo(player.Name, player.Scores, player.Controls.ToDisplayString(), tankInfo);
+        var info = new PlayerInfo(
+            _player.Name,
+            _player.Scores,
+            _player.Controls.ToDisplayString(),
+            tankInfo,
+            _player.OpenConnections);
 
         // TODO: switch to async version with pre-allocated buffer / IMemoryOwner
         return JsonSerializer.SerializeToUtf8Bytes(info, AppSerializerContext.Default.PlayerInfo);

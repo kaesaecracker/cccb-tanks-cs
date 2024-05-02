@@ -2,12 +2,18 @@ using System.Net.WebSockets;
 
 namespace TanksServer.Interactivity;
 
-internal sealed class ControlsServerConnection(
-    WebSocket socket,
-    ILogger<ControlsServerConnection> logger,
-    Player player
-) : WebsocketServerConnection(logger, new ByteChannelWebSocket(socket, logger, 2))
+internal sealed class ControlsServerConnection : WebsocketServerConnection
 {
+    private readonly Player _player;
+
+    public ControlsServerConnection(WebSocket socket,
+        ILogger<ControlsServerConnection> logger,
+        Player player) : base(logger, new ByteChannelWebSocket(socket, logger, 2))
+    {
+        _player = player;
+        _player.IncrementConnectionCount();
+    }
+
     private enum MessageType : byte
     {
         Enable = 0x01,
@@ -28,7 +34,7 @@ internal sealed class ControlsServerConnection(
         var type = (MessageType)buffer.Span[0];
         var control = (InputType)buffer.Span[1];
 
-        Logger.LogTrace("player input {} {} {}", player.Name, type, control);
+        Logger.LogTrace("player input {} {} {}", _player.Name, type, control);
 
         var isEnable = type switch
         {
@@ -37,29 +43,35 @@ internal sealed class ControlsServerConnection(
             _ => throw new ArgumentException("invalid message type")
         };
 
-        player.LastInput = DateTime.Now;
+        _player.LastInput = DateTime.Now;
 
         switch (control)
         {
             case InputType.Forward:
-                player.Controls.Forward = isEnable;
+                _player.Controls.Forward = isEnable;
                 break;
             case InputType.Backward:
-                player.Controls.Backward = isEnable;
+                _player.Controls.Backward = isEnable;
                 break;
             case InputType.Left:
-                player.Controls.TurnLeft = isEnable;
+                _player.Controls.TurnLeft = isEnable;
                 break;
             case InputType.Right:
-                player.Controls.TurnRight = isEnable;
+                _player.Controls.TurnRight = isEnable;
                 break;
             case InputType.Shoot:
-                player.Controls.Shoot = isEnable;
+                _player.Controls.Shoot = isEnable;
                 break;
             default:
                 throw new ArgumentException("invalid control type");
         }
 
+        return ValueTask.CompletedTask;
+    }
+
+    public override ValueTask RemovedAsync()
+    {
+        _player.DecrementConnectionCount();
         return ValueTask.CompletedTask;
     }
 }

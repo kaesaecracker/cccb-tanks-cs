@@ -35,7 +35,7 @@ internal sealed class TankSpawnQueue(
             return false; // no one on queue
 
         var now = DateTime.Now;
-        if (player.LastInput + _idleTimeout < now)
+        if (player.OpenConnections < 1 || player.LastInput + _idleTimeout < now)
         {
             // player idle
             _queue.Enqueue(player);

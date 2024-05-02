@@ -22,20 +22,9 @@ internal abstract class WebsocketServerConnection(
         Logger.LogTrace("done receiving");
     }
 
+    public abstract ValueTask RemovedAsync();
+
     protected abstract ValueTask HandleMessageAsync(Memory<byte> buffer);
 
-    protected async ValueTask LockedAsync(Func<ValueTask> action)
-    {
-        await _mutex.WaitAsync();
-        try
-        {
-            await action();
-        }
-        finally
-        {
-            _mutex.Release();
-        }
-    }
-
-    public void Dispose() => _mutex.Dispose();
+    public virtual void Dispose() => _mutex.Dispose();
 }

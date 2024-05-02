@@ -6,5 +6,5 @@ build:
 	podman build . --tag=$(TAG)
 
 run: build
-	podman run -i -p 80:3000 localhost/$(TAG):latest
+	podman run -i -p 3000:3000 localhost/$(TAG):latest
 

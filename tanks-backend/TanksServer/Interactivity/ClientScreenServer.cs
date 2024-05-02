@@ -7,7 +7,8 @@ namespace TanksServer.Interactivity;
 internal sealed class ClientScreenServer(
     ILogger<ClientScreenServer> logger,
     ILoggerFactory loggerFactory
-) : WebsocketServer<ClientScreenServerConnection>(logger), IFrameConsumer
+) : WebsocketServer<ClientScreenServerConnection>(logger),
+    IFrameConsumer
 {
     public Task HandleClientAsync(WebSocket socket, Player? player)
         => base.HandleClientAsync(new ClientScreenServerConnection(

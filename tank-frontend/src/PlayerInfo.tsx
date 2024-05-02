@@ -34,6 +34,7 @@ type PlayerInfoMessage = {
     readonly scores: Scores;
     readonly controls: string;
     readonly tank?: TankInfo;
+    readonly openConnections: number;
 }
 
 export default function PlayerInfo({player}: { player: string }) {
@@ -81,6 +82,8 @@ export default function PlayerInfo({player}: { player: string }) {
             <ScoreRow name="pixels moved" value={lastJsonMessage.scores.pixelsMoved}/>
 
             <ScoreRow name="score" value={lastJsonMessage.scores.overallScore}/>
+
+            <ScoreRow name="connections" value={lastJsonMessage.openConnections}/>
             </tbody>
         </table>
     </Column>;
