@@ -36,6 +36,9 @@ export default function MapChooser() {
         postMap.mutate(chosenMap);
     };
 
+    if (query.isError)
+        return <></>;
+
     const disabled = !query.isSuccess || postMap.isPending;
 
     return <select className="MapChooser-DropDown" onChange={onChange} disabled={disabled}>

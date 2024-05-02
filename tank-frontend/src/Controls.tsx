@@ -58,6 +58,9 @@ export default function Controls({player}: { player: string }) {
         };
     }, [readyState]);
 
+    if (readyState != ReadyState.OPEN)
+        return <></>;
+
     return <div className="Controls flex-row">
         <div className="flex-column Controls-Container">
             <h3>Move</h3>
