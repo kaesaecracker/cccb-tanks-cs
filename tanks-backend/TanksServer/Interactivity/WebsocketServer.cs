@@ -47,6 +47,7 @@ internal abstract class WebsocketServer<T>(
         await AddConnectionAsync(connection);
         await connection.ReceiveAsync();
         await RemoveConnectionAsync(connection);
+        await connection.RemovedAsync();
     }
 
     private async ValueTask LockedAsync(Func<ValueTask> action, CancellationToken cancellationToken)
@@ -62,7 +63,7 @@ internal abstract class WebsocketServer<T>(
         }
     }
 
-    public void Dispose() => _mutex.Dispose();
+    public virtual void Dispose() => _mutex.Dispose();
 
     public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 

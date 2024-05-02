@@ -11,5 +11,6 @@ internal record struct PlayerInfo(
     string Name,
     Scores Scores,
     string Controls,
-    TankInfo? Tank
+    TankInfo? Tank,
+    int OpenConnections
 );

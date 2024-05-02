@@ -1,16 +1,11 @@
 using System.Buffers;
-using System.Diagnostics;
 using System.Net.WebSockets;
 using DisplayCommands;
 using TanksServer.Graphics;
 
 namespace TanksServer.Interactivity;
 
-internal sealed class ClientScreenServerConnection(
-    WebSocket webSocket,
-    ILogger<ClientScreenServerConnection> logger,
-    Player? player
-) : WebsocketServerConnection(logger, new ByteChannelWebSocket(webSocket, logger, 0))
+internal sealed class ClientScreenServerConnection : WebsocketServerConnection
 {
     private sealed record class Package(
         IMemoryOwner<byte> PixelsOwner,
@@ -20,12 +15,21 @@ internal sealed class ClientScreenServerConnection(
     );
 
     private readonly MemoryPool<byte> _memoryPool = MemoryPool<byte>.Shared;
+    private readonly PlayerScreenData? _playerDataBuilder;
+    private readonly Player? _player;
     private int _wantsFrameOnTick = 1;
     private Package? _next;
 
-    private readonly PlayerScreenData? _playerDataBuilder = player == null
-        ? null
-        : new PlayerScreenData(logger, player);
+    public ClientScreenServerConnection(WebSocket webSocket,
+        ILogger<ClientScreenServerConnection> logger,
+        Player? player) : base(logger, new ByteChannelWebSocket(webSocket, logger, 0))
+    {
+        _player = player;
+        _player?.IncrementConnectionCount();
+        _playerDataBuilder = player == null
+            ? null
+            : new PlayerScreenData(logger, player);
+    }
 
     protected override ValueTask HandleMessageAsync(Memory<byte> _)
     {
@@ -70,6 +74,12 @@ internal sealed class ClientScreenServerConnection(
         var oldNext = Interlocked.Exchange(ref _next, next);
         oldNext?.PixelsOwner.Dispose();
         oldNext?.PlayerDataOwner?.Dispose();
+    }
+
+    public override ValueTask RemovedAsync()
+    {
+        _player?.DecrementConnectionCount();
+        return ValueTask.CompletedTask;
     }
 
     private async ValueTask SendAndDisposeAsync(Package package)
