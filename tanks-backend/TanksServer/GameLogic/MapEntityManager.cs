@@ -2,7 +2,6 @@ namespace TanksServer.GameLogic;
 
 internal sealed class MapEntityManager(
     ILogger<MapEntityManager> logger,
-    MapService map,
     IOptions<GameRules> options
 )
 {
@@ -34,12 +33,12 @@ internal sealed class MapEntityManager(
 
     public void RemoveWhere(Predicate<Bullet> predicate) => _bullets.RemoveWhere(predicate);
 
-    public void SpawnTank(Player player)
+    public void SpawnTank(Player player, FloatPosition position)
     {
         var tank = new Tank
         {
             Owner = player,
-            Position = ChooseSpawnPosition(),
+            Position = position,
             Rotation = Random.Shared.NextDouble(),
             Magazine = new Magazine(MagazineType.Basic, 0, _rules.MagazineSize)
         };
@@ -47,12 +46,16 @@ internal sealed class MapEntityManager(
         logger.LogInformation("Tank added for player {}", player.Name);
     }
 
-    public void SpawnPowerUp(PowerUpType type, MagazineType? magazineType) => _powerUps.Add(new PowerUp
+    public void SpawnPowerUp(FloatPosition position, PowerUpType type, MagazineType? magazineType)
     {
-        Position = ChooseSpawnPosition(),
-        Type = type,
-        MagazineType = magazineType
-    });
+        var powerUp = new PowerUp
+        {
+            Position = position,
+            Type = type,
+            MagazineType = magazineType
+        };
+        _powerUps.Add(powerUp);
+    }
 
     public void RemoveWhere(Predicate<PowerUp> predicate) => _powerUps.RemoveWhere(predicate);
 
@@ -64,33 +67,8 @@ internal sealed class MapEntityManager(
 
     public Tank? GetCurrentTankOfPlayer(Player player) => _playerTanks.GetValueOrDefault(player);
 
-    private IEnumerable<IMapEntity> AllEntities => Bullets
+    public IEnumerable<IMapEntity> AllEntities => Bullets
         .Cast<IMapEntity>()
         .Concat(Tanks)
         .Concat(PowerUps);
-
-    private FloatPosition ChooseSpawnPosition()
-    {
-        var maxMinDistance = 0d;
-        TilePosition spawnTile = default;
-        for (ushort x = 1; x < MapService.TilesPerRow - 1; x++)
-        for (ushort y = 1; y < MapService.TilesPerColumn - 1; y++)
-        {
-            var tile = new TilePosition(x, y);
-            if (map.Current.IsWall(tile))
-                continue;
-
-            var tilePixelCenter = tile.ToPixelPosition().GetPixelRelative(4, 4).ToFloatPosition();
-            var minDistance = AllEntities
-                .Select(entity => entity.Position.Distance(tilePixelCenter))
-                .Aggregate(double.MaxValue, Math.Min);
-            if (minDistance <= maxMinDistance)
-                continue;
-
-            maxMinDistance = minDistance;
-            spawnTile = tile;
-        }
-
-        return spawnTile.ToPixelPosition().GetPixelRelative(4, 4).ToFloatPosition();
-    }
 }

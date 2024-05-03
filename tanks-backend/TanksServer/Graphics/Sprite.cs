@@ -26,5 +26,17 @@ internal sealed class Sprite(bool?[,] data)
     public bool? this[int x, int y] => data[x, y];
 
     public int Width => data.GetLength(0);
+
     public int Height => data.GetLength(1);
+
+    public bool[,] ToBoolArray()
+    {
+        var result = new bool[Width, Height];
+
+        for (var y = 0; y < Height; y++)
+        for (var x = 0; x < Width; x++)
+            result[x, y] = this[x, y] ?? false;
+
+        return result;
+    }
 }
