@@ -1,5 +1,4 @@
 using System.Net.WebSockets;
-using System.Text;
 using System.Text.Json;
 using TanksServer.GameLogic;
 
@@ -46,32 +45,20 @@ internal sealed class PlayerInfoConnection(
     private byte[]? GetMessageToSend()
     {
         var tank = entityManager.GetCurrentTankOfPlayer(player);
-        var tankInfo = tank != null
-            ? new TankInfo(tank.Orientation, tank.ExplosiveBullets, tank.Position.ToPixelPosition(), tank.Moving)
-            : null;
-        var info = new PlayerInfo(player.Name, player.Scores, ControlsToString(player.Controls), tankInfo);
+
+        TankInfo? tankInfo = null;
+        if (tank != null)
+        {
+            var magazine = tank.ReloadingUntil > DateTime.Now ? "[ RELOADING ]" : tank.Magazine.ToDisplayString();
+            tankInfo = new TankInfo(tank.Orientation, magazine, tank.Position.ToPixelPosition(), tank.Moving);
+        }
+
+        var info = new PlayerInfo(player.Name, player.Scores, player.Controls.ToDisplayString(), tankInfo);
         var response = JsonSerializer.SerializeToUtf8Bytes(info, _context.PlayerInfo);
 
         if (response.SequenceEqual(_lastMessage))
             return null;
 
         return _lastMessage = response;
-    }
-
-    private static string ControlsToString(PlayerControls controls)
-    {
-        var str = new StringBuilder("[ ");
-        if (controls.Forward)
-            str.Append("▲ ");
-        if (controls.Backward)
-            str.Append("▼ ");
-        if (controls.TurnLeft)
-            str.Append("◄ ");
-        if (controls.TurnRight)
-            str.Append("► ");
-        if (controls.Shoot)
-            str.Append("• ");
-        str.Append(']');
-        return str.ToString();
     }
 }

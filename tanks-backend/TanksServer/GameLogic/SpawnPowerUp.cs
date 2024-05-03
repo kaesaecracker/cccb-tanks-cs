@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace TanksServer.GameLogic;
 
 internal sealed class SpawnPowerUp(
@@ -15,7 +17,24 @@ internal sealed class SpawnPowerUp(
         if (Random.Shared.NextDouble() > _spawnChance * delta.TotalSeconds)
             return ValueTask.CompletedTask;
 
-        entityManager.SpawnPowerUp();
+
+        var type = Random.Shared.Next(4) == 0
+            ? PowerUpType.MagazineSizeUpgrade
+            : PowerUpType.MagazineTypeUpgrade;
+
+        MagazineType? magazineType = type switch
+        {
+            PowerUpType.MagazineTypeUpgrade => Random.Shared.Next(0, 3) switch
+            {
+                0 => MagazineType.Fast,
+                1 => MagazineType.Explosive,
+                2 => MagazineType.Smart,
+                _ => throw new UnreachableException()
+            },
+            _ => null
+        };
+
+        entityManager.SpawnPowerUp(type, magazineType);
         return ValueTask.CompletedTask;
     }
 }

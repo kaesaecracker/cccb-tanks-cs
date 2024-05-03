@@ -4,7 +4,7 @@ internal sealed class Bullet : IMapEntity
 {
     public required Player Owner { get; init; }
 
-    public required double Rotation { get; init; }
+    public required double Rotation { get; set; }
 
     public required FloatPosition Position { get; set; }
 
@@ -15,4 +15,8 @@ internal sealed class Bullet : IMapEntity
     public PixelBounds Bounds => new(Position.ToPixelPosition(), Position.ToPixelPosition());
 
     internal required DateTime OwnerCollisionAfter { get; init; }
+
+    public required double Speed { get; init; }
+
+    public required bool IsSmart { get; init; }
 }

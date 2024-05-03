@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace TanksServer.GameLogic;
 
 internal sealed class CollectPowerUp(
@@ -21,7 +23,33 @@ internal sealed class CollectPowerUp(
                 continue;
 
             // now the tank overlaps the power up by at least 0.5 tiles
-            tank.ExplosiveBullets += 10;
+
+            switch (obj.Type)
+            {
+                case PowerUpType.MagazineTypeUpgrade:
+                    if (obj.MagazineType == null)
+                        throw new UnreachableException();
+
+                    tank.Magazine = tank.Magazine with
+                    {
+                        Type = tank.Magazine.Type | obj.MagazineType.Value,
+                        UsedBullets = 0
+                    };
+
+                    if (tank.ReloadingUntil >= DateTime.Now)
+                        tank.ReloadingUntil = DateTime.Now;
+
+                    break;
+                case PowerUpType.MagazineSizeUpgrade:
+                    tank.Magazine = tank.Magazine with
+                    {
+                        MaxBullets = (byte)int.Clamp(tank.Magazine.MaxBullets + 1, 1, 32)
+                    };
+                    break;
+                default:
+                    throw new UnreachableException();
+            }
+
             tank.Owner.Scores.PowerUpsCollected++;
             return true;
         }
