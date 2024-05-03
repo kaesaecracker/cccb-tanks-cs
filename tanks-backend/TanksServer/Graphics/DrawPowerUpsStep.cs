@@ -4,26 +4,34 @@ namespace TanksServer.Graphics;
 
 internal sealed class DrawPowerUpsStep(MapEntityManager entityManager) : IDrawStep
 {
-    private readonly Sprite _explosiveSprite = Sprite.FromImageFile("assets/powerup_explosive.png");
+    private readonly Sprite _genericSprite = Sprite.FromImageFile("assets/powerup_explosive.png");
+    private readonly Sprite _smartSprite = Sprite.FromImageFile("assets/powerup_smart.png");
 
     public void Draw(GamePixelGrid pixels)
     {
         foreach (var powerUp in entityManager.PowerUps)
         {
-            var position = powerUp.Bounds.TopLeft;
+            var sprite = _genericSprite;
+            if (powerUp is { Type: PowerUpType.MagazineType, MagazineType: MagazineType.Smart })
+                sprite = _smartSprite;
 
-            for (byte dy = 0; dy < MapService.TileSize; dy++)
-            for (byte dx = 0; dx < MapService.TileSize; dx++)
-            {
-                var pixelState = _explosiveSprite[dx, dy];
-                if (!pixelState.HasValue)
-                    continue;
+            DrawPowerUp(pixels, sprite, powerUp.Bounds.TopLeft);
+        }
+    }
 
-                var (x, y) = position.GetPixelRelative(dx, dy);
-                pixels[x, y].EntityType = pixelState.Value
-                    ? GamePixelEntityType.PowerUp
-                    : null;
-            }
+    private static void DrawPowerUp(GamePixelGrid pixels, Sprite sprite, PixelPosition position)
+    {
+        for (byte dy = 0; dy < MapService.TileSize; dy++)
+        for (byte dx = 0; dx < MapService.TileSize; dx++)
+        {
+            var pixelState = sprite[dx, dy];
+            if (!pixelState.HasValue)
+                continue;
+
+            var (x, y) = position.GetPixelRelative(dx, dy);
+            pixels[x, y].EntityType = pixelState.Value
+                ? GamePixelEntityType.PowerUp
+                : null;
         }
     }
 }
