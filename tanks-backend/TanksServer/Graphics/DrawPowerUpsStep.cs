@@ -4,16 +4,18 @@ namespace TanksServer.Graphics;
 
 internal sealed class DrawPowerUpsStep(MapEntityManager entityManager) : IDrawStep
 {
-    private readonly Sprite _genericSprite = Sprite.FromImageFile("assets/powerup_explosive.png");
+    private readonly Sprite _genericSprite = Sprite.FromImageFile("assets/powerup_generic.png");
     private readonly Sprite _smartSprite = Sprite.FromImageFile("assets/powerup_smart.png");
 
     public void Draw(GamePixelGrid pixels)
     {
         foreach (var powerUp in entityManager.PowerUps)
         {
-            var sprite = _genericSprite;
-            if (powerUp is { Type: PowerUpType.MagazineType, MagazineType: MagazineType.Smart })
-                sprite = _smartSprite;
+            var sprite = powerUp switch
+            {
+                { Type: PowerUpType.MagazineType, MagazineType: MagazineType.Smart } => _smartSprite,
+                _ => _genericSprite
+            };
 
             DrawPowerUp(pixels, sprite, powerUp.Bounds.TopLeft);
         }
