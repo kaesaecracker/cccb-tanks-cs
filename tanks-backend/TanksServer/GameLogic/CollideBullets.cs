@@ -96,7 +96,7 @@ internal sealed class CollideBullets(
             if (tank == null)
                 return;
 
-            if (tank.Owner == owner)
+            if (tank.Owner != owner)
                 owner.Scores.Kills++;
             tank.Owner.Scores.Deaths++;
 
