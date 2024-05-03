@@ -105,6 +105,4 @@ There are other commands implemented as well, e.g. for changing the brightness.
     - 11: (reserved)
 - client responds with empty message to request the next frame
 
-## Backlog: Bugs, Wishes, Ideas
-- Generalize drawing of entities as there are multiple classes with pretty much the same code
-- Generalize hit box collision
+
