@@ -1,8 +1,13 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using TanksServer.Graphics;
 
 namespace TanksServer.GameLogic;
+
+internal abstract class MapPrototype
+{
+    public abstract Map CreateInstance();
+}
 
 internal sealed class MapService
 {
@@ -12,7 +17,7 @@ internal sealed class MapService
     public const ushort PixelsPerRow = TilesPerRow * TileSize;
     public const ushort PixelsPerColumn = TilesPerColumn * TileSize;
 
-    private readonly Dictionary<string, bool[,]> _maps = new();
+    private readonly Dictionary<string, MapPrototype> _maps = new();
 
     public IEnumerable<string> MapNames => _maps.Keys;
 
@@ -27,88 +32,26 @@ internal sealed class MapService
 
         var chosenMapIndex = Random.Shared.Next(_maps.Count);
         var chosenMapName = _maps.Keys.Skip(chosenMapIndex).First();
-        Current = new Map(chosenMapName, _maps[chosenMapName]);
+        Current = _maps[chosenMapName].CreateInstance();
     }
+
+    public bool TryGetMapByName(string name, [MaybeNullWhen(false)] out MapPrototype map)
+        => _maps.TryGetValue(name, out map);
+
+    public void SwitchTo(MapPrototype prototype) => Current = prototype.CreateInstance();
 
     private void LoadMapPng(string file)
     {
-        using var image = Image.Load<Rgba32>(file);
-
-        if (image.Width != PixelsPerRow || image.Height != PixelsPerColumn)
-            throw new FileLoadException($"invalid image size in file {file}");
-
-        var whitePixel = new Rgba32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
-        var walls = new bool[PixelsPerRow, PixelsPerColumn];
-
-        for (var y = 0; y < image.Height; y++)
-        for (var x = 0; x < image.Width; x++)
-            walls[x, y] = image[x, y] == whitePixel;
-
-        _maps.Add(Path.GetFileName(file), walls);
+        var name = Path.GetFileName(file);
+        var prototype = new SpriteMapPrototype(name, Sprite.FromImageFile(file));
+        _maps.Add(Path.GetFileName(file), prototype);
     }
 
     private void LoadMapString(string file)
     {
         var map = File.ReadAllText(file).ReplaceLineEndings(string.Empty).Trim();
-        if (map.Length != TilesPerColumn * TilesPerRow)
-            throw new FileLoadException($"cannot load map {file}: invalid length");
-
-        var walls = new bool[PixelsPerRow, PixelsPerColumn];
-
-        for (ushort tileX = 0; tileX < TilesPerRow; tileX++)
-        for (ushort tileY = 0; tileY < TilesPerColumn; tileY++)
-        {
-            var tile = new TilePosition(tileX, tileY);
-            if (map[tileX + tileY * TilesPerRow] != '#')
-                continue;
-
-            for (byte pixelInTileX = 0; pixelInTileX < TileSize; pixelInTileX++)
-            for (byte pixelInTileY = 0; pixelInTileY < TileSize; pixelInTileY++)
-            {
-                var (x, y) = tile.ToPixelPosition().GetPixelRelative(pixelInTileX, pixelInTileY);
-                walls[x, y] = true;
-            }
-        }
-
-        _maps.Add(Path.GetFileName(file), walls);
-    }
-
-    public bool TrySwitchTo(string name)
-    {
-        if (!_maps.TryGetValue(name, out var mapData))
-            return false;
-        Current = new Map(name, (bool[,]) mapData.Clone());
-        return true;
-    }
-}
-
-internal sealed class Map(string name, bool[,] walls)
-{
-    public string Name => name;
-
-    public bool IsWall(int x, int y) => walls[x, y];
-
-    public bool IsWall(PixelPosition position) => walls[position.X, position.Y];
-
-    public bool IsWall(TilePosition position)
-    {
-        var pixel = position.ToPixelPosition();
-
-        for (short dx = 0; dx < MapService.TileSize; dx++)
-        for (short dy = 0; dy < MapService.TileSize; dy++)
-        {
-            if (IsWall(pixel.GetPixelRelative(dx, dy)))
-                return true;
-        }
-
-        return false;
-    }
-
-    public bool TryDestroyWallAt(PixelPosition pixel)
-    {
-        var result = walls[pixel.X, pixel.Y];
-        if (result)
-            walls[pixel.X, pixel.Y] = false;
-        return result;
+        var name = Path.GetFileName(file);
+        var prototype = new TextMapPrototype(name, map);
+        _maps.Add(name, prototype);
     }
 }

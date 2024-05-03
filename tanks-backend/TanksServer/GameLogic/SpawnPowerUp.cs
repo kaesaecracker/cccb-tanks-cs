@@ -4,7 +4,8 @@ namespace TanksServer.GameLogic;
 
 internal sealed class SpawnPowerUp(
     IOptions<GameRules> options,
-    MapEntityManager entityManager
+    MapEntityManager entityManager,
+    EmptyTileFinder emptyTileFinder
 ) : ITickStep
 {
     private readonly double _spawnChance = options.Value.PowerUpSpawnChance;
@@ -34,7 +35,8 @@ internal sealed class SpawnPowerUp(
             _ => null
         };
 
-        entityManager.SpawnPowerUp(type, magazineType);
+        var position = emptyTileFinder.ChooseEmptyTile().GetCenter().ToFloatPosition();
+        entityManager.SpawnPowerUp(position, type, magazineType);
         return ValueTask.CompletedTask;
     }
 }

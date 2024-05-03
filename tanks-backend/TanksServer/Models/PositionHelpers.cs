@@ -38,4 +38,7 @@ internal static class PositionHelpers
             pixelPosition.GetPixelRelative(add, add)
         );
     }
+
+    public static PixelPosition GetCenter(this TilePosition tile)
+        => tile.ToPixelPosition().GetPixelRelative(4, 4);
 }

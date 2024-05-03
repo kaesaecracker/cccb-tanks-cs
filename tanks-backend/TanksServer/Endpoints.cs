@@ -11,7 +11,8 @@ internal sealed class Endpoints(
     ClientScreenServer clientScreenServer,
     PlayerServer playerService,
     ControlsServer controlsServer,
-    MapService mapService
+    MapService mapService,
+    ChangeToRequestedMap changeToRequestedMap
 )
 {
     public void Map(WebApplication app)
@@ -29,8 +30,9 @@ internal sealed class Endpoints(
     {
         if (string.IsNullOrWhiteSpace(name))
             return TypedResults.BadRequest("invalid map name");
-        if (!mapService.TrySwitchTo(name))
+        if (!mapService.TryGetMapByName(name, out var map))
             return TypedResults.NotFound("map with name not found");
+        changeToRequestedMap.Request(map);
         return TypedResults.Ok();
     }
 

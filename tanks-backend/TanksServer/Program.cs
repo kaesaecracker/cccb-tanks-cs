@@ -64,11 +64,14 @@ public static class Program
         builder.Services.AddSingleton<TankSpawnQueue>();
         builder.Services.AddSingleton<Endpoints>();
         builder.Services.AddSingleton<BufferPool>();
+        builder.Services.AddSingleton<EmptyTileFinder>();
+        builder.Services.AddSingleton<ChangeToRequestedMap>();
 
         builder.Services.AddHostedService<GameTickWorker>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ControlsServer>());
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ClientScreenServer>());
 
+        builder.Services.AddSingleton<ITickStep, ChangeToRequestedMap>(sp => sp.GetRequiredService<ChangeToRequestedMap>());
         builder.Services.AddSingleton<ITickStep, MoveBullets>();
         builder.Services.AddSingleton<ITickStep, CollideBullets>();
         builder.Services.AddSingleton<ITickStep, RotateTanks>();

@@ -4,7 +4,8 @@ namespace TanksServer.GameLogic;
 
 internal sealed class TankSpawnQueue(
     IOptions<GameRules> options,
-    MapEntityManager entityManager
+    MapEntityManager entityManager,
+    EmptyTileFinder tileFinder
 ) : ITickStep
 {
     private readonly ConcurrentQueue<Player> _queue = new();
@@ -25,7 +26,8 @@ internal sealed class TankSpawnQueue(
         if (!TryDequeueNext(out var player))
             return ValueTask.CompletedTask;
 
-        entityManager.SpawnTank(player);
+        var position = tileFinder.ChooseEmptyTile().GetCenter().ToFloatPosition();
+        entityManager.SpawnTank(player, position);
         return ValueTask.CompletedTask;
     }
 
