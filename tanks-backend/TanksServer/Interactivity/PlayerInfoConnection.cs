@@ -1,3 +1,5 @@
+using System.Buffers;
+using System.IO;
 using System.Net.WebSockets;
 using System.Text.Json;
 using TanksServer.GameLogic;
@@ -6,11 +8,15 @@ namespace TanksServer.Interactivity;
 
 internal sealed class PlayerInfoConnection : WebsocketServerConnection
 {
-    private int _wantsInfoOnTick = 1;
-    private byte[]? _lastMessage = null;
-    private byte[]? _nextMessage = null;
     private readonly Player _player;
     private readonly MapEntityManager _entityManager;
+    private readonly MemoryStream _tempStream = new();
+    private readonly MemoryPool<byte> _memoryPool = MemoryPool<byte>.Shared;
+    private int _wantsInfoOnTick = 1;
+    private Package? _lastMessage = null;
+    private Package? _nextMessage = null;
+
+    private sealed record class Package(IMemoryOwner<byte> Owner, Memory<byte> Memory);
 
     public PlayerInfoConnection(Player player,
         ILogger logger,
@@ -36,7 +42,7 @@ internal sealed class PlayerInfoConnection : WebsocketServerConnection
     {
         await Task.Yield();
 
-        var response = GetMessageToSend();
+        var response = await GenerateMessageAsync();
         var wantsNow = Interlocked.Exchange(ref _wantsInfoOnTick, 0) != 0;
 
         if (wantsNow)
@@ -54,7 +60,7 @@ internal sealed class PlayerInfoConnection : WebsocketServerConnection
         return ValueTask.CompletedTask;
     }
 
-    private byte[] GetMessageToSend()
+    private async ValueTask<Package> GenerateMessageAsync()
     {
         var tank = _entityManager.GetCurrentTankOfPlayer(_player);
 
@@ -72,13 +78,21 @@ internal sealed class PlayerInfoConnection : WebsocketServerConnection
             tankInfo,
             _player.OpenConnections);
 
-        // TODO: switch to async version with pre-allocated buffer / IMemoryOwner
-        return JsonSerializer.SerializeToUtf8Bytes(info, AppSerializerContext.Default.PlayerInfo);
+        _tempStream.Position = 0;
+        await JsonSerializer.SerializeAsync(_tempStream, info, AppSerializerContext.Default.PlayerInfo);
+
+        var messageLength = (int)_tempStream.Position;
+        var owner = _memoryPool.Rent(messageLength);
+        var package = new Package(owner, owner.Memory[..messageLength]);
+
+        _tempStream.Position = 0;
+        await _tempStream.ReadExactlyAsync(package.Memory);
+        return package;
     }
 
-    private async ValueTask SendAndDisposeAsync(byte[] data)
+    private async ValueTask SendAndDisposeAsync(Package data)
     {
-        await Socket.SendTextAsync(data);
-        Interlocked.Exchange(ref _lastMessage, data);
+        await Socket.SendTextAsync(data.Memory);
+        Interlocked.Exchange(ref _lastMessage, data)?.Owner.Dispose();
     }
 }
