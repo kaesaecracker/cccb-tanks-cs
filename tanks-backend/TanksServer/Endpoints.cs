@@ -18,7 +18,7 @@ internal sealed class Endpoints(
     {
         app.MapPost("/player", PostPlayer);
         app.MapGet("/player", GetPlayerAsync);
-        app.MapGet("/scores", () => playerService.GetAll() as IEnumerable<Player>);
+        app.MapGet("/scores", () => playerService.Players);
         app.Map("/screen", ConnectScreenAsync);
         app.Map("/controls", ConnectControlsAsync);
         app.MapGet("/map", () => mapService.MapNames);

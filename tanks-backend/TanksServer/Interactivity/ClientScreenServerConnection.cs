@@ -7,24 +7,23 @@ namespace TanksServer.Interactivity;
 
 internal sealed class ClientScreenServerConnection : WebsocketServerConnection
 {
-    private sealed record class Package(
-        IMemoryOwner<byte> PixelsOwner,
-        Memory<byte> Pixels,
-        IMemoryOwner<byte>? PlayerDataOwner,
-        Memory<byte>? PlayerData
-    );
+    private sealed record class Package(IMemoryOwner<byte> Pixels, IMemoryOwner<byte>? PlayerData);
 
-    private readonly MemoryPool<byte> _memoryPool = MemoryPool<byte>.Shared;
+    private readonly BufferPool _bufferPool;
     private readonly PlayerScreenData? _playerDataBuilder;
     private readonly Player? _player;
     private int _wantsFrameOnTick = 1;
     private Package? _next;
 
-    public ClientScreenServerConnection(WebSocket webSocket,
+    public ClientScreenServerConnection(
+        WebSocket webSocket,
         ILogger<ClientScreenServerConnection> logger,
-        Player? player) : base(logger, new ByteChannelWebSocket(webSocket, logger, 0))
+        Player? player,
+        BufferPool bufferPool
+    ) : base(logger, new ByteChannelWebSocket(webSocket, logger, 0))
     {
         _player = player;
+        _bufferPool = bufferPool;
         _player?.IncrementConnectionCount();
         _playerDataBuilder = player == null
             ? null
@@ -46,25 +45,22 @@ internal sealed class ClientScreenServerConnection : WebsocketServerConnection
         return ValueTask.CompletedTask;
     }
 
-    public async ValueTask OnGameTickAsync(PixelGrid pixels, GamePixelGrid gamePixelGrid)
+    public async Task OnGameTickAsync(PixelGrid pixels, GamePixelGrid gamePixelGrid)
     {
         await Task.Yield();
 
-        var nextPixelsOwner = _memoryPool.Rent(pixels.Data.Length);
-        var nextPixels = nextPixelsOwner.Memory[..pixels.Data.Length];
-        pixels.Data.CopyTo(nextPixels);
+        var nextPixels = _bufferPool.Rent(pixels.Data.Length);
+        pixels.Data.CopyTo(nextPixels.Memory);
 
-        IMemoryOwner<byte>? nextPlayerDataOwner = null;
-        Memory<byte>? nextPlayerData = null;
+        IMemoryOwner<byte>? nextPlayerData = null;
         if (_playerDataBuilder != null)
         {
             var data = _playerDataBuilder.Build(gamePixelGrid);
-            nextPlayerDataOwner = _memoryPool.Rent(data.Length);
-            nextPlayerData = nextPlayerDataOwner.Memory[..data.Length];
-            data.CopyTo(nextPlayerData.Value);
+            nextPlayerData = _bufferPool.Rent(data.Length);
+            data.CopyTo(nextPlayerData.Memory);
         }
 
-        var next = new Package(nextPixelsOwner, nextPixels, nextPlayerDataOwner, nextPlayerData);
+        var next = new Package(nextPixels, nextPlayerData);
         if (Interlocked.Exchange(ref _wantsFrameOnTick, 0) != 0)
         {
             await SendAndDisposeAsync(next);
@@ -72,8 +68,8 @@ internal sealed class ClientScreenServerConnection : WebsocketServerConnection
         }
 
         var oldNext = Interlocked.Exchange(ref _next, next);
-        oldNext?.PixelsOwner.Dispose();
-        oldNext?.PlayerDataOwner?.Dispose();
+        oldNext?.Pixels.Dispose();
+        oldNext?.PlayerData?.Dispose();
     }
 
     public override ValueTask RemovedAsync()
@@ -86,9 +82,9 @@ internal sealed class ClientScreenServerConnection : WebsocketServerConnection
     {
         try
         {
-            await Socket.SendBinaryAsync(package.Pixels, package.PlayerData == null);
+            await Socket.SendBinaryAsync(package.Pixels.Memory, package.PlayerData == null);
             if (package.PlayerData != null)
-                await Socket.SendBinaryAsync(package.PlayerData.Value);
+                await Socket.SendBinaryAsync(package.PlayerData.Memory);
         }
         catch (WebSocketException ex)
         {
@@ -96,8 +92,8 @@ internal sealed class ClientScreenServerConnection : WebsocketServerConnection
         }
         finally
         {
-            package.PixelsOwner.Dispose();
-            package.PlayerDataOwner?.Dispose();
+            package.Pixels.Dispose();
+            package.PlayerData?.Dispose();
         }
     }
 }

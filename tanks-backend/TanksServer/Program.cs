@@ -63,6 +63,7 @@ public static class Program
         builder.Services.AddSingleton<ClientScreenServer>();
         builder.Services.AddSingleton<TankSpawnQueue>();
         builder.Services.AddSingleton<Endpoints>();
+        builder.Services.AddSingleton<BufferPool>();
 
         builder.Services.AddHostedService<GameTickWorker>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ControlsServer>());

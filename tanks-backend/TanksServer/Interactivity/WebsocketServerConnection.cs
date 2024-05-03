@@ -3,9 +3,8 @@ namespace TanksServer.Interactivity;
 internal abstract class WebsocketServerConnection(
     ILogger logger,
     ByteChannelWebSocket socket
-) : IDisposable
+)
 {
-    private readonly SemaphoreSlim _mutex = new(1);
     protected readonly ByteChannelWebSocket Socket = socket;
     protected readonly ILogger Logger = logger;
 
@@ -25,6 +24,4 @@ internal abstract class WebsocketServerConnection(
     public abstract ValueTask RemovedAsync();
 
     protected abstract ValueTask HandleMessageAsync(Memory<byte> buffer);
-
-    public virtual void Dispose() => _mutex.Dispose();
 }
