@@ -1,5 +1,6 @@
 using DisplayCommands;
 using TanksServer.GameLogic;
+using TanksServer.Interactivity;
 
 namespace TanksServer.Graphics;
 
@@ -22,7 +23,8 @@ internal sealed class GeneratePixelsTickStep(
         if (_observerPixelGrid.Data.Span.SequenceEqual(_lastObserverPixelGrid.Data.Span))
             return;
 
-        await Task.WhenAll(_consumers.Select(c => c.OnFrameDoneAsync(_gamePixelGrid, _observerPixelGrid)));
+        await _consumers.Select(c => c.OnFrameDoneAsync(_gamePixelGrid, _observerPixelGrid))
+            .WhenAll();
 
         (_lastGamePixelGrid, _gamePixelGrid) = (_gamePixelGrid, _lastGamePixelGrid);
         (_lastObserverPixelGrid, _observerPixelGrid) = (_observerPixelGrid, _lastObserverPixelGrid);

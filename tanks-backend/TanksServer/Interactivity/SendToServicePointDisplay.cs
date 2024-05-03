@@ -75,7 +75,7 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
 
     private void RefreshScores()
     {
-        var playersToDisplay = _players.GetAll()
+        var playersToDisplay = _players.Players
             .OrderByDescending(p => p.Scores.Kills)
             .Take(ScoresPlayerRows);
 

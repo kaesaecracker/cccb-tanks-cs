@@ -1,69 +1,44 @@
+using System.Diagnostics;
 using Microsoft.Extensions.Hosting;
 
 namespace TanksServer.Interactivity;
 
 internal abstract class WebsocketServer<T>(
     ILogger logger
-) : IHostedLifecycleService, IDisposable
+) : IHostedLifecycleService
     where T : WebsocketServerConnection
 {
-    private readonly SemaphoreSlim _mutex = new(1, 1);
     private bool _closing;
-    private readonly HashSet<T> _connections = [];
+    private readonly ConcurrentDictionary<T, byte> _connections = [];
 
     public async Task StoppingAsync(CancellationToken cancellationToken)
     {
+        _closing = true;
         logger.LogInformation("closing connections");
-        await LockedAsync(async () =>
-        {
-            _closing = true;
-            await Task.WhenAll(_connections.Select(c => c.CloseAsync()));
-        }, cancellationToken);
+        await _connections.Keys.Select(c => c.CloseAsync())
+            .WhenAll();
         logger.LogInformation("closed connections");
     }
 
-    protected ValueTask ParallelForEachConnectionAsync(Func<T, Task> body) =>
-        LockedAsync(async () => await Task.WhenAll(_connections.Select(body)), CancellationToken.None);
+    protected IEnumerable<T> Connections => _connections.Keys;
 
-    private ValueTask AddConnectionAsync(T connection) => LockedAsync(async () =>
+    protected async Task HandleClientAsync(T connection)
     {
         if (_closing)
         {
             logger.LogWarning("refusing connection because server is shutting down");
             await connection.CloseAsync();
+            return;
         }
 
-        _connections.Add(connection);
-    }, CancellationToken.None);
+        var added = _connections.TryAdd(connection, 0);
+        Debug.Assert(added);
 
-    private ValueTask RemoveConnectionAsync(T connection) => LockedAsync(() =>
-    {
-        _connections.Remove(connection);
-        return ValueTask.CompletedTask;
-    }, CancellationToken.None);
-
-    protected async Task HandleClientAsync(T connection)
-    {
-        await AddConnectionAsync(connection);
         await connection.ReceiveAsync();
-        await RemoveConnectionAsync(connection);
+
+        _ = _connections.TryRemove(connection, out _);
         await connection.RemovedAsync();
     }
-
-    private async ValueTask LockedAsync(Func<ValueTask> action, CancellationToken cancellationToken)
-    {
-        await _mutex.WaitAsync(cancellationToken);
-        try
-        {
-            await action();
-        }
-        finally
-        {
-            _mutex.Release();
-        }
-    }
-
-    public virtual void Dispose() => _mutex.Dispose();
 
     public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
