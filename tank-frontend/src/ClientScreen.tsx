@@ -1,7 +1,8 @@
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import './ClientScreen.css';
 import {hslToString, Theme} from './theme.ts';
 import {makeApiUrl, useMyWebSocket} from './serverCalls.tsx';
+import {ReadyState} from 'react-use-websocket';
 
 const pixelsPerRow = 352;
 const pixelsPerCol = 160;
@@ -101,6 +102,7 @@ export default function ClientScreen({theme, player}: {
     player: string | null
 }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [shouldSendMessage, setShouldSendMessage] = useState(false);
 
     const url = makeApiUrl('/screen', 'ws');
     if (player && player !== '')
@@ -109,12 +111,23 @@ export default function ClientScreen({theme, player}: {
     const {
         lastMessage,
         sendMessage,
-        getWebSocket
-    } = useMyWebSocket(url.toString(), {});
+        getWebSocket,
+        readyState
+    } = useMyWebSocket(url.toString(), {
+        onOpen: _ => setShouldSendMessage(true)
+    });
 
     const socket = getWebSocket();
     if (socket)
         (socket as WebSocket).binaryType = 'arraybuffer';
+
+    useEffect(() => {
+        if (!shouldSendMessage || readyState !== ReadyState.OPEN)
+            return;
+        setShouldSendMessage(false);
+        sendMessage('');
+    }, [readyState, shouldSendMessage]);
+
 
     useEffect(() => {
         if (lastMessage === null)
@@ -155,7 +168,7 @@ export default function ClientScreen({theme, player}: {
             if (ignore)
                 return;
 
-            sendMessage('');
+            setShouldSendMessage(true);
         };
 
         start();

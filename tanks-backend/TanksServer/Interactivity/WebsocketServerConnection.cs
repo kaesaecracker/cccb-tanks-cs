@@ -3,7 +3,7 @@ namespace TanksServer.Interactivity;
 internal abstract class WebsocketServerConnection(
     ILogger logger,
     ByteChannelWebSocket socket
-)
+): IDisposable
 {
     protected readonly ByteChannelWebSocket Socket = socket;
     protected readonly ILogger Logger = logger;
@@ -21,7 +21,7 @@ internal abstract class WebsocketServerConnection(
         Logger.LogTrace("done receiving");
     }
 
-    public abstract ValueTask RemovedAsync();
-
     protected abstract ValueTask HandleMessageAsync(Memory<byte> buffer);
+
+    public abstract void Dispose();
 }

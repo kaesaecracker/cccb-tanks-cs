@@ -19,10 +19,10 @@ export type Player = {
     readonly scores: Scores;
 };
 
-export function useMyWebSocket<T = unknown>(url: string, options: Options) {
+export function useMyWebSocket<T = unknown>(url: string, options: Options = {}) {
     return useWebSocket<T>(url, {
         shouldReconnect: () => true,
-        reconnectAttempts: 5,
+        reconnectAttempts: 2,
         onReconnectStop: () => alert('server connection failed. please reload.'),
         ...options
     });

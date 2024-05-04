@@ -69,9 +69,5 @@ internal sealed class ControlsServerConnection : WebsocketServerConnection
         return ValueTask.CompletedTask;
     }
 
-    public override ValueTask RemovedAsync()
-    {
-        _player.DecrementConnectionCount();
-        return ValueTask.CompletedTask;
-    }
+    public override void Dispose() => _player.DecrementConnectionCount();
 }
