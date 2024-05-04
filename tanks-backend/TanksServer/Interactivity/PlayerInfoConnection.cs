@@ -48,6 +48,14 @@ internal sealed class PlayerInfoConnection : WebsocketServerConnection
         await Task.Yield();
 
         var response = await GenerateMessageAsync();
+
+        var shouldDropPacket = _lastMessage != null && response.Memory.Span.SequenceEqual(_lastMessage.Memory.Span);
+        if (shouldDropPacket)
+        {
+            response.Dispose();
+            return;
+        }
+
         var wantsNow = Interlocked.Exchange(ref _wantsInfoOnTick, 0) != 0;
 
         if (wantsNow)
