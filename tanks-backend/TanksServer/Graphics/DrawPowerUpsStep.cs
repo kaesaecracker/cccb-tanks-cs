@@ -6,6 +6,7 @@ internal sealed class DrawPowerUpsStep(MapEntityManager entityManager) : IDrawSt
 {
     private readonly Sprite _genericSprite = Sprite.FromImageFile("assets/powerup_generic.png");
     private readonly Sprite _smartSprite = Sprite.FromImageFile("assets/powerup_smart.png");
+    private readonly Sprite _magazineSprite = Sprite.FromImageFile("assets/powerup_magazine.png");
 
     public void Draw(GamePixelGrid pixels)
     {
@@ -13,6 +14,7 @@ internal sealed class DrawPowerUpsStep(MapEntityManager entityManager) : IDrawSt
         {
             var sprite = powerUp switch
             {
+                { Type: PowerUpType.MagazineSize } => _magazineSprite,
                 { Type: PowerUpType.MagazineType, MagazineType: MagazineType.Smart } => _smartSprite,
                 _ => _genericSprite
             };
