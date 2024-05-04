@@ -1,18 +1,20 @@
 using System.Buffers;
+using System.Diagnostics;
 using System.Net.WebSockets;
 using DisplayCommands;
+using DotNext.Threading;
 using TanksServer.Graphics;
 
 namespace TanksServer.Interactivity;
 
-internal sealed class ClientScreenServerConnection : WebsocketServerConnection
+internal sealed class ClientScreenServerConnection
+    : WebsocketServerConnection, IDisposable
 {
-    private sealed record class Package(IMemoryOwner<byte> Pixels, IMemoryOwner<byte>? PlayerData);
-
     private readonly BufferPool _bufferPool;
     private readonly PlayerScreenData? _playerDataBuilder;
     private readonly Player? _player;
-    private int _wantsFrameOnTick = 1;
+    private readonly AsyncAutoResetEvent _nextPackageEvent = new(false, 1);
+    private int _runningMessageHandlers = 0;
     private Package? _next;
 
     public ClientScreenServerConnection(
@@ -32,23 +34,49 @@ internal sealed class ClientScreenServerConnection : WebsocketServerConnection
 
     protected override ValueTask HandleMessageAsync(Memory<byte> _)
     {
-        if (_wantsFrameOnTick != 0)
-            return ValueTask.CompletedTask;
+        if (Interlocked.Increment(ref _runningMessageHandlers) == 1)
+            return Core();
 
-        var package = Interlocked.Exchange(ref _next, null);
-        if (package != null)
-            return SendAndDisposeAsync(package);
-
-        // the delay between one exchange and this set could be enough for another frame to complete
-        // this would mean the client simply drops a frame, so this should be fine
-        _wantsFrameOnTick = 1;
+        Interlocked.Decrement(ref _runningMessageHandlers);
         return ValueTask.CompletedTask;
+
+        async ValueTask Core()
+        {
+            await _nextPackageEvent.WaitAsync();
+            var package = Interlocked.Exchange(ref _next, null);
+            if (package == null)
+                throw new UnreachableException("package should be set here");
+            await SendAndDisposeAsync(package);
+            Interlocked.Decrement(ref _runningMessageHandlers);
+        }
     }
 
     public async Task OnGameTickAsync(PixelGrid pixels, GamePixelGrid gamePixelGrid)
     {
         await Task.Yield();
 
+        var next = BuildNextPackage(pixels, gamePixelGrid);
+        var oldNext = Interlocked.Exchange(ref _next, next);
+
+        _nextPackageEvent.Set();
+
+        oldNext?.Dispose();
+    }
+
+    public override ValueTask RemovedAsync()
+    {
+        _player?.DecrementConnectionCount();
+        return ValueTask.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        _nextPackageEvent.Dispose();
+        Interlocked.Exchange(ref _next, null)?.Dispose();
+    }
+
+    private Package BuildNextPackage(PixelGrid pixels, GamePixelGrid gamePixelGrid)
+    {
         var nextPixels = _bufferPool.Rent(pixels.Data.Length);
         pixels.Data.CopyTo(nextPixels.Memory);
 
@@ -61,21 +89,7 @@ internal sealed class ClientScreenServerConnection : WebsocketServerConnection
         }
 
         var next = new Package(nextPixels, nextPlayerData);
-        if (Interlocked.Exchange(ref _wantsFrameOnTick, 0) != 0)
-        {
-            await SendAndDisposeAsync(next);
-            return;
-        }
-
-        var oldNext = Interlocked.Exchange(ref _next, next);
-        oldNext?.Pixels.Dispose();
-        oldNext?.PlayerData?.Dispose();
-    }
-
-    public override ValueTask RemovedAsync()
-    {
-        _player?.DecrementConnectionCount();
-        return ValueTask.CompletedTask;
+        return next;
     }
 
     private async ValueTask SendAndDisposeAsync(Package package)
@@ -92,8 +106,19 @@ internal sealed class ClientScreenServerConnection : WebsocketServerConnection
         }
         finally
         {
-            package.Pixels.Dispose();
-            package.PlayerData?.Dispose();
+            package.Dispose();
+        }
+    }
+
+    private sealed record class Package(
+        IMemoryOwner<byte> Pixels,
+        IMemoryOwner<byte>? PlayerData
+    ) : IDisposable
+    {
+        public void Dispose()
+        {
+            Pixels.Dispose();
+            PlayerData?.Dispose();
         }
     }
 }
