@@ -2,16 +2,18 @@ namespace TanksServer.GameLogic;
 
 internal sealed class TextMapPrototype : MapPrototype
 {
-    private readonly string _name;
-    private readonly string _text;
+    public override string Name { get; }
+
+    public string Text { get; }
 
     public TextMapPrototype(string name, string text)
     {
         if (text.Length != MapService.TilesPerColumn * MapService.TilesPerRow)
             throw new ArgumentException($"cannot load map {name}: invalid length");
-        _name = name;
-        _text = text;
+        Name = name;
+        Text = text;
     }
+
 
     public override Map CreateInstance()
     {
@@ -21,7 +23,7 @@ internal sealed class TextMapPrototype : MapPrototype
         for (ushort tileY = 0; tileY < MapService.TilesPerColumn; tileY++)
         {
             var tile = new TilePosition(tileX, tileY);
-            if (_text[tileX + tileY * MapService.TilesPerRow] != '#')
+            if (Text[tileX + tileY * MapService.TilesPerRow] != '#')
                 continue;
 
             for (byte pixelInTileX = 0; pixelInTileX < MapService.TileSize; pixelInTileX++)
@@ -32,6 +34,6 @@ internal sealed class TextMapPrototype : MapPrototype
             }
         }
 
-        return new Map(_name, walls);
+        return new Map(Name, walls);
     }
 }

@@ -24,14 +24,18 @@ internal sealed class Endpoints(
         app.Map("/controls", ConnectControlsAsync);
         app.MapGet("/map", () => mapService.MapNames);
         app.MapPost("/map", PostMap);
+        app.MapGet("/map/{name}", GetMapByName);
     }
 
     private Results<BadRequest<string>, NotFound<string>, Ok> PostMap([FromQuery] string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             return TypedResults.BadRequest("invalid map name");
-        if (!mapService.TryGetMapByName(name, out var map))
+
+        name = name.Trim().ToUpperInvariant();
+        if (!mapService.TryGetPrototype(name, out var map))
             return TypedResults.NotFound("map with name not found");
+
         changeToRequestedMap.Request(map);
         return TypedResults.Ok();
     }
@@ -87,5 +91,20 @@ internal sealed class Endpoints(
 
         var player = playerService.GetOrAdd(name);
         return TypedResults.Ok(player.Name);
+    }
+
+    private Results<Ok<MapInfo>, NotFound, BadRequest<string>> GetMapByName(string name)
+    {
+        name = name.Trim().ToUpperInvariant();
+        if (string.IsNullOrEmpty(name))
+            return TypedResults.BadRequest("map name cannot be empty");
+
+        if (!mapService.TryGetPrototype(name, out var prototype))
+            return TypedResults.NotFound();
+        if (!mapService.TryGetPreview(name, out var preview))
+            return TypedResults.NotFound();
+
+        var mapInfo = new MapInfo(prototype.Name, prototype.GetType().Name, preview.Data);
+        return TypedResults.Ok(mapInfo);
     }
 }
