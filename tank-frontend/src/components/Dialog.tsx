@@ -6,7 +6,7 @@ export default function Dialog({children, className}: {
     children: ReactNode;
     className?: string;
 }) {
-    return <Column className={'Dialog ' + (className ?? '')}>
+    return <Column className={'Dialog overflow-scroll ' + (className ?? '')}>
         {children}
     </Column>
 }

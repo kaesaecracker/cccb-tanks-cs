@@ -62,7 +62,7 @@ function MapChooserDialog({mapNames, theme, onClose, onConfirm}: {
     const [chosenMap, setChosenMap] = useState<string>();
     return <Dialog>
         <h3>Choose a map</h3>
-        <Row className="MapChooser-Row">
+        <Row className="MapChooser-Row overflow-scroll">
             {mapNames.map(name => <MapPreview
                 key={name}
                 mapName={name}
