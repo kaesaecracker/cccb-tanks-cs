@@ -1,5 +1,5 @@
 
-#screen {
+.PixelGridCanvas {
     aspect-ratio: calc(352 / 160);
     flex-grow: 1;
     object-fit: contain;
