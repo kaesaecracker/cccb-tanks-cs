@@ -19,6 +19,21 @@ export type Player = {
     readonly scores: Scores;
 };
 
+type TankInfo = {
+    readonly magazine: string;
+    readonly position: { x: number; y: number };
+    readonly orientation: number;
+    readonly moving: boolean;
+}
+
+export type PlayerInfoMessage = {
+    readonly name: string;
+    readonly scores: Scores;
+    readonly controls: string;
+    readonly tank?: TankInfo;
+    readonly openConnections: number;
+}
+
 export function useMyWebSocket<T = unknown>(url: string, options: Options = {}) {
     return useWebSocket<T>(url, {
         shouldReconnect: () => true,
