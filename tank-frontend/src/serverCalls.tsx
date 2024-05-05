@@ -34,6 +34,12 @@ export type PlayerInfoMessage = {
     readonly openConnections: number;
 }
 
+export type MapInfo = {
+    readonly name: string;
+    readonly typeName: string;
+    readonly preview: string;
+}
+
 export function useMyWebSocket<T = unknown>(url: string, options: Options = {}) {
     return useWebSocket<T>(url, {
         shouldReconnect: () => true,

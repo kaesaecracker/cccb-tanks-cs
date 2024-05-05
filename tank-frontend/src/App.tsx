@@ -8,8 +8,8 @@ import Scoreboard from './Scoreboard.tsx';
 import Button from './components/Button.tsx';
 import MapChooser from './MapChooser.tsx';
 import './App.css';
-import {getRandomTheme, useStoredTheme} from "./theme.ts";
-import { useState } from 'react';
+import {getRandomTheme, useStoredTheme} from './theme.ts';
+import {useState} from 'react';
 
 export default function App() {
     const [theme, setTheme] = useStoredTheme();
@@ -21,7 +21,7 @@ export default function App() {
 
         <Row>
             <h1 className="flex-grow">CCCB-Tanks!</h1>
-            <MapChooser />
+            <MapChooser theme={theme}/>
             <Button text="change colors" onClick={() => setTheme(_ => getRandomTheme())}/>
             <Button
                 onClick={() => window.open('https://github.com/kaesaecracker/cccb-tanks-cs', '_blank')?.focus()}

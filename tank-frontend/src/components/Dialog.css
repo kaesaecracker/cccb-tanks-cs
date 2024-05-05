@@ -10,4 +10,9 @@
 
     gap: 16px;
     padding: 16px;
+
+    max-height: 75vh;
+    max-width: 75vw;
+
+    overflow: scroll;
 }
