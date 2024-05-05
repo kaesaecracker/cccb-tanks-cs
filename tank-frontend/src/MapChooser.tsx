@@ -71,8 +71,11 @@ function MapChooserDialog({mapNames, theme, onClose, onConfirm}: {
                 onClick={() => setChosenMap(name)}
             />)}
         </Row>
-        <Button text="confirm" disabled={!chosenMap} onClick={() => chosenMap && onConfirm(chosenMap)}/>
-        <Button text="cancel" onClick={onClose}/>
+        <Row>
+            <div className='flex-grow'/>
+            <Button text="« cancel" onClick={onClose}/>
+            <Button text="√ confirm" disabled={!chosenMap} onClick={() => chosenMap && onConfirm(chosenMap)}/>
+        </Row>
     </Dialog>;
 }
 
@@ -105,7 +108,7 @@ export default function MapChooser({theme}: {
     const [open, setOpen] = useState(false);
 
     return <>
-        <Button text="Change map"
+        <Button text="▓ Change map"
                 disabled={!query.isSuccess || postMap.isPending}
                 onClick={() => setOpen(true)}/>
         {query.isSuccess && open &&

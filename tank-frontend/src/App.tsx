@@ -22,12 +22,12 @@ export default function App() {
         <Row>
             <h1 className="flex-grow">CCCB-Tanks!</h1>
             <MapChooser theme={theme}/>
-            <Button text="change colors" onClick={() => setTheme(_ => getRandomTheme())}/>
+            <Button text="☼ change colors" onClick={() => setTheme(_ => getRandomTheme())}/>
             <Button
                 onClick={() => window.open('https://github.com/kaesaecracker/cccb-tanks-cs', '_blank')?.focus()}
-                text="GitHub"/>
+                text="⌂ source"/>
             {name !== '' &&
-                <Button onClick={() => setName(_ => '')} text="logout"/>}
+                <Button onClick={() => setName(_ => '')} text="∩ logout"/>}
         </Row>
 
         {name || <JoinForm onDone={name => setName(_ => name)}/>}

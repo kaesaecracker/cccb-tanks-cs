@@ -41,7 +41,7 @@ export default function JoinForm({onDone}: {
         <Button
             onClick={confirm}
             disabled={disableButtons}
-            text="INSERT COIN"/>
+            text="¢ INSERT COIN"/>
         {postPlayer.isError && <p>{postPlayer.error.message}</p>}
     </Dialog>;
 }
