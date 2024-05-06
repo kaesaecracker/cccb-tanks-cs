@@ -1,0 +1,16 @@
+
+.Dialog {
+    border: solid var(--border-size-thick) var(--color-secondary);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    background: var(--color-background);
+
+    gap: 16px;
+    padding: 16px;
+
+    max-height: 75vh;
+    max-width: 75vw;
+}

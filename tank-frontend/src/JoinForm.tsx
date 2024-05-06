@@ -1,10 +1,11 @@
 import {useState} from 'react';
-import './JoinForm.css';
+import {useMutation} from '@tanstack/react-query';
+
 import {makeApiUrl} from './serverCalls';
-import Column from './components/Column.tsx';
 import Button from './components/Button.tsx';
 import TextInput from './components/TextInput.tsx';
-import {useMutation} from '@tanstack/react-query';
+import Dialog from './components/Dialog.tsx';
+import './JoinForm.css';
 
 export default function JoinForm({onDone}: {
     onDone: (name: string) => void;
@@ -29,7 +30,7 @@ export default function JoinForm({onDone}: {
 
     const confirm = () => postPlayer.mutate({name});
 
-    return <Column className="JoinForm">
+    return <Dialog className="JoinForm">
         <h3> Enter your name to play </h3>
         <TextInput
             value={name}
@@ -40,7 +41,7 @@ export default function JoinForm({onDone}: {
         <Button
             onClick={confirm}
             disabled={disableButtons}
-            text="INSERT COIN"/>
+            text="¢ INSERT COIN"/>
         {postPlayer.isError && <p>{postPlayer.error.message}</p>}
-    </Column>;
+    </Dialog>;
 }

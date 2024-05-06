@@ -1,9 +1,81 @@
-import {ChangeEvent} from 'react';
-import {makeApiUrl} from './serverCalls';
-import './MapChooser.css';
+import {useState} from 'react';
 import {useMutation, useQuery} from '@tanstack/react-query';
+import {makeApiUrl, MapInfo} from './serverCalls';
+import Dialog from './components/Dialog.tsx';
+import PixelGridCanvas from './components/PixelGridCanvas.tsx';
+import Column from './components/Column.tsx';
+import Button from './components/Button.tsx';
+import Row from './components/Row.tsx';
+import './MapChooser.css';
 
-export default function MapChooser() {
+function base64ToArrayBuffer(base64: string) {
+    const binaryString = atob(base64);
+    const bytes = new Uint8ClampedArray(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+}
+
+function MapPreview({mapName, highlight, onClick}: {
+    readonly mapName: string,
+    readonly highlight: boolean,
+    readonly onClick: () => void
+}) {
+    const query = useQuery({
+        queryKey: ['get-map', mapName],
+        queryFn: async () => {
+            const url = makeApiUrl(`/map/${mapName}`);
+            const response = await fetch(url, {method: 'GET'});
+            if (!response.ok)
+                throw new Error(`response failed with code ${response.status} (${response.status})${await response.text()}`);
+            return await response.json() as MapInfo;
+        }
+    });
+
+    if (query.isError)
+        return <p>{query.error.message}</p>;
+    else if (query.isPending)
+        return <p>loading...</p>;
+
+    const {name, preview} = query.data;
+
+    return <Column
+        key={mapName}
+        className={'MapChooser-Preview' + (highlight ? ' MapChooser-Preview-Highlight' : '')}
+        onClick={onClick}
+    >
+        <PixelGridCanvas pixels={base64ToArrayBuffer(preview)}/>
+        <p>{name}</p>
+    </Column>;
+}
+
+
+function MapChooserDialog({mapNames, onClose, onConfirm}: {
+    readonly mapNames: string[];
+    readonly onConfirm: (mapName: string) => void;
+    readonly onClose: () => void;
+}) {
+    const [chosenMap, setChosenMap] = useState<string>();
+    return <Dialog>
+        <h3>Choose a map</h3>
+        <Row className="MapChooser-Row overflow-scroll">
+            {mapNames.map(name => <MapPreview
+                key={name}
+                mapName={name}
+                highlight={chosenMap == name}
+                onClick={() => setChosenMap(name)}
+            />)}
+        </Row>
+        <Row>
+            <div className="flex-grow"/>
+            <Button text="« cancel" onClick={onClose}/>
+            <Button text="√ confirm" disabled={!chosenMap} onClick={() => chosenMap && onConfirm(chosenMap)}/>
+        </Row>
+    </Dialog>;
+}
+
+export default function MapChooser({}: {}) {
     const query = useQuery({
         queryKey: ['get-maps'],
         queryFn: async () => {
@@ -27,22 +99,21 @@ export default function MapChooser() {
         }
     });
 
-    const onChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        if (event.target.selectedIndex < 1)
-            return;
-        event.preventDefault();
+    const [open, setOpen] = useState(false);
 
-        const chosenMap = event.target.options[event.target.selectedIndex].value;
-        postMap.mutate(chosenMap);
-    };
-
-    if (query.isError)
-        return <></>;
-
-    const disabled = !query.isSuccess || postMap.isPending;
-
-    return <select className="MapChooser-DropDown" onChange={onChange} disabled={disabled}>
-        <option value="" defaultValue={''}>Choose map</option>
-        {query.isSuccess && query.data.map(m => <option key={m} value={m}>{m}</option>)}
-    </select>;
+    return <>
+        <Button text="▓ Change map"
+                disabled={!query.isSuccess || postMap.isPending}
+                onClick={() => setOpen(true)}/>
+        {query.isSuccess && open &&
+            <MapChooserDialog
+                mapNames={query.data!}
+                onClose={() => setOpen(false)}
+                onConfirm={name => {
+                    setOpen(false);
+                    postMap.mutate(name);
+                }}
+            />
+        }
+    </>;
 }

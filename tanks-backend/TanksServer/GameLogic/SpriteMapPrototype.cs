@@ -5,17 +5,18 @@ namespace TanksServer.GameLogic;
 
 internal sealed class SpriteMapPrototype : MapPrototype
 {
-    private readonly string _name;
-    private readonly Sprite _sprite;
+    public override string Name { get; }
+
+    public Sprite Sprite { get; }
 
     public SpriteMapPrototype(string name, Sprite sprite)
     {
         if (sprite.Width != MapService.PixelsPerRow || sprite.Height != MapService.PixelsPerColumn)
-            throw new FileLoadException($"invalid image size in file {_name}");
+            throw new FileLoadException($"invalid image size in file {Name}");
 
-        _name = name;
-        _sprite = sprite;
+        Name = name;
+        Sprite = sprite;
     }
 
-    public override Map CreateInstance() => new(_name, _sprite.ToBoolArray());
+    public override Map CreateInstance() => new(Name, Sprite.ToBoolArray());
 }

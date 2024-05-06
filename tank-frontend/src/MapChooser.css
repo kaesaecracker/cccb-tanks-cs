@@ -7,3 +7,17 @@
     border-color: var(--color-primary);
     color: var(--color-primary);
 }
+
+.MapChooser-Row {
+    flex-wrap: wrap;
+}
+
+.MapChooser-Preview {
+    flex-grow: 1;
+    padding: var(--padding-normal);
+    border: solid var(--border-size-thin) var(--color-primary);
+}
+
+.MapChooser-Preview-Highlight {
+    border-color: var(--color-secondary);
+}

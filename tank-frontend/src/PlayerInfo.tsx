@@ -1,4 +1,4 @@
-import {makeApiUrl, Scores, useMyWebSocket} from './serverCalls';
+import {makeApiUrl, PlayerInfoMessage, useMyWebSocket} from './serverCalls';
 import Column from './components/Column.tsx';
 import {ReadyState} from 'react-use-websocket';
 import {useEffect, useState} from 'react';
@@ -19,21 +19,6 @@ function ScoreRow({name, value}: {
         <td>{name}</td>
         <td>{valueStr}</td>
     </tr>;
-}
-
-type TankInfo = {
-    readonly magazine: string;
-    readonly position: { x: number; y: number };
-    readonly orientation: number;
-    readonly moving: boolean;
-}
-
-type PlayerInfoMessage = {
-    readonly name: string;
-    readonly scores: Scores;
-    readonly controls: string;
-    readonly tank?: TankInfo;
-    readonly openConnections: number;
 }
 
 export default function PlayerInfo({player}: { player: string }) {

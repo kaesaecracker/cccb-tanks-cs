@@ -1,13 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using DisplayCommands;
 using TanksServer.Graphics;
 
 namespace TanksServer.GameLogic;
-
-internal abstract class MapPrototype
-{
-    public abstract Map CreateInstance();
-}
 
 internal sealed class MapService
 {
@@ -17,9 +13,10 @@ internal sealed class MapService
     public const ushort PixelsPerRow = TilesPerRow * TileSize;
     public const ushort PixelsPerColumn = TilesPerColumn * TileSize;
 
-    private readonly Dictionary<string, MapPrototype> _maps = new();
+    private readonly Dictionary<string, MapPrototype> _mapPrototypes = new();
+    private readonly Dictionary<string, PixelGrid> _mapPreviews = new();
 
-    public IEnumerable<string> MapNames => _maps.Keys;
+    public IEnumerable<string> MapNames => _mapPrototypes.Keys;
 
     public Map Current { get; private set; }
 
@@ -29,29 +26,49 @@ internal sealed class MapService
             LoadMapString(file);
         foreach (var file in Directory.EnumerateFiles("./assets/maps/", "*.png"))
             LoadMapPng(file);
-
-        var chosenMapIndex = Random.Shared.Next(_maps.Count);
-        var chosenMapName = _maps.Keys.Skip(chosenMapIndex).First();
-        Current = _maps[chosenMapName].CreateInstance();
+        Current = GetRandomMap();
     }
 
-    public bool TryGetMapByName(string name, [MaybeNullWhen(false)] out MapPrototype map)
-        => _maps.TryGetValue(name, out map);
+    public bool TryGetPrototype(string name, [MaybeNullWhen(false)] out MapPrototype map)
+        => _mapPrototypes.TryGetValue(name, out map);
 
     public void SwitchTo(MapPrototype prototype) => Current = prototype.CreateInstance();
 
+    public bool TryGetPreview(string name, [MaybeNullWhen(false)] out PixelGrid pixelGrid)
+    {
+        if (_mapPreviews.TryGetValue(name, out pixelGrid))
+            return true; // already generated
+        if (!_mapPrototypes.TryGetValue(name, out var prototype))
+            return false; // name not found
+
+        pixelGrid = new PixelGrid(PixelsPerRow, PixelsPerColumn);
+        DrawMapStep.Draw(pixelGrid, prototype.CreateInstance());
+
+        _mapPreviews.TryAdd(name, pixelGrid); // another thread may have added the map already
+        return true; // new preview
+    }
+
     private void LoadMapPng(string file)
     {
-        var name = Path.GetFileName(file);
+        var name = MapNameFromFilePath(file);
         var prototype = new SpriteMapPrototype(name, Sprite.FromImageFile(file));
-        _maps.Add(Path.GetFileName(file), prototype);
+        _mapPrototypes.Add(name, prototype);
     }
 
     private void LoadMapString(string file)
     {
+        var name = MapNameFromFilePath(file);
         var map = File.ReadAllText(file).ReplaceLineEndings(string.Empty).Trim();
-        var name = Path.GetFileName(file);
         var prototype = new TextMapPrototype(name, map);
-        _maps.Add(name, prototype);
+        _mapPrototypes.Add(name, prototype);
+    }
+
+    private static string MapNameFromFilePath(string filePath) => Path.GetFileName(filePath).ToUpperInvariant();
+
+    private Map GetRandomMap()
+    {
+        var chosenMapIndex = Random.Shared.Next(_mapPrototypes.Count);
+        var chosenMapName = _mapPrototypes.Keys.Skip(chosenMapIndex).First();
+        return _mapPrototypes[chosenMapName].CreateInstance();
     }
 }
