@@ -37,7 +37,7 @@ internal abstract class WebsocketServer<T>(
         await connection.ReceiveAsync();
 
         _ = _connections.TryRemove(connection, out _);
-        await connection.RemovedAsync();
+        connection.Dispose();
     }
 
     public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;

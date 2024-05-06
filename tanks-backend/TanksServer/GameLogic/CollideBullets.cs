@@ -2,20 +2,31 @@ using TanksServer.Graphics;
 
 namespace TanksServer.GameLogic;
 
-internal sealed class CollideBullets(
-    MapEntityManager entityManager,
-    MapService map,
-    IOptions<GameRules> options,
-    TankSpawnQueue tankSpawnQueue
-) : ITickStep
+internal sealed class CollideBullets : ITickStep
 {
     private readonly Sprite _explosiveSprite = Sprite.FromImageFile("assets/explosion.png");
+    private readonly Predicate<Bullet> _removeBulletsPredicate;
+    private readonly MapEntityManager _entityManager;
+    private readonly MapService _map;
+    private readonly bool _destructibleWalls;
+    private readonly TankSpawnQueue _tankSpawnQueue;
+
+    public CollideBullets(MapEntityManager entityManager,
+        MapService map,
+        IOptions<GameRules> options,
+        TankSpawnQueue tankSpawnQueue)
+    {
+        _entityManager = entityManager;
+        _map = map;
+        _tankSpawnQueue = tankSpawnQueue;
+
+        _destructibleWalls = options.Value.DestructibleWalls;
+        _removeBulletsPredicate = b => BulletHitsTank(b) || BulletHitsWall(b) || BulletTimesOut(b);
+    }
 
     public ValueTask TickAsync(TimeSpan _)
     {
-        entityManager.RemoveWhere(BulletHitsTank);
-        entityManager.RemoveWhere(BulletHitsWall);
-        entityManager.RemoveWhere(BulletTimesOut);
+        _entityManager.RemoveWhere(_removeBulletsPredicate);
         return ValueTask.CompletedTask;
     }
 
@@ -31,7 +42,7 @@ internal sealed class CollideBullets(
     private bool BulletHitsWall(Bullet bullet)
     {
         var pixel = bullet.Position.ToPixelPosition();
-        if (!map.Current.IsWall(pixel))
+        if (!_map.Current.IsWall(pixel))
             return false;
 
         ExplodeAt(pixel, bullet.IsExplosive, bullet.Owner);
@@ -50,7 +61,7 @@ internal sealed class CollideBullets(
 
     private Tank? GetTankAt(FloatPosition position, Player owner, bool canHitOwnTank)
     {
-        foreach (var tank in entityManager.Tanks)
+        foreach (var tank in _entityManager.Tanks)
         {
             var hitsOwnTank = owner == tank.Owner;
             if (hitsOwnTank && !canHitOwnTank)
@@ -89,7 +100,7 @@ internal sealed class CollideBullets(
 
         void Core(PixelPosition position)
         {
-            if (options.Value.DestructibleWalls && map.Current.TryDestroyWallAt(position))
+            if (_destructibleWalls && _map.Current.TryDestroyWallAt(position))
                 owner.Scores.WallsDestroyed++;
 
             var tank = GetTankAt(position.ToFloatPosition(), owner, true);
@@ -100,8 +111,8 @@ internal sealed class CollideBullets(
                 owner.Scores.Kills++;
             tank.Owner.Scores.Deaths++;
 
-            entityManager.Remove(tank);
-            tankSpawnQueue.EnqueueForDelayedSpawn(tank.Owner);
+            _entityManager.Remove(tank);
+            _tankSpawnQueue.EnqueueForDelayedSpawn(tank.Owner);
         }
     }
 }

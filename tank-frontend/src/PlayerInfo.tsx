@@ -28,7 +28,6 @@ type TankInfo = {
     readonly moving: boolean;
 }
 
-
 type PlayerInfoMessage = {
     readonly name: string;
     readonly scores: Scores;
@@ -48,7 +47,8 @@ export default function PlayerInfo({player}: { player: string }) {
         readyState,
         sendMessage
     } = useMyWebSocket<PlayerInfoMessage>(url.toString(), {
-        onMessage: () => setShouldSendMessage(true)
+        onMessage: () => setShouldSendMessage(true),
+        onOpen: _ => setShouldSendMessage(true)
     });
 
     useEffect(() => {

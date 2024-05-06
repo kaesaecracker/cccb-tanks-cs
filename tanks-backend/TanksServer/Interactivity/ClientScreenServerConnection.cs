@@ -5,15 +5,12 @@ using TanksServer.Graphics;
 
 namespace TanksServer.Interactivity;
 
-internal sealed class ClientScreenServerConnection : WebsocketServerConnection
+internal sealed class ClientScreenServerConnection
+    : DroppablePackageRequestConnection<ClientScreenServerConnection.Package>
 {
-    private sealed record class Package(IMemoryOwner<byte> Pixels, IMemoryOwner<byte>? PlayerData);
-
     private readonly BufferPool _bufferPool;
     private readonly PlayerScreenData? _playerDataBuilder;
     private readonly Player? _player;
-    private int _wantsFrameOnTick = 1;
-    private Package? _next;
 
     public ClientScreenServerConnection(
         WebSocket webSocket,
@@ -30,55 +27,29 @@ internal sealed class ClientScreenServerConnection : WebsocketServerConnection
             : new PlayerScreenData(logger, player);
     }
 
-    protected override ValueTask HandleMessageAsync(Memory<byte> _)
-    {
-        if (_wantsFrameOnTick != 0)
-            return ValueTask.CompletedTask;
-
-        var package = Interlocked.Exchange(ref _next, null);
-        if (package != null)
-            return SendAndDisposeAsync(package);
-
-        // the delay between one exchange and this set could be enough for another frame to complete
-        // this would mean the client simply drops a frame, so this should be fine
-        _wantsFrameOnTick = 1;
-        return ValueTask.CompletedTask;
-    }
-
     public async Task OnGameTickAsync(PixelGrid pixels, GamePixelGrid gamePixelGrid)
     {
         await Task.Yield();
+        var next = BuildNextPackage(pixels, gamePixelGrid);
+        SetNextPackage(next);
+    }
 
+    private Package BuildNextPackage(PixelGrid pixels, GamePixelGrid gamePixelGrid)
+    {
         var nextPixels = _bufferPool.Rent(pixels.Data.Length);
         pixels.Data.CopyTo(nextPixels.Memory);
 
-        IMemoryOwner<byte>? nextPlayerData = null;
-        if (_playerDataBuilder != null)
-        {
-            var data = _playerDataBuilder.Build(gamePixelGrid);
-            nextPlayerData = _bufferPool.Rent(data.Length);
-            data.CopyTo(nextPlayerData.Memory);
-        }
+        if (_playerDataBuilder == null)
+            return new Package(nextPixels, null);
 
-        var next = new Package(nextPixels, nextPlayerData);
-        if (Interlocked.Exchange(ref _wantsFrameOnTick, 0) != 0)
-        {
-            await SendAndDisposeAsync(next);
-            return;
-        }
+        var data = _playerDataBuilder.Build(gamePixelGrid);
+        var nextPlayerData = _bufferPool.Rent(data.Length);
+        data.CopyTo(nextPlayerData.Memory);
 
-        var oldNext = Interlocked.Exchange(ref _next, next);
-        oldNext?.Pixels.Dispose();
-        oldNext?.PlayerData?.Dispose();
+        return new Package(nextPixels, nextPlayerData);
     }
 
-    public override ValueTask RemovedAsync()
-    {
-        _player?.DecrementConnectionCount();
-        return ValueTask.CompletedTask;
-    }
-
-    private async ValueTask SendAndDisposeAsync(Package package)
+    protected override async ValueTask SendPackageAsync(Package package)
     {
         try
         {
@@ -90,10 +61,23 @@ internal sealed class ClientScreenServerConnection : WebsocketServerConnection
         {
             Logger.LogWarning(ex, "send failed");
         }
-        finally
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
+        _player?.DecrementConnectionCount();
+    }
+
+    internal sealed record class Package(
+        IMemoryOwner<byte> Pixels,
+        IMemoryOwner<byte>? PlayerData
+    ) : IDisposable
+    {
+        public void Dispose()
         {
-            package.Pixels.Dispose();
-            package.PlayerData?.Dispose();
+            Pixels.Dispose();
+            PlayerData?.Dispose();
         }
     }
 }

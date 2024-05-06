@@ -6,18 +6,14 @@ using TanksServer.GameLogic;
 
 namespace TanksServer.Interactivity;
 
-// MemoryStream is IDisposable but does not need to be disposed
-#pragma warning disable CA1001
-internal sealed class PlayerInfoConnection : WebsocketServerConnection
-#pragma warning restore CA1001
+internal sealed class PlayerInfoConnection
+    : DroppablePackageRequestConnection<IMemoryOwner<byte>>
 {
     private readonly Player _player;
     private readonly MapEntityManager _entityManager;
     private readonly BufferPool _bufferPool;
     private readonly MemoryStream _tempStream = new();
-    private int _wantsInfoOnTick = 1;
     private IMemoryOwner<byte>? _lastMessage = null;
-    private IMemoryOwner<byte>? _nextMessage = null;
 
     public PlayerInfoConnection(
         Player player,
@@ -33,39 +29,22 @@ internal sealed class PlayerInfoConnection : WebsocketServerConnection
         _player.IncrementConnectionCount();
     }
 
-    protected override ValueTask HandleMessageAsync(Memory<byte> buffer)
-    {
-        var next = Interlocked.Exchange(ref _nextMessage, null);
-        if (next != null)
-            return SendAndDisposeAsync(next);
-
-        _wantsInfoOnTick = 1;
-        return ValueTask.CompletedTask;
-    }
-
     public async Task OnGameTickAsync()
     {
         await Task.Yield();
 
         var response = await GenerateMessageAsync();
-        var wantsNow = Interlocked.Exchange(ref _wantsInfoOnTick, 0) != 0;
-
-        if (wantsNow)
-        {
-            await SendAndDisposeAsync(response);
-            return;
-        }
-
-        Interlocked.Exchange(ref _nextMessage, response);
+        if (response != null)
+            SetNextPackage(response);
     }
 
-    public override ValueTask RemovedAsync()
+    public override void Dispose()
     {
+        base.Dispose();
         _player.DecrementConnectionCount();
-        return ValueTask.CompletedTask;
     }
 
-    private async ValueTask<IMemoryOwner<byte>> GenerateMessageAsync()
+    private async ValueTask<IMemoryOwner<byte>?> GenerateMessageAsync()
     {
         var tank = _entityManager.GetCurrentTankOfPlayer(_player);
 
@@ -89,12 +68,18 @@ internal sealed class PlayerInfoConnection : WebsocketServerConnection
         var messageLength = (int)_tempStream.Position;
         var owner = _bufferPool.Rent(messageLength);
 
+
         _tempStream.Position = 0;
         await _tempStream.ReadExactlyAsync(owner.Memory);
-        return owner;
+
+        if (_lastMessage == null || !owner.Memory.Span.SequenceEqual(_lastMessage.Memory.Span))
+            return owner;
+
+        owner.Dispose();
+        return null;
     }
 
-    private async ValueTask SendAndDisposeAsync(IMemoryOwner<byte> data)
+    protected override async ValueTask SendPackageAsync(IMemoryOwner<byte> data)
     {
         await Socket.SendTextAsync(data.Memory);
         Interlocked.Exchange(ref _lastMessage, data)?.Dispose();
