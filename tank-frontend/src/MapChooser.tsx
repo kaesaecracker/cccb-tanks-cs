@@ -4,7 +4,6 @@ import {makeApiUrl, MapInfo} from './serverCalls';
 import Dialog from './components/Dialog.tsx';
 import PixelGridCanvas from './components/PixelGridCanvas.tsx';
 import Column from './components/Column.tsx';
-import {Theme} from './theme.ts';
 import Button from './components/Button.tsx';
 import Row from './components/Row.tsx';
 import './MapChooser.css';
@@ -18,9 +17,8 @@ function base64ToArrayBuffer(base64: string) {
     return bytes;
 }
 
-function MapPreview({mapName, theme, highlight, onClick}: {
+function MapPreview({mapName, highlight, onClick}: {
     readonly mapName: string,
-    readonly theme: Theme,
     readonly highlight: boolean,
     readonly onClick: () => void
 }) {
@@ -47,15 +45,14 @@ function MapPreview({mapName, theme, highlight, onClick}: {
         className={'MapChooser-Preview' + (highlight ? ' MapChooser-Preview-Highlight' : '')}
         onClick={onClick}
     >
-        <PixelGridCanvas pixels={base64ToArrayBuffer(preview)} theme={theme}/>
+        <PixelGridCanvas pixels={base64ToArrayBuffer(preview)}/>
         <p>{name}</p>
     </Column>;
 }
 
 
-function MapChooserDialog({mapNames, theme, onClose, onConfirm}: {
+function MapChooserDialog({mapNames, onClose, onConfirm}: {
     readonly mapNames: string[];
-    readonly theme: Theme;
     readonly onConfirm: (mapName: string) => void;
     readonly onClose: () => void;
 }) {
@@ -66,22 +63,19 @@ function MapChooserDialog({mapNames, theme, onClose, onConfirm}: {
             {mapNames.map(name => <MapPreview
                 key={name}
                 mapName={name}
-                theme={theme}
                 highlight={chosenMap == name}
                 onClick={() => setChosenMap(name)}
             />)}
         </Row>
         <Row>
-            <div className='flex-grow'/>
+            <div className="flex-grow"/>
             <Button text="« cancel" onClick={onClose}/>
             <Button text="√ confirm" disabled={!chosenMap} onClick={() => chosenMap && onConfirm(chosenMap)}/>
         </Row>
     </Dialog>;
 }
 
-export default function MapChooser({theme}: {
-    readonly theme: Theme;
-}) {
+export default function MapChooser({}: {}) {
     const query = useQuery({
         queryKey: ['get-maps'],
         queryFn: async () => {
@@ -114,7 +108,6 @@ export default function MapChooser({theme}: {
         {query.isSuccess && open &&
             <MapChooserDialog
                 mapNames={query.data!}
-                theme={theme}
                 onClose={() => setOpen(false)}
                 onConfirm={name => {
                     setOpen(false);

@@ -1,5 +1,5 @@
-import {hslToString, Theme} from '../theme.ts';
-import {useEffect, useRef} from 'react';
+import {hslToString, ThemeContext} from '../theme.ts';
+import {useContext, useEffect, useRef} from 'react';
 import './PixelGridCanvas.css';
 
 const pixelsPerRow = 352;
@@ -104,10 +104,10 @@ function drawPixelsToCanvas(
     context.putImageData(imageData, 0, 0);
 }
 
-export default function PixelGridCanvas({pixels, theme}: {
+export default function PixelGridCanvas({pixels}: {
     readonly pixels: Uint8ClampedArray;
-    readonly theme: Theme;
 }) {
+    const theme = useContext(ThemeContext);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {

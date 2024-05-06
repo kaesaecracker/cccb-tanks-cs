@@ -1,12 +1,10 @@
 import {useEffect, useState} from 'react';
-import {Theme} from './theme.ts';
 import {makeApiUrl, useMyWebSocket} from './serverCalls.tsx';
 import {ReadyState} from 'react-use-websocket';
 import PixelGridCanvas from './components/PixelGridCanvas.tsx';
 
 
-export default function ClientScreen({theme, player}: {
-    theme: Theme,
+export default function ClientScreen({player}: {
     player: string | null
 }) {
     const [shouldSendMessage, setShouldSendMessage] = useState(false);
@@ -40,5 +38,5 @@ export default function ClientScreen({theme, player}: {
         return <></>;
 
     const pixels = new Uint8ClampedArray(lastMessage.data);
-    return <PixelGridCanvas pixels={pixels} theme={theme}/>;
+    return <PixelGridCanvas pixels={pixels}/>;
 }

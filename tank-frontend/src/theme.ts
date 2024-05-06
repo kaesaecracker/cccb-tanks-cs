@@ -1,4 +1,5 @@
-import {useStoredObjectState} from "./useStoredState.ts";
+import {useStoredObjectState} from './useStoredState.ts';
+import {createContext} from 'react';
 
 export type Theme = {
     primary: HSL;
@@ -88,3 +89,5 @@ export function useStoredTheme() {
         save: applyTheme
     });
 }
+
+export const ThemeContext = createContext<Theme>(getRandomTheme());
