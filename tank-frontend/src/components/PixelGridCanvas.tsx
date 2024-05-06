@@ -9,7 +9,8 @@ const observerMessageSize = pixelsPerCol * pixelsPerRow / 8;
 enum GamePixelEntityType {
     Wall = 0x0,
     Tank = 0x1,
-    Bullet = 0x2
+    Bullet = 0x2,
+    PowerUp = 0x3
 }
 
 function getPixelDataIndexes(bitIndex: number) {
@@ -37,26 +38,30 @@ function parseAdditionalDataNibble(nibble: number) {
 
 function drawPixelsToCanvas(
     {
-        context, width, height, pixels, additional, foreground, background, playerColor, otherTanksColor
+        context, width, height, pixels, additional, colors
     }: {
         context: CanvasRenderingContext2D,
         width: number,
         height: number,
         pixels: Uint8ClampedArray,
         additional: Uint8ClampedArray | null,
-        background: Uint8ClampedArray,
-        foreground: Uint8ClampedArray,
-        playerColor: Uint8ClampedArray,
-        otherTanksColor: Uint8ClampedArray
+        colors: {
+            background: Uint8ClampedArray,
+            foreground: Uint8ClampedArray,
+            player: Uint8ClampedArray,
+            tanks: Uint8ClampedArray,
+            powerUps: Uint8ClampedArray,
+            bullets: Uint8ClampedArray
+        }
     }
 ) {
     let additionalDataIndex = 0;
     let additionalDataByte: number | null = null;
     const nextPixelColor = (isOn: boolean) => {
         if (!isOn)
-            return background;
+            return colors.background;
         if (!additional)
-            return foreground;
+            return colors.foreground;
 
         let info;
         if (additionalDataByte === null) {
@@ -69,12 +74,16 @@ function drawPixelsToCanvas(
         }
 
         if (info.isCurrentPlayer)
-            return playerColor;
+            return colors.player;
 
-        if (info.entityType == GamePixelEntityType.Tank)
-            return otherTanksColor;
+        if (info.entityType === GamePixelEntityType.Tank)
+            return colors.tanks;
+        if (info.entityType === GamePixelEntityType.PowerUp)
+            return colors.powerUps;
+        if (info.entityType === GamePixelEntityType.Bullet)
+            return colors.bullets;
 
-        return foreground;
+        return colors.foreground;
     };
 
     const imageData = context.getImageData(0, 0, width, height, {colorSpace: 'srgb'});
@@ -127,10 +136,14 @@ export default function PixelGridCanvas({pixels, theme}: {
                 height: canvas.height,
                 pixels,
                 additional: additionalData,
-                background: normalizeColor(drawContext, hslToString(theme.background)),
-                foreground: normalizeColor(drawContext, hslToString(theme.primary)),
-                playerColor: normalizeColor(drawContext, hslToString(theme.secondary)),
-                otherTanksColor: normalizeColor(drawContext, hslToString(theme.tertiary))
+                colors: {
+                    background: normalizeColor(drawContext, hslToString(theme.background)),
+                    foreground: normalizeColor(drawContext, hslToString(theme.primary)),
+                    player: normalizeColor(drawContext, hslToString(theme.secondary)),
+                    tanks: normalizeColor(drawContext, hslToString(theme.tertiary)),
+                    powerUps: normalizeColor(drawContext, hslToString(theme.tertiary)),
+                    bullets: normalizeColor(drawContext, hslToString(theme.tertiary))
+                }
             });
         };
 
