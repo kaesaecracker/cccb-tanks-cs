@@ -1,5 +1,11 @@
 import {useStoredObjectState} from './useStoredState.ts';
-import {createContext} from 'react';
+import {createContext, ReactNode, useContext, useEffect, useRef, useState} from 'react';
+
+export type HSL = {
+    h: number;
+    s: number;
+    l: number;
+}
 
 export type Theme = {
     primary: HSL;
@@ -13,12 +19,6 @@ const rootStyle = document.querySelector(':root')?.style;
 
 function getRandom(min: number, max: number) {
     return min + Math.random() * (max - min);
-}
-
-type HSL = {
-    h: number;
-    s: number;
-    l: number;
 }
 
 function getRandomHsl(params: {
@@ -91,3 +91,63 @@ export function useStoredTheme() {
 }
 
 export const ThemeContext = createContext<Theme>(getRandomTheme());
+
+type Rgba = Uint8ClampedArray;
+
+export type RgbaTheme = {
+    primary: Rgba;
+    secondary: Rgba;
+    background: Rgba;
+    tertiary: Rgba;
+}
+
+const dummyRgbaTheme: RgbaTheme = {
+    primary: new Uint8ClampedArray([0, 0, 0, 0]),
+    secondary: new Uint8ClampedArray([0, 0, 0, 0]),
+    background: new Uint8ClampedArray([0, 0, 0, 0]),
+    tertiary: new Uint8ClampedArray([0, 0, 0, 0])
+};
+
+const RgbaThemeContext = createContext<RgbaTheme>(dummyRgbaTheme);
+
+function normalizeColor(context: CanvasRenderingContext2D, color: HSL) {
+    context.fillStyle = hslToString(color);
+    context.fillRect(0, 0, 1, 1);
+    return context.getImageData(0, 0, 1, 1).data;
+}
+
+export function useRgbaThemeContext() {
+    return useContext(RgbaThemeContext);
+}
+
+export function RgbaThemeProvider({children}: { children: ReactNode }) {
+    const hslTheme = useContext(ThemeContext);
+    const [rgbaTheme, setRgbaTheme] = useState<RgbaTheme | null>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (canvas === null)
+            throw new Error('canvas null');
+
+        const drawContext = canvas.getContext('2d', {
+            alpha: true,
+            colorSpace: 'srgb',
+            willReadFrequently: true
+        });
+        if (!drawContext)
+            throw new Error('could not get draw context');
+
+        setRgbaTheme({
+            background: normalizeColor(drawContext, hslTheme.background),
+            primary: normalizeColor(drawContext, hslTheme.primary),
+            secondary: normalizeColor(drawContext, hslTheme.secondary),
+            tertiary: normalizeColor(drawContext, hslTheme.tertiary),
+        });
+    }, [hslTheme, canvasRef.current]);
+
+    return <RgbaThemeContext.Provider value={rgbaTheme || dummyRgbaTheme}>
+        <canvas hidden={true} ref={canvasRef}/>
+        {children}
+    </RgbaThemeContext.Provider>;
+}

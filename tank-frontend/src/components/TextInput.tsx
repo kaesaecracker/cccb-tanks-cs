@@ -1,7 +1,7 @@
 import {ChangeEventHandler} from "react";
 import './TextInput.css';
 
-export default function TextInput(props: {
+export default function TextInput( {onChange, className, value, placeholder, onEnter }: {
     onChange?: ChangeEventHandler<HTMLInputElement> | undefined;
     className?: string;
     value: string;
@@ -9,13 +9,14 @@ export default function TextInput(props: {
     onEnter?: () => void;
 }) {
     return <input
-        {...props}
         type="text"
-        className={'TextInput ' + (props.className?? '')}
-
+        className={'TextInput ' + (className?? '')}
+        value={value}
+        placeholder={placeholder}
+        onChange={onChange}
         onKeyUp={event => {
-            if (props.onEnter && event.key === 'Enter')
-                props.onEnter();
+            if (onEnter && event.key === 'Enter')
+                onEnter();
         }}
     />;
 }
