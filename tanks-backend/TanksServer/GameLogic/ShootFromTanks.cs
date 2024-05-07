@@ -26,24 +26,17 @@ internal sealed class ShootFromTanks(
         if (tank.ReloadingUntil >= now)
             return;
 
-        if (tank.Magazine.Empty)
+        if (tank.UsedBullets >= tank.MaxBullets)
         {
             tank.ReloadingUntil = now.AddMilliseconds(_config.ReloadDelayMs);
-            tank.Magazine = tank.Magazine with
-            {
-                UsedBullets = 0,
-                Type = MagazineType.Basic
-            };
+            tank.UsedBullets = 0;
             return;
         }
 
         tank.NextShotAfter = now.AddMilliseconds(_config.ShootDelayMs);
-        tank.Magazine = tank.Magazine with
-        {
-            UsedBullets = (byte)(tank.Magazine.UsedBullets + 1)
-        };
+        tank.UsedBullets++;
 
         tank.Owner.Scores.ShotsFired++;
-        entityManager.SpawnBullet(tank.Owner, tank.Position, tank.Orientation / 16d, tank.Magazine.Type);
+        entityManager.SpawnBullet(tank.Owner, tank.Position, tank.Orientation / 16d, tank.BulletStats);
     }
 }

@@ -8,8 +8,6 @@ internal sealed class Bullet : IMapEntity
 
     public required FloatPosition Position { get; set; }
 
-    public required bool IsExplosive { get; init; }
-
     public required DateTime Timeout { get; init; }
 
     public PixelBounds Bounds => new(Position.ToPixelPosition(), Position.ToPixelPosition());
@@ -18,7 +16,5 @@ internal sealed class Bullet : IMapEntity
 
     public required double Speed { get; set; }
 
-    public required double Acceleration { get; init; }
-
-    public required bool IsSmart { get; init; }
+    public required BulletStats Stats { get; init; }
 }

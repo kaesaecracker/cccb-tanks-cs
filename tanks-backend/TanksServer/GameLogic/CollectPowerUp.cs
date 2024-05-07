@@ -2,19 +2,27 @@ using System.Diagnostics;
 
 namespace TanksServer.GameLogic;
 
-internal sealed class CollectPowerUp(
-    MapEntityManager entityManager
-) : ITickStep
+internal sealed class CollectPowerUp : ITickStep
 {
-    private readonly Predicate<PowerUp> _collectPredicate = b => TryCollect(b, entityManager.Tanks);
+    private readonly Predicate<PowerUp> _collectPredicate;
+    private readonly GameRules _rules;
+    private readonly MapEntityManager _entityManager;
+
+    public CollectPowerUp(MapEntityManager entityManager,
+        IOptions<GameRules> options)
+    {
+        _entityManager = entityManager;
+        _rules = options.Value;
+        _collectPredicate = b => TryCollect(b, entityManager.Tanks);
+    }
 
     public ValueTask TickAsync(TimeSpan delta)
     {
-        entityManager.RemoveWhere(_collectPredicate);
+        _entityManager.RemoveWhere(_collectPredicate);
         return ValueTask.CompletedTask;
     }
 
-    private static bool TryCollect(PowerUp powerUp, IEnumerable<Tank> tanks)
+    private bool TryCollect(PowerUp powerUp, IEnumerable<Tank> tanks)
     {
         var position = powerUp.Position;
         foreach (var tank in tanks)
@@ -34,32 +42,38 @@ internal sealed class CollectPowerUp(
         return false;
     }
 
-    private static void ApplyPowerUpEffect(PowerUp powerUp, Tank tank)
+    private void ApplyPowerUpEffect(PowerUp powerUp, Tank tank)
     {
         switch (powerUp.Type)
         {
-            case PowerUpType.MagazineType:
-                if (powerUp.MagazineType == null)
-                    throw new UnreachableException();
-
-                tank.Magazine = tank.Magazine with
-                {
-                    Type = tank.Magazine.Type | powerUp.MagazineType.Value,
-                    UsedBullets = 0
-                };
-
-                if (tank.ReloadingUntil >= DateTime.Now)
-                    tank.ReloadingUntil = DateTime.Now;
-
-                break;
             case PowerUpType.MagazineSize:
-                tank.Magazine = tank.Magazine with
+                tank.MaxBullets = (byte)int.Clamp(tank.MaxBullets + 1, 1, 32);
+                break;
+
+            case PowerUpType.BulletAcceleration:
+                tank.BulletStats = tank.BulletStats with
                 {
-                    MaxBullets = (byte)int.Clamp(tank.Magazine.MaxBullets + 1, 1, 32)
+                    Acceleration = tank.BulletStats.Acceleration * _rules.BulletAccelerationUpgradeStrength
                 };
                 break;
+
+            case PowerUpType.ExplosiveBullets:
+                tank.BulletStats = tank.BulletStats with { Explosive = true };
+                break;
+
+            case PowerUpType.SmartBullets:
+                tank.BulletStats = tank.BulletStats with { Smart = true };
+                break;
+
+            case PowerUpType.BulletSpeed:
+                tank.BulletStats = tank.BulletStats with
+                {
+                    Speed = tank.BulletStats.Speed * _rules.BulletSpeedUpgradeStrength
+                };
+                break;
+
             default:
-                throw new UnreachableException();
+                throw new NotImplementedException($"unknown type {powerUp.Type}");
         }
     }
 }

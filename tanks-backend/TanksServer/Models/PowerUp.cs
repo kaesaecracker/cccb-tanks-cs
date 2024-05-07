@@ -4,8 +4,11 @@ namespace TanksServer.Models;
 
 internal enum PowerUpType
 {
-    MagazineType,
-    MagazineSize
+    MagazineSize,
+    BulletSpeed,
+    BulletAcceleration,
+    ExplosiveBullets,
+    SmartBullets,
 }
 
 internal sealed class PowerUp: IMapEntity
@@ -15,6 +18,4 @@ internal sealed class PowerUp: IMapEntity
     public PixelBounds Bounds => Position.GetBoundsForCenter(MapService.TileSize);
 
     public required PowerUpType Type { get; init; }
-
-    public MagazineType? MagazineType { get; init; }
 }

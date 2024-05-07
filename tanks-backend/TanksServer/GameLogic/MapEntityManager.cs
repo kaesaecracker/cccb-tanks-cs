@@ -15,19 +15,17 @@ internal sealed class MapEntityManager(
     public IEnumerable<Tank> Tanks => _playerTanks.Values;
     public IEnumerable<PowerUp> PowerUps => _powerUps;
 
-    public void SpawnBullet(Player tankOwner, FloatPosition position, double rotation, MagazineType type)
+    public void SpawnBullet(Player tankOwner, FloatPosition position, double rotation, BulletStats stats)
     {
         _bullets.Add(new Bullet
         {
             Owner = tankOwner,
             Position = position,
             Rotation = rotation,
-            IsExplosive = type.HasFlag(MagazineType.Explosive),
             Timeout = DateTime.Now + _bulletTimeout,
             OwnerCollisionAfter = DateTime.Now + TimeSpan.FromSeconds(1),
             Speed = _rules.BulletSpeed,
-            IsSmart = type.HasFlag(MagazineType.Smart),
-            Acceleration = type.HasFlag(MagazineType.Fast) ? _rules.FastBulletAcceleration : 0d
+            Stats = stats
         });
     }
 
@@ -35,24 +33,23 @@ internal sealed class MapEntityManager(
 
     public void SpawnTank(Player player, FloatPosition position)
     {
-        var tank = new Tank
+        var tank = new Tank(player)
         {
-            Owner = player,
             Position = position,
             Rotation = Random.Shared.NextDouble(),
-            Magazine = new Magazine(MagazineType.Basic, 0, _rules.MagazineSize)
+            MaxBullets = _rules.MagazineSize,
+            BulletStats =new BulletStats(_rules.BulletSpeed, 0, false, false)
         };
         _playerTanks[player] = tank;
         logger.LogInformation("Tank added for player {}", player.Name);
     }
 
-    public void SpawnPowerUp(FloatPosition position, PowerUpType type, MagazineType? magazineType)
+    public void SpawnPowerUp(FloatPosition position, PowerUpType type)
     {
         var powerUp = new PowerUp
         {
             Position = position,
-            Type = type,
-            MagazineType = magazineType
+            Type = type
         };
         _powerUps.Add(powerUp);
     }

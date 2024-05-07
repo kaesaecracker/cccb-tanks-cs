@@ -28,5 +28,7 @@ internal sealed class GameRules
 
     public double SmartBulletInertia { get; set; } = 1;
 
-    public double FastBulletAcceleration { get; set; } = 0.25;
+    public double BulletAccelerationUpgradeStrength { get; set; } = 0.1;
+
+    public double BulletSpeedUpgradeStrength { get; set; } = 0.1;
 }
