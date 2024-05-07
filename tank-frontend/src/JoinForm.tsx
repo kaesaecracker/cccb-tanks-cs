@@ -34,7 +34,7 @@ export default function JoinForm({onDone}: {
         <TextInput
             value={name}
             placeholder="player name"
-            onChange={e => setName(e.target.value)}
+            onChange={n => setName(n)}
             onEnter={confirm}
         />
         <Button

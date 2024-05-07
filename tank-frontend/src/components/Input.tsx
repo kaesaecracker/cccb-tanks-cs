@@ -1,8 +1,7 @@
-import {ChangeEventHandler} from 'react';
 import './Input.css';
 
 export function TextInput({onChange, className, value, placeholder, onEnter}: {
-    onChange?: ChangeEventHandler<HTMLInputElement> | undefined;
+    onChange?: (value: string) => void;
     className?: string;
     value: string;
     placeholder?: string;
@@ -13,10 +12,15 @@ export function TextInput({onChange, className, value, placeholder, onEnter}: {
         className={'Input ' + (className ?? '')}
         value={value}
         placeholder={placeholder}
-        onChange={onChange}
+        onChange={event => {
+            if (!onChange)
+                return;
+            onChange(event.target.value);
+        }}
         onKeyUp={event => {
-            if (onEnter && event.key === 'Enter')
-                onEnter();
+            if (!onEnter || event.key !== 'Enter')
+                return;
+            onEnter();
         }}
     />;
 }
