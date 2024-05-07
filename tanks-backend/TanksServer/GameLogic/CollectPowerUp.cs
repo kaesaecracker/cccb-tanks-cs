@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace TanksServer.GameLogic;
 
 internal sealed class CollectPowerUp : ITickStep
@@ -47,13 +45,13 @@ internal sealed class CollectPowerUp : ITickStep
         switch (powerUp.Type)
         {
             case PowerUpType.MagazineSize:
-                tank.MaxBullets = (byte)int.Clamp(tank.MaxBullets + 1, 1, 32);
+                tank.MaxBullets = int.Clamp(tank.MaxBullets + 1, 1, 32);
                 break;
 
             case PowerUpType.BulletAcceleration:
                 tank.BulletStats = tank.BulletStats with
                 {
-                    Acceleration = tank.BulletStats.Acceleration * _rules.BulletAccelerationUpgradeStrength
+                    Acceleration = tank.BulletStats.Acceleration + _rules.BulletAccelerationUpgradeStrength
                 };
                 break;
 
@@ -68,7 +66,7 @@ internal sealed class CollectPowerUp : ITickStep
             case PowerUpType.BulletSpeed:
                 tank.BulletStats = tank.BulletStats with
                 {
-                    Speed = tank.BulletStats.Speed * _rules.BulletSpeedUpgradeStrength
+                    Speed = tank.BulletStats.Speed + _rules.BulletSpeedUpgradeStrength
                 };
                 break;
 

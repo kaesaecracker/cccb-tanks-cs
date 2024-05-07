@@ -15,18 +15,14 @@ export type Scores = {
 };
 
 type Tank = {
-    readonly position: { x: number; y: number };
+    readonly pixelPosition: { x: number; y: number };
     readonly orientation: number;
     readonly moving: boolean;
     readonly bulletStats: BulletStats;
     readonly reloadingUntil: string;
     readonly nextShotAfter: string;
-    readonly magazine: {
-        readonly empty: boolean;
-        readonly  usedBullets: number;
-        readonly maxBullets: number;
-        readonly displayString: string;
-    };
+    readonly usedBullets: number;
+    readonly maxBullets: number;
 }
 
 export type Player = {

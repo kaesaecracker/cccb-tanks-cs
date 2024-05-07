@@ -16,7 +16,7 @@ internal sealed class GameRules
 
     public double ShootDelayMs { get; set; }
 
-    public double BulletSpeed { get; set; }
+    public double BulletSpeed { get; set; } = 75;
 
     public int SpawnDelayMs { get; set; }
 
@@ -28,7 +28,7 @@ internal sealed class GameRules
 
     public double SmartBulletInertia { get; set; } = 1;
 
-    public double BulletAccelerationUpgradeStrength { get; set; } = 0.1;
+    public double BulletAccelerationUpgradeStrength { get; set; } = 15;
 
-    public double BulletSpeedUpgradeStrength { get; set; } = 0.1;
+    public double BulletSpeedUpgradeStrength { get; set; } = 5;
 }

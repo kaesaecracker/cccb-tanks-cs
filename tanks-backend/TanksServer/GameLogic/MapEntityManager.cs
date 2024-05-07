@@ -33,9 +33,8 @@ internal sealed class MapEntityManager(
 
     public void SpawnTank(Player player, FloatPosition position)
     {
-        var tank = new Tank(player)
+        var tank = new Tank(player, position)
         {
-            Position = position,
             Rotation = Random.Shared.NextDouble(),
             MaxBullets = _rules.MagazineSize,
             BulletStats =new BulletStats(_rules.BulletSpeed, 0, false, false)

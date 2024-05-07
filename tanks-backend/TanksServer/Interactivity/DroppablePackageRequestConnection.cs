@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using DotNext.Threading;
 
 namespace TanksServer.Interactivity;

@@ -46,25 +46,24 @@ export default function PlayerInfo({player}: { player: string }) {
     if (!lastJsonMessage || readyState !== ReadyState.OPEN)
         return <></>;
 
-    let position = '';
-    if (lastJsonMessage.tank)
-        position = `(${Math.round(lastJsonMessage.tank.position.x)}|${Math.round(lastJsonMessage.tank.position.y)})`;
-
     return <Column className="PlayerInfo">
         <h3>
             Playing as {lastJsonMessage.player.name}
         </h3>
         <table>
             <tbody>
-            <ScoreRow name="magazine" value={lastJsonMessage.tank?.magazine}/>
-            <ScoreRow name="controls" value={lastJsonMessage.controls}/>
-            <ScoreRow name="position" value={position}/>
-            <ScoreRow name="orientation" value={lastJsonMessage.tank?.orientation}/>
-            <ScoreRow name="bullet speed" value={lastJsonMessage.tank?.bulletStats.speed}/>
-            <ScoreRow name="bullet acceleration" value={lastJsonMessage.tank?.bulletStats.acceleration}/>
-            <ScoreRow name="smart bullets" value={lastJsonMessage.tank?.bulletStats.smart}/>
-            <ScoreRow name="explosive bullets" value={lastJsonMessage.tank?.bulletStats.explosive}/>
+            {lastJsonMessage.tank && <>
+                <ScoreRow name="magazine" value={`${lastJsonMessage.tank.usedBullets} / ${lastJsonMessage.tank.maxBullets}`}/>
+                <ScoreRow name="position" value={`(${Math.round(lastJsonMessage.tank.pixelPosition.x)}|${Math.round(lastJsonMessage.tank.pixelPosition.y)})`}/>
+                <ScoreRow name="orientation" value={lastJsonMessage.tank.orientation}/>
+                <ScoreRow name="bullet speed" value={lastJsonMessage.tank.bulletStats.speed}/>
+                <ScoreRow name="bullet acceleration" value={lastJsonMessage.tank.bulletStats.acceleration}/>
+                <ScoreRow name="smart bullets" value={lastJsonMessage.tank.bulletStats.smart}/>
+                <ScoreRow name="explosive bullets" value={lastJsonMessage.tank.bulletStats.explosive}/>
+                <ScoreRow name="moving" value={lastJsonMessage.tank.moving}/>
+            </>}
 
+            <ScoreRow name="controls" value={lastJsonMessage.controls}/>
             <ScoreRow name="kills" value={lastJsonMessage.player.scores.kills}/>
             <ScoreRow name="deaths" value={lastJsonMessage.player.scores.deaths}/>
             <ScoreRow name="walls destroyed" value={lastJsonMessage.player.scores.wallsDestroyed}/>
@@ -73,7 +72,6 @@ export default function PlayerInfo({player}: { player: string }) {
             <ScoreRow name="pixels moved" value={lastJsonMessage.player.scores.pixelsMoved}/>
             <ScoreRow name="score" value={lastJsonMessage.player.scores.overallScore}/>
 
-            <ScoreRow name="moving" value={lastJsonMessage.tank?.moving}/>
             <ScoreRow name="connections" value={lastJsonMessage.player.openConnections}/>
             </tbody>
         </table>

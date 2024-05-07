@@ -4,13 +4,13 @@ using TanksServer.GameLogic;
 
 namespace TanksServer.Models;
 
-internal sealed class Tank(Player owner) : IMapEntity
+internal sealed class Tank(Player owner, FloatPosition position) : IMapEntity
 {
     private double _rotation;
 
     [JsonIgnore] public Player Owner { get; } = owner;
 
-    public double Rotation
+    [JsonIgnore] public double Rotation
     {
         get => _rotation;
         set
@@ -25,7 +25,9 @@ internal sealed class Tank(Player owner) : IMapEntity
 
     public bool Moving { get; set; }
 
-    public required FloatPosition Position { get; set; }
+    [JsonIgnore] public FloatPosition Position { get; set; } = position;
+
+    public PixelPosition PixelPosition => Position.ToPixelPosition();
 
     [JsonIgnore] public PixelBounds Bounds => Position.GetBoundsForCenter(MapService.TileSize);
 
