@@ -27,4 +27,6 @@ internal sealed class GameRules
     public int ReloadDelayMs { get; set; } = 3000;
 
     public double SmartBulletInertia { get; set; } = 1;
+
+    public double FastBulletAcceleration { get; set; } = 0.25;
 }

@@ -17,7 +17,6 @@ internal sealed class MapEntityManager(
 
     public void SpawnBullet(Player tankOwner, FloatPosition position, double rotation, MagazineType type)
     {
-        var speed = _rules.BulletSpeed * (type.HasFlag(MagazineType.Fast) ? 2 : 1);
         _bullets.Add(new Bullet
         {
             Owner = tankOwner,
@@ -26,8 +25,9 @@ internal sealed class MapEntityManager(
             IsExplosive = type.HasFlag(MagazineType.Explosive),
             Timeout = DateTime.Now + _bulletTimeout,
             OwnerCollisionAfter = DateTime.Now + TimeSpan.FromSeconds(1),
-            Speed = speed,
-            IsSmart = type.HasFlag(MagazineType.Smart)
+            Speed = _rules.BulletSpeed,
+            IsSmart = type.HasFlag(MagazineType.Smart),
+            Acceleration = type.HasFlag(MagazineType.Fast) ? _rules.FastBulletAcceleration : 0d
         });
     }
 

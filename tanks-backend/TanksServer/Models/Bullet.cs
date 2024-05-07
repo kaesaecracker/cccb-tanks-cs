@@ -16,7 +16,9 @@ internal sealed class Bullet : IMapEntity
 
     internal required DateTime OwnerCollisionAfter { get; init; }
 
-    public required double Speed { get; init; }
+    public required double Speed { get; set; }
+
+    public required double Acceleration { get; init; }
 
     public required bool IsSmart { get; init; }
 }

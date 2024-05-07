@@ -24,6 +24,8 @@ internal sealed class MoveBullets(
             bullet.Rotation += difference * inertiaFactor;
         }
 
+        bullet.Speed *= 1 + (bullet.Acceleration * delta.TotalSeconds);
+
         var speed = bullet.Speed * delta.TotalSeconds;
         var angle = bullet.Rotation * 2 * Math.PI;
         bullet.Position = new FloatPosition(
