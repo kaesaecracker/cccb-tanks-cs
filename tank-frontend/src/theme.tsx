@@ -12,6 +12,7 @@ export type HslTheme = {
     secondary: HSL;
     background: HSL;
     tertiary: HSL;
+    text: HSL;
 }
 
 type Rgba = Uint8ClampedArray;
@@ -82,7 +83,9 @@ export function getRandomTheme(): HslTheme {
     const tertiary = getRandomHsl(otherColorParams);
     primary.h = angle(+3 * goldenAngle + primary.h);
 
-    return {background, primary, secondary, tertiary};
+    const text = {h: 0, s: 0, l: 100};
+
+    return {background, primary, secondary, tertiary, text};
 }
 
 const dummyRgbaTheme: RgbaTheme = {
@@ -127,6 +130,7 @@ export function ThemeProvider({children}: {
         rootStyle.setProperty('--color-primary', hslToString(theme.primary));
         rootStyle.setProperty('--color-secondary', hslToString(theme.secondary));
         rootStyle.setProperty('--color-background', hslToString(theme.background));
+        rootStyle.setProperty('--color-text', hslToString(theme.text));
     }
 
     const [hslTheme, setHslTheme] = useStoredObjectState<HslTheme>('theme', getRandomTheme, {
@@ -158,7 +162,7 @@ export function ThemeProvider({children}: {
 
     return <HslThemeContext.Provider value={{hslTheme, setHslTheme}}>
         <RgbaThemeContext.Provider value={rgbaTheme || dummyRgbaTheme}>
-            <canvas hidden={true} ref={canvasRef}/>
+            <canvas hidden={true} ref={canvasRef} width={1} height={1}/>
             {children}
         </RgbaThemeContext.Provider>;
     </HslThemeContext.Provider>;

@@ -95,6 +95,10 @@ function ThemeChooserDialog({onClose}: {
                 name="tertiary"
                 value={hslTheme.tertiary}
                 setValue={value => setHslTheme(old => ({...old, tertiary: value}))}/>
+            <HslEditor
+                name="text"
+                value={hslTheme.text}
+                setValue={value => setHslTheme(old => ({...old, text: value}))}/>
         </Column>
     </Dialog>;
 }
