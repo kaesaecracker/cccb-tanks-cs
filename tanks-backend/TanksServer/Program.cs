@@ -51,6 +51,9 @@ public static class Program
 
         builder.Services.AddHttpLogging(_ => { });
 
+        var healthCheckBuilder = builder.Services.AddHealthChecks();
+        healthCheckBuilder.AddCheck<UpdatesPerSecondCounter>("updates check");
+
         builder.Services.Configure<HostConfiguration>(builder.Configuration.GetSection("Host"));
         var hostConfiguration = builder.Configuration.GetSection("Host").Get<HostConfiguration>();
         if (hostConfiguration == null)
@@ -66,12 +69,14 @@ public static class Program
         builder.Services.AddSingleton<BufferPool>();
         builder.Services.AddSingleton<EmptyTileFinder>();
         builder.Services.AddSingleton<ChangeToRequestedMap>();
+        builder.Services.AddSingleton<UpdatesPerSecondCounter>();
 
         builder.Services.AddHostedService<GameTickWorker>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ControlsServer>());
         builder.Services.AddHostedService(sp => sp.GetRequiredService<ClientScreenServer>());
 
-        builder.Services.AddSingleton<ITickStep, ChangeToRequestedMap>(sp => sp.GetRequiredService<ChangeToRequestedMap>());
+        builder.Services.AddSingleton<ITickStep, ChangeToRequestedMap>(sp =>
+            sp.GetRequiredService<ChangeToRequestedMap>());
         builder.Services.AddSingleton<ITickStep, MoveBullets>();
         builder.Services.AddSingleton<ITickStep, CollideBullets>();
         builder.Services.AddSingleton<ITickStep, RotateTanks>();
@@ -82,7 +87,8 @@ public static class Program
         builder.Services.AddSingleton<ITickStep, SpawnPowerUp>();
         builder.Services.AddSingleton<ITickStep, GeneratePixelsTickStep>();
         builder.Services.AddSingleton<ITickStep, PlayerServer>(sp => sp.GetRequiredService<PlayerServer>());
-        builder.Services.AddSingleton<ITickStep, UpdatesPerSecondCounter>();
+        builder.Services.AddSingleton<ITickStep, UpdatesPerSecondCounter>(sp =>
+            sp.GetRequiredService<UpdatesPerSecondCounter>());
 
         builder.Services.AddSingleton<IDrawStep, DrawMapStep>();
         builder.Services.AddSingleton<IDrawStep, DrawPowerUpsStep>();
