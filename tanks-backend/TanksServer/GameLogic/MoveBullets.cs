@@ -24,8 +24,7 @@ internal sealed class MoveBullets(
             bullet.Rotation += difference * inertiaFactor;
         }
 
-        bullet.Speed = double.Clamp(bullet.Speed * (1 + (bullet.Stats.Acceleration * delta.TotalSeconds)), 0d,
-            MapService.TileSize * 10);
+        bullet.Speed += (bullet.Stats.Acceleration * delta.TotalSeconds);
 
         var speed = bullet.Speed * delta.TotalSeconds;
         var angle = bullet.Rotation * 2 * Math.PI;
