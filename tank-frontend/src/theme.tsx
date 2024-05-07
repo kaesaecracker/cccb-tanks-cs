@@ -1,7 +1,7 @@
 import {useStoredObjectState} from './useStoredState.ts';
 import {createContext, ReactNode, useContext, useMemo, useRef, useState} from 'react';
 
-type HSL = {
+export type HSL = {
     h: number;
     s: number;
     l: number;
@@ -53,7 +53,7 @@ function getRandomHsl(params: {
     return {h, s, l};
 }
 
-function hslToString({h, s, l}: HSL) {
+export function hslToString({h, s, l}: HSL) {
     return `hsl(${h},${s}%,${l}%)`;
 }
 
