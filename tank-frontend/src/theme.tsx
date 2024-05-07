@@ -1,5 +1,5 @@
 import {useStoredObjectState} from './useStoredState.ts';
-import {createContext, ReactNode, useContext, useEffect, useRef, useState} from 'react';
+import {createContext, ReactNode, useContext, useMemo, useRef, useState} from 'react';
 
 type HSL = {
     h: number;
@@ -12,6 +12,15 @@ export type HslTheme = {
     secondary: HSL;
     background: HSL;
     tertiary: HSL;
+}
+
+type Rgba = Uint8ClampedArray;
+
+export type RgbaTheme = {
+    primary: Rgba;
+    secondary: Rgba;
+    background: Rgba;
+    tertiary: Rgba;
 }
 
 // @ts-ignore
@@ -76,22 +85,6 @@ export function getRandomTheme(): HslTheme {
     return {background, primary, secondary, tertiary};
 }
 
-function applyTheme(theme: HslTheme) {
-    console.log('apply theme', theme);
-    rootStyle.setProperty('--color-primary', hslToString(theme.primary));
-    rootStyle.setProperty('--color-secondary', hslToString(theme.secondary));
-    rootStyle.setProperty('--color-background', hslToString(theme.background));
-}
-
-type Rgba = Uint8ClampedArray;
-
-export type RgbaTheme = {
-    primary: Rgba;
-    secondary: Rgba;
-    background: Rgba;
-    tertiary: Rgba;
-}
-
 const dummyRgbaTheme: RgbaTheme = {
     primary: new Uint8ClampedArray([0, 0, 0, 0]),
     secondary: new Uint8ClampedArray([0, 0, 0, 0]),
@@ -104,7 +97,6 @@ function hslToRgba(context: CanvasRenderingContext2D, color: HSL) {
     context.fillRect(0, 0, 1, 1);
     return context.getImageData(0, 0, 1, 1).data;
 }
-
 
 const HslThemeContext = createContext<null | {
     hslTheme: HslTheme,
@@ -128,34 +120,41 @@ export function useHslTheme() {
 export function ThemeProvider({children}: {
     children?: ReactNode;
 }) {
+    const [rgbaTheme, setRgbaTheme] = useState<RgbaTheme | null>(null);
+
+    function applyTheme(theme: HslTheme) {
+        console.log('apply theme', theme);
+        rootStyle.setProperty('--color-primary', hslToString(theme.primary));
+        rootStyle.setProperty('--color-secondary', hslToString(theme.secondary));
+        rootStyle.setProperty('--color-background', hslToString(theme.background));
+    }
+
     const [hslTheme, setHslTheme] = useStoredObjectState<HslTheme>('theme', getRandomTheme, {
         load: applyTheme,
         save: applyTheme
     });
-
-    const [rgbaTheme, setRgbaTheme] = useState<RgbaTheme | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (canvas === null)
-            throw new Error('canvas null');
+    const canvas = canvasRef.current;
+
+    useMemo(() => {
+        if (!canvas)
+            return;
 
         const drawContext = canvas.getContext('2d', {
-            alpha: true,
+            alpha: false,
             colorSpace: 'srgb',
             willReadFrequently: true
         });
         if (!drawContext)
             throw new Error('could not get draw context');
-
         setRgbaTheme({
             background: hslToRgba(drawContext, hslTheme.background),
             primary: hslToRgba(drawContext, hslTheme.primary),
             secondary: hslToRgba(drawContext, hslTheme.secondary),
             tertiary: hslToRgba(drawContext, hslTheme.tertiary),
         });
-    }, [hslTheme, canvasRef.current]);
+    }, [hslTheme, canvas]);
 
     return <HslThemeContext.Provider value={{hslTheme, setHslTheme}}>
         <RgbaThemeContext.Provider value={rgbaTheme || dummyRgbaTheme}>
