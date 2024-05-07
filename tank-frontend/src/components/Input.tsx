@@ -1,7 +1,7 @@
-import {ChangeEventHandler} from "react";
+import {ChangeEventHandler} from 'react';
 import './Input.css';
 
-export function TextInput( {onChange, className, value, placeholder, onEnter }: {
+export function TextInput({onChange, className, value, placeholder, onEnter}: {
     onChange?: ChangeEventHandler<HTMLInputElement> | undefined;
     className?: string;
     value: string;
@@ -10,7 +10,7 @@ export function TextInput( {onChange, className, value, placeholder, onEnter }: 
 }) {
     return <input
         type="text"
-        className={'Input ' + (className?? '')}
+        className={'Input ' + (className ?? '')}
         value={value}
         placeholder={placeholder}
         onChange={onChange}
@@ -21,8 +21,8 @@ export function TextInput( {onChange, className, value, placeholder, onEnter }: 
     />;
 }
 
-export function NumberInput( {onChange, className, value, placeholder, onEnter }: {
-    onChange?: ChangeEventHandler<HTMLInputElement> | undefined;
+export function NumberInput({onChange, className, value, placeholder, onEnter}: {
+    onChange?: (value: number) => void;
     className?: string;
     value: number;
     placeholder?: string;
@@ -30,16 +30,47 @@ export function NumberInput( {onChange, className, value, placeholder, onEnter }
 }) {
     return <input
         type="number"
-        className={'Input ' + (className?? '')}
+        className={'Input ' + (className ?? '')}
         value={value}
         placeholder={placeholder}
-        onChange={onChange}
+        onChange={event => {
+            if (!onChange)
+                return;
+            onChange(parseFloat(event.target.value));
+        }}
         onKeyUp={event => {
-            if (onEnter && event.key === 'Enter')
-                onEnter();
+            if (!onEnter || event.key !== 'Enter')
+                return;
+            onEnter();
         }}
     />;
 }
 
+export function RangeInput({onChange, className, value, placeholder, onEnter, min, max}: {
+    onChange?: (value: number) => void;
+    className?: string;
+    value: number;
+    min: number;
+    max: number;
+    placeholder?: string;
+    onEnter?: () => void;
+}) {
+    return <input
+        type="range"
+        className={'Input RangeInput ' + (className ?? '')}
+        value={value} min={min} max={max}
+        placeholder={placeholder}
+        onChange={event => {
+            if (!onChange)
+                return;
+            onChange(parseFloat(event.target.value));
+        }}
+        onKeyUp={event => {
+            if (!onEnter || event.key !== 'Enter')
+                return;
+            onEnter();
+        }}
+    />;
+}
 
 
