@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using DisplayCommands;
@@ -13,8 +14,8 @@ internal sealed class MapService
     public const ushort PixelsPerRow = TilesPerRow * TileSize;
     public const ushort PixelsPerColumn = TilesPerColumn * TileSize;
 
-    private readonly Dictionary<string, MapPrototype> _mapPrototypes = new();
-    private readonly Dictionary<string, PixelGrid> _mapPreviews = new();
+    private readonly ConcurrentDictionary<string, MapPrototype> _mapPrototypes = new();
+    private readonly ConcurrentDictionary<string, PixelGrid> _mapPreviews = new();
 
     public IEnumerable<string> MapNames => _mapPrototypes.Keys;
 
@@ -52,7 +53,8 @@ internal sealed class MapService
     {
         var name = MapNameFromFilePath(file);
         var prototype = new SpriteMapPrototype(name, Sprite.FromImageFile(file));
-        _mapPrototypes.Add(name, prototype);
+        var added = _mapPrototypes.TryAdd(name, prototype);
+        Debug.Assert(added);
     }
 
     private void LoadMapString(string file)
@@ -60,7 +62,7 @@ internal sealed class MapService
         var name = MapNameFromFilePath(file);
         var map = File.ReadAllText(file).ReplaceLineEndings(string.Empty).Trim();
         var prototype = new TextMapPrototype(name, map);
-        _mapPrototypes.Add(name, prototype);
+        _mapPrototypes.TryAdd(name, prototype);
     }
 
     private static string MapNameFromFilePath(string filePath) => Path.GetFileName(filePath).ToUpperInvariant();
