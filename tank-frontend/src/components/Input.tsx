@@ -5,7 +5,7 @@ export function TextInput( {onChange, className, value, placeholder, onEnter }: 
     onChange?: ChangeEventHandler<HTMLInputElement> | undefined;
     className?: string;
     value: string;
-    placeholder: string;
+    placeholder?: string;
     onEnter?: () => void;
 }) {
     return <input
@@ -25,7 +25,7 @@ export function NumberInput( {onChange, className, value, placeholder, onEnter }
     onChange?: ChangeEventHandler<HTMLInputElement> | undefined;
     className?: string;
     value: number;
-    placeholder: string;
+    placeholder?: string;
     onEnter?: () => void;
 }) {
     return <input

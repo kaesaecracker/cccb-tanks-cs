@@ -10,11 +10,13 @@ export default function Dialog({children, className, title, onClose}: {
     className?: string;
     onClose?: () => void;
 }) {
-    return <Column className={'Dialog overflow-scroll ' + (className ?? '')}>
+    return <Column className={'Dialog ' + (className ?? '')}>
         <Row>
-            <h3 className='flex-grow'>{title}</h3>
-            {onClose && <Button text='x' onClick={onClose} />}
+            <h3 className="flex-grow">{title}</h3>
+            {onClose && <Button text="x" onClick={onClose}/>}
         </Row>
-        {children}
-    </Column>
+        <Column className='overflow-scroll'>
+            {children}
+        </Column>
+    </Column>;
 }
