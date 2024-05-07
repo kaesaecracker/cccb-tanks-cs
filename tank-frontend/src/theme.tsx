@@ -1,13 +1,13 @@
 import {useStoredObjectState} from './useStoredState.ts';
 import {createContext, ReactNode, useContext, useEffect, useRef, useState} from 'react';
 
-export type HSL = {
+type HSL = {
     h: number;
     s: number;
     l: number;
 }
 
-export type Theme = {
+export type HslTheme = {
     primary: HSL;
     secondary: HSL;
     background: HSL;
@@ -44,7 +44,7 @@ function getRandomHsl(params: {
     return {h, s, l};
 }
 
-export function hslToString({h, s, l}: HSL) {
+function hslToString({h, s, l}: HSL) {
     return `hsl(${h},${s}%,${l}%)`;
 }
 
@@ -52,7 +52,7 @@ function angle(a: number) {
     return ((a % 360.0) + 360) % 360;
 }
 
-export function getRandomTheme(): Theme {
+export function getRandomTheme(): HslTheme {
     const goldenAngle = 180 * (3 - Math.sqrt(5));
 
     const background = getRandomHsl({maxSaturation: 50, minLightness: 10, maxLightness: 30});
@@ -76,21 +76,12 @@ export function getRandomTheme(): Theme {
     return {background, primary, secondary, tertiary};
 }
 
-function applyTheme(theme: Theme) {
+function applyTheme(theme: HslTheme) {
     console.log('apply theme', theme);
     rootStyle.setProperty('--color-primary', hslToString(theme.primary));
     rootStyle.setProperty('--color-secondary', hslToString(theme.secondary));
     rootStyle.setProperty('--color-background', hslToString(theme.background));
 }
-
-export function useStoredTheme() {
-    return useStoredObjectState<Theme>('theme', getRandomTheme, {
-        load: applyTheme,
-        save: applyTheme
-    });
-}
-
-export const ThemeContext = createContext<Theme>(getRandomTheme());
 
 type Rgba = Uint8ClampedArray;
 
@@ -108,20 +99,40 @@ const dummyRgbaTheme: RgbaTheme = {
     tertiary: new Uint8ClampedArray([0, 0, 0, 0])
 };
 
-const RgbaThemeContext = createContext<RgbaTheme>(dummyRgbaTheme);
-
-function normalizeColor(context: CanvasRenderingContext2D, color: HSL) {
+function hslToRgba(context: CanvasRenderingContext2D, color: HSL) {
     context.fillStyle = hslToString(color);
     context.fillRect(0, 0, 1, 1);
     return context.getImageData(0, 0, 1, 1).data;
 }
 
-export function useRgbaThemeContext() {
+
+const HslThemeContext = createContext<null | {
+    hslTheme: HslTheme,
+    setHslTheme: (mutator: (oldState: HslTheme) => HslTheme) => void
+}>(null);
+const RgbaThemeContext = createContext<RgbaTheme>(dummyRgbaTheme);
+
+export function useRgbaTheme() {
     return useContext(RgbaThemeContext);
 }
 
-export function RgbaThemeProvider({children}: { children: ReactNode }) {
-    const hslTheme = useContext(ThemeContext);
+export function useHslTheme() {
+    const context = useContext(HslThemeContext);
+    if (context === null) {
+        throw new Error();
+    }
+
+    return context;
+}
+
+export function ThemeProvider({children}: {
+    children?: ReactNode;
+}) {
+    const [hslTheme, setHslTheme] = useStoredObjectState<HslTheme>('theme', getRandomTheme, {
+        load: applyTheme,
+        save: applyTheme
+    });
+
     const [rgbaTheme, setRgbaTheme] = useState<RgbaTheme | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -139,15 +150,17 @@ export function RgbaThemeProvider({children}: { children: ReactNode }) {
             throw new Error('could not get draw context');
 
         setRgbaTheme({
-            background: normalizeColor(drawContext, hslTheme.background),
-            primary: normalizeColor(drawContext, hslTheme.primary),
-            secondary: normalizeColor(drawContext, hslTheme.secondary),
-            tertiary: normalizeColor(drawContext, hslTheme.tertiary),
+            background: hslToRgba(drawContext, hslTheme.background),
+            primary: hslToRgba(drawContext, hslTheme.primary),
+            secondary: hslToRgba(drawContext, hslTheme.secondary),
+            tertiary: hslToRgba(drawContext, hslTheme.tertiary),
         });
     }, [hslTheme, canvasRef.current]);
 
-    return <RgbaThemeContext.Provider value={rgbaTheme || dummyRgbaTheme}>
-        <canvas hidden={true} ref={canvasRef}/>
-        {children}
-    </RgbaThemeContext.Provider>;
+    return <HslThemeContext.Provider value={{hslTheme, setHslTheme}}>
+        <RgbaThemeContext.Provider value={rgbaTheme || dummyRgbaTheme}>
+            <canvas hidden={true} ref={canvasRef}/>
+            {children}
+        </RgbaThemeContext.Provider>;
+    </HslThemeContext.Provider>;
 }

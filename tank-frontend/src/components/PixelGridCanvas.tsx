@@ -1,6 +1,6 @@
 import {useEffect, useRef} from 'react';
 import './PixelGridCanvas.css';
-import {useRgbaThemeContext} from '../theme.tsx';
+import {useRgbaTheme} from '../theme.tsx';
 
 const pixelsPerRow = 352;
 const pixelsPerCol = 160;
@@ -101,7 +101,7 @@ function drawPixelsToCanvas(
 export default function PixelGridCanvas({pixels}: {
     readonly pixels: Uint8ClampedArray;
 }) {
-    const theme = useRgbaThemeContext();
+    const theme = useRgbaTheme();
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
