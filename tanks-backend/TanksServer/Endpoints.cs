@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using DisplayCommands;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
@@ -17,7 +18,8 @@ internal sealed class Endpoints(
     PlayerServer playerService,
     ControlsServer controlsServer,
     MapService mapService,
-    ChangeToRequestedMap changeToRequestedMap
+    ChangeToRequestedMap changeToRequestedMap,
+    IDisplayConnection displayConnection
 )
 {
     public void Map(WebApplication app)
@@ -29,6 +31,7 @@ internal sealed class Endpoints(
         app.Map("/controls", ConnectControlsAsync);
         app.MapGet("/map", () => mapService.MapNames);
         app.MapPost("/map", PostMap);
+        app.MapPost("/resetDisplay", displayConnection.SendHardResetAsync);
         app.MapGet("/map/{name}", GetMapByName);
 
         app.MapHealthChecks("/health", new HealthCheckOptions
