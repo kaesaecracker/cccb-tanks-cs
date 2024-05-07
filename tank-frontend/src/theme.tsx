@@ -133,7 +133,7 @@ export function ThemeProvider({children}: {
         rootStyle.setProperty('--color-text', hslToString(theme.text));
     }
 
-    const [hslTheme, setHslTheme] = useStoredObjectState<HslTheme>('theme', getRandomTheme, {
+    const [hslTheme, setHslTheme] = useStoredObjectState<HslTheme>('theme2', getRandomTheme, {
         load: applyTheme,
         save: applyTheme
     });
