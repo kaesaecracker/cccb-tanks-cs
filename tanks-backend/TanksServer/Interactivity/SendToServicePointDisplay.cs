@@ -18,6 +18,7 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
     private readonly PlayerServer _players;
     private readonly Cp437Grid _scoresBuffer;
     private readonly TimeSpan _minFrameTime;
+    private readonly IOptionsMonitor<HostConfiguration> _options;
 
     private DateTime _nextFailLogAfter = DateTime.Now;
     private DateTime _nextFrameAfter = DateTime.Now;
@@ -27,7 +28,8 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
         ILogger<SendToServicePointDisplay> logger,
         IDisplayConnection displayConnection,
         IOptions<HostConfiguration> hostOptions,
-        MapService mapService
+        MapService mapService,
+        IOptionsMonitor<HostConfiguration> options
     )
     {
         _players = players;
@@ -35,6 +37,7 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
         _displayConnection = displayConnection;
         _mapService = mapService;
         _minFrameTime = TimeSpan.FromMilliseconds(hostOptions.Value.ServicePointDisplayMinFrameTimeMs);
+        _options = options;
 
         var localIp = _displayConnection.GetLocalIPv4().Split('.');
         Debug.Assert(localIp.Length == 4);
@@ -50,6 +53,9 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
 
     public async Task OnFrameDoneAsync(GamePixelGrid gamePixelGrid, PixelGrid observerPixels)
     {
+        if (!_options.CurrentValue.EnableServicePointDisplay)
+            return;
+
         if (DateTime.Now < _nextFrameAfter)
             return;
 
