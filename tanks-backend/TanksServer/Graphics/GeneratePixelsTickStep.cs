@@ -1,4 +1,4 @@
-using DisplayCommands;
+using ServicePoint2;
 using TanksServer.GameLogic;
 using TanksServer.Interactivity;
 
@@ -10,9 +10,9 @@ internal sealed class GeneratePixelsTickStep(
 ) : ITickStep
 {
     private GamePixelGrid _lastGamePixelGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
-    private PixelGrid _lastObserverPixelGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
+    private PixelGrid _lastObserverPixelGrid = PixelGrid.New(MapService.PixelsPerRow, MapService.PixelsPerColumn);
     private GamePixelGrid _gamePixelGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
-    private PixelGrid _observerPixelGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
+    private PixelGrid _observerPixelGrid = PixelGrid.New(MapService.PixelsPerRow, MapService.PixelsPerColumn);
 
     private readonly List<IDrawStep> _drawSteps = drawSteps.ToList();
     private readonly List<IFrameConsumer> _consumers = consumers.ToList();
@@ -20,7 +20,7 @@ internal sealed class GeneratePixelsTickStep(
     public async ValueTask TickAsync(TimeSpan _)
     {
         Draw(_gamePixelGrid, _observerPixelGrid);
-        if (_observerPixelGrid.Data.Span.SequenceEqual(_lastObserverPixelGrid.Data.Span))
+        if (_observerPixelGrid.Data.SequenceEqual(_lastObserverPixelGrid.Data))
             return;
 
         await _consumers.Select(c => c.OnFrameDoneAsync(_gamePixelGrid, _observerPixelGrid))
@@ -36,7 +36,7 @@ internal sealed class GeneratePixelsTickStep(
         foreach (var step in _drawSteps)
             step.Draw(gamePixelGrid);
 
-        observerPixelGrid.Clear();
+        observerPixelGrid.Fill(false);
         for (var y = 0; y < MapService.PixelsPerColumn; y++)
         for (var x = 0; x < MapService.PixelsPerRow; x++)
         {

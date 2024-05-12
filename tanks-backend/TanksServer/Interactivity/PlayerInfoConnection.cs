@@ -13,7 +13,7 @@ internal sealed class PlayerInfoConnection
     private readonly MapEntityManager _entityManager;
     private readonly BufferPool _bufferPool;
     private readonly MemoryStream _tempStream = new();
-    private IMemoryOwner<byte>? _lastMessage = null;
+    private IMemoryOwner<byte>? _lastMessage;
 
     public PlayerInfoConnection(
         Player player,

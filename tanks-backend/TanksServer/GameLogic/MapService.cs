@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using DisplayCommands;
+using ServicePoint2;
 using TanksServer.Graphics;
 
 namespace TanksServer.GameLogic;
@@ -42,7 +42,7 @@ internal sealed class MapService
         if (!_mapPrototypes.TryGetValue(name, out var prototype))
             return false; // name not found
 
-        pixelGrid = new PixelGrid(PixelsPerRow, PixelsPerColumn);
+        pixelGrid = PixelGrid.New(PixelsPerRow, PixelsPerColumn);
         DrawMapStep.Draw(pixelGrid, prototype.CreateInstance());
 
         _mapPreviews.TryAdd(name, pixelGrid); // another thread may have added the map already

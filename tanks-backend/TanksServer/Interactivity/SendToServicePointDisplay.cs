@@ -1,6 +1,7 @@
 using System.Diagnostics;
+using System.Net;
 using System.Net.Sockets;
-using DisplayCommands;
+using ServicePoint2;
 using TanksServer.GameLogic;
 using TanksServer.Graphics;
 
@@ -12,11 +13,11 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
     private const int ScoresHeight = 20;
     private const int ScoresPlayerRows = ScoresHeight - 6;
 
-    private readonly IDisplayConnection _displayConnection;
+    private readonly Connection _displayConnection;
     private readonly MapService _mapService;
     private readonly ILogger<SendToServicePointDisplay> _logger;
     private readonly PlayerServer _players;
-    private readonly Cp437Grid _scoresBuffer;
+    private readonly ByteGrid _scoresBuffer;
     private readonly TimeSpan _minFrameTime;
     private readonly IOptionsMonitor<HostConfiguration> _options;
 
@@ -26,11 +27,11 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
     public SendToServicePointDisplay(
         PlayerServer players,
         ILogger<SendToServicePointDisplay> logger,
-        IDisplayConnection displayConnection,
+        Connection displayConnection,
         IOptions<HostConfiguration> hostOptions,
         MapService mapService,
-        IOptionsMonitor<HostConfiguration> options
-    )
+        IOptionsMonitor<HostConfiguration> options,
+        IOptions<DisplayConfiguration> displayConfig)
     {
         _players = players;
         _logger = logger;
@@ -39,16 +40,15 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
         _minFrameTime = TimeSpan.FromMilliseconds(hostOptions.Value.ServicePointDisplayMinFrameTimeMs);
         _options = options;
 
-        var localIp = _displayConnection.GetLocalIPv4().Split('.');
+        var localIp = GetLocalIPv4(displayConfig.Value).Split('.');
         Debug.Assert(localIp.Length == 4);
-        _scoresBuffer = new Cp437Grid(12, 20)
-        {
-            [00] = "== TANKS! ==",
-            [01] = "-- scores --",
-            [17] = "--  join  --",
-            [18] = string.Join('.', localIp[..2]),
-            [19] = string.Join('.', localIp[2..])
-        };
+        _scoresBuffer = ByteGrid.New(12, 20);
+
+        _scoresBuffer[00] = "== TANKS! ==";
+        _scoresBuffer[01] = "-- scores --";
+        _scoresBuffer[17] = "--  join  --";
+        _scoresBuffer[18] = string.Join('.', localIp[..2]);
+        _scoresBuffer[19] = string.Join('.', localIp[2..]);
     }
 
     public async Task OnFrameDoneAsync(GamePixelGrid gamePixelGrid, PixelGrid observerPixels)
@@ -66,8 +66,8 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
 
         try
         {
-            await _displayConnection.SendBitmapLinearWindowAsync(0, 0, observerPixels);
-            await _displayConnection.SendCp437DataAsync(MapService.TilesPerRow, 0, _scoresBuffer);
+            _displayConnection.Send(Command.BitmapLinearWin(0, 0, observerPixels.Clone()));
+            _displayConnection.Send(Command.Cp437Data(MapService.TilesPerRow, 0, _scoresBuffer.Clone()));
         }
         catch (SocketException ex)
         {
@@ -102,5 +102,13 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
             _scoresBuffer[row] = string.Empty;
 
         _scoresBuffer[16] = _mapService.Current.Name[..(Math.Min(ScoresWidth, _mapService.Current.Name.Length) - 1)];
+    }
+
+    private static string GetLocalIPv4(DisplayConfiguration configuration)
+    {
+        using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0);
+        socket.Connect(configuration.Hostname, configuration.Port);
+        var endPoint = socket.LocalEndPoint as IPEndPoint ?? throw new NotSupportedException();
+        return endPoint.Address.ToString();
     }
 }

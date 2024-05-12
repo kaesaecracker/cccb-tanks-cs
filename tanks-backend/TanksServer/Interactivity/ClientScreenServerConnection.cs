@@ -1,6 +1,6 @@
 using System.Buffers;
 using System.Net.WebSockets;
-using DisplayCommands;
+using ServicePoint2;
 using TanksServer.Graphics;
 
 namespace TanksServer.Interactivity;
@@ -36,8 +36,9 @@ internal sealed class ClientScreenServerConnection
 
     private Package BuildNextPackage(PixelGrid pixels, GamePixelGrid gamePixelGrid)
     {
-        var nextPixels = _bufferPool.Rent(pixels.Data.Length);
-        pixels.Data.CopyTo(nextPixels.Memory);
+        var pixelsData = pixels.Data;
+        var nextPixels = _bufferPool.Rent(pixelsData.Length);
+        pixelsData.CopyTo(nextPixels.Memory.Span);
 
         if (_playerDataBuilder == null)
             return new Package(nextPixels, null);

@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace TanksServer.GameLogic;
 
 internal sealed class SpawnPowerUp(
