@@ -4,12 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TanksServer", "TanksServer\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{12DB7D48-1BB2-488B-B4D9-4126087D2F8C}"
 	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
-		shared.props = shared.props
 		Dockerfile = Dockerfile
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServicePoint2", "..\..\servicepoint2\servicepoint2-binding-cs\ServicePoint2\ServicePoint2.csproj", "{BC27CED4-82FE-4CD4-B784-B7596586801D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,9 +17,5 @@ Global
 		{D88BF376-47A4-4C72-ADD1-983F9285C351}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D88BF376-47A4-4C72-ADD1-983F9285C351}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D88BF376-47A4-4C72-ADD1-983F9285C351}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BC27CED4-82FE-4CD4-B784-B7596586801D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BC27CED4-82FE-4CD4-B784-B7596586801D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BC27CED4-82FE-4CD4-B784-B7596586801D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BC27CED4-82FE-4CD4-B784-B7596586801D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
