@@ -21,12 +21,15 @@
     <ItemGroup>
         <PackageReference Include="DotNext.Threading" Version="5.3.0" />
         <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
-        <PackageReference Include="ServicePoint2" Version="0.2.0" />
         <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
     </ItemGroup>
 
     <ItemGroup>
         <None Include="./assets/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Always"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\servicepoint\servicepoint2-binding-cs\src\ServicePoint2.csproj" />
     </ItemGroup>
 
 </Project>
