@@ -1,0 +1,3 @@
+[submodule "tanks-backend/servicepoint"]
+	path = tanks-backend/servicepoint
+	url = https://github.com/kaesaecracker/servicepoint.git
