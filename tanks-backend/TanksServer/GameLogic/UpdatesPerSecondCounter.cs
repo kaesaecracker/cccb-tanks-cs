@@ -1,13 +1,42 @@
 using System.Diagnostics;
+using System.Globalization;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace TanksServer.GameLogic;
 
-internal sealed class UpdatesPerSecondCounter(ILogger<UpdatesPerSecondCounter> logger) : ITickStep
+internal sealed class UpdatesPerSecondCounter(
+    ILogger<UpdatesPerSecondCounter> logger
+) : ITickStep, IHealthCheck
 {
     private static readonly TimeSpan LongTime = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan CriticalUpdateTime = TimeSpan.FromMilliseconds(50);
 
     private readonly Stopwatch _long = Stopwatch.StartNew();
+
+    private readonly record struct Statistics(
+        ulong Updates,
+        TimeSpan TotalTime,
+        double AverageUpdatesPerSecond,
+        TimeSpan MinFrameTime,
+        TimeSpan AverageFrameTime,
+        TimeSpan MaxFrameTime)
+    {
+        public override string ToString() =>
+            $"{nameof(Updates)}: {Updates}, {nameof(TotalTime)}: {TotalTime}, {nameof(AverageUpdatesPerSecond)}: {AverageUpdatesPerSecond}, {nameof(MinFrameTime)}: {MinFrameTime}, {nameof(AverageFrameTime)}: {AverageFrameTime}, {nameof(MaxFrameTime)}: {MaxFrameTime}";
+
+        public Dictionary<string, object> ToDictionary() => new()
+        {
+            [nameof(Updates)] = Updates.ToString(),
+            [nameof(TotalTime)] = TotalTime.ToString(),
+            [nameof(AverageUpdatesPerSecond)] = AverageUpdatesPerSecond.ToString(CultureInfo.InvariantCulture),
+            [nameof(MinFrameTime)] = MinFrameTime.ToString(),
+            [nameof(AverageFrameTime)] = AverageFrameTime.ToString(),
+            [nameof(MaxFrameTime)] = MaxFrameTime.ToString()
+        };
+    };
+
+    private Statistics? _currentStatistics = null;
+
     private ulong _updatesSinceLongReset;
     private TimeSpan _minFrameTime = TimeSpan.MaxValue;
     private TimeSpan _maxFrameTime = TimeSpan.MinValue;
@@ -40,16 +69,20 @@ internal sealed class UpdatesPerSecondCounter(ILogger<UpdatesPerSecondCounter> l
 
     private void LogCounters()
     {
+        var time = _long.Elapsed;
+
+        _currentStatistics = new Statistics(
+            _updatesSinceLongReset,
+            time,
+            _updatesSinceLongReset / time.TotalSeconds,
+            _minFrameTime,
+            time / _updatesSinceLongReset,
+            _maxFrameTime);
+
         if (!logger.IsEnabled(LogLevel.Debug))
             return;
 
-        var time = _long.Elapsed;
-        var averageTime = Math.Round(time.TotalMilliseconds / _updatesSinceLongReset, 2);
-        var averageUps = Math.Round(_updatesSinceLongReset / time.TotalSeconds, 2);
-        var min = Math.Round(_minFrameTime.TotalMilliseconds, 2);
-        var max = Math.Round(_maxFrameTime.TotalMilliseconds, 2);
-        logger.LogDebug("count={}, time={}, avg={}ms, ups={}, min={}ms, max={}ms",
-            _updatesSinceLongReset, time, averageTime, averageUps, min, max);
+        logger.LogDebug("statistics: {}", _currentStatistics);
     }
 
     private void ResetCounters()
@@ -58,5 +91,24 @@ internal sealed class UpdatesPerSecondCounter(ILogger<UpdatesPerSecondCounter> l
         _updatesSinceLongReset = 0;
         _minFrameTime = TimeSpan.MaxValue;
         _maxFrameTime = TimeSpan.MinValue;
+    }
+
+    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context,
+        CancellationToken cancellationToken = new())
+    {
+        var stats = _currentStatistics;
+        if (stats == null)
+        {
+            return Task.FromResult(
+                HealthCheckResult.Degraded("no statistics available yet - this is expected shortly after start"));
+        }
+
+        if (stats.Value.MaxFrameTime > CriticalUpdateTime)
+        {
+            return Task.FromResult(HealthCheckResult.Degraded("max frame time too high", null,
+                stats.Value.ToDictionary()));
+        }
+
+        return Task.FromResult(HealthCheckResult.Healthy("", stats.Value.ToDictionary()));
     }
 }

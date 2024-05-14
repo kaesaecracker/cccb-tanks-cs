@@ -1,15 +1,8 @@
 
-.MapChooser-DropDown {
-    border: solid var(--border-size-thin);
-    padding: var(--padding-normal);
-
-    background: var(--color-background);
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-}
-
 .MapChooser-Row {
-    flex-wrap: wrap;
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
 }
 
 .MapChooser-Preview {
@@ -20,4 +13,8 @@
 
 .MapChooser-Preview-Highlight {
     border-color: var(--color-secondary);
+}
+
+.MapChooser-Dialog {
+    width: 100%;
 }

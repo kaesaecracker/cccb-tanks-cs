@@ -1,0 +1,9 @@
+.Input {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    padding: var(--padding-normal);
+}
+
+.RangeInput {
+    appearance: auto;
+}

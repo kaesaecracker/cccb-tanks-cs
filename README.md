@@ -62,8 +62,8 @@ There are other commands implemented as well, e.g. for changing the brightness.
 - runs all game logic
 - sends image and text to the service point display
 - sends image to clients
-- currently, the game has a fixed tick and frame rate of 25/s
-- One frame is ~7KB, not including the text
+- The game has a dynamic update rate. Hundreds of updates per second on a laptop are expected.
+- One frame is ~7KB, not including the text and player specific data
 - maps can be loaded from png files containing black and white pixels or simple text files
 - some values (like tank speed) can be configured but are fixed at run time
 

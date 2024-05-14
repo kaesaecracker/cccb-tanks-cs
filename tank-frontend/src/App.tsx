@@ -1,3 +1,5 @@
+import {useState} from 'react';
+
 import ClientScreen from './ClientScreen';
 import Controls from './Controls.tsx';
 import JoinForm from './JoinForm.tsx';
@@ -7,23 +9,22 @@ import Row from './components/Row.tsx';
 import Scoreboard from './Scoreboard.tsx';
 import Button from './components/Button.tsx';
 import MapChooser from './MapChooser.tsx';
+import {ThemeProvider} from './theme.tsx';
 import './App.css';
-import {ThemeContext, getRandomTheme, useStoredTheme} from './theme.ts';
-import {useState} from 'react';
+import ThemeChooser from './ThemeChooser.tsx';
 
 export default function App() {
-    const [theme, setTheme] = useStoredTheme();
     const [name, setName] = useState<string | null>(null);
 
-    return <ThemeContext.Provider value={theme}>
+    return <ThemeProvider>
         <Column className="flex-grow">
 
             <ClientScreen player={name}/>
 
             <Row>
                 <h1 className="flex-grow">CCCB-Tanks!</h1>
-                <MapChooser />
-                <Button text="☼ change colors" onClick={() => setTheme(_ => getRandomTheme())}/>
+                <MapChooser/>
+                <ThemeChooser/>
                 <Button
                     onClick={() => window.open('https://github.com/kaesaecracker/cccb-tanks-cs', '_blank')?.focus()}
                     text="⌂ source"/>
@@ -40,5 +41,5 @@ export default function App() {
             </Row>
 
         </Column>
-    </ThemeContext.Provider>;
+    </ThemeProvider>;
 }

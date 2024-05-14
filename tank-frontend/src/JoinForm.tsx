@@ -3,7 +3,7 @@ import {useMutation} from '@tanstack/react-query';
 
 import {makeApiUrl} from './serverCalls';
 import Button from './components/Button.tsx';
-import TextInput from './components/TextInput.tsx';
+import {TextInput} from './components/Input.tsx';
 import Dialog from './components/Dialog.tsx';
 import './JoinForm.css';
 
@@ -30,12 +30,11 @@ export default function JoinForm({onDone}: {
 
     const confirm = () => postPlayer.mutate({name});
 
-    return <Dialog className="JoinForm">
-        <h3> Enter your name to play </h3>
+    return <Dialog className="JoinForm" title="Enter your name to play">
         <TextInput
             value={name}
             placeholder="player name"
-            onChange={e => setName(e.target.value)}
+            onChange={n => setName(n)}
             onEnter={confirm}
         />
         <Button

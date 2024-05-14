@@ -1,6 +1,6 @@
-import {hslToString, ThemeContext} from '../theme.ts';
-import {useContext, useEffect, useRef} from 'react';
+import {useEffect, useRef} from 'react';
 import './PixelGridCanvas.css';
+import {useRgbaTheme} from '../theme.tsx';
 
 const pixelsPerRow = 352;
 const pixelsPerCol = 160;
@@ -18,12 +18,6 @@ function getPixelDataIndexes(bitIndex: number) {
         byteIndex: Math.floor(bitIndex / 8),
         bitInByteIndex: 7 - bitIndex % 8
     };
-}
-
-function normalizeColor(context: CanvasRenderingContext2D, color: string) {
-    context.fillStyle = color;
-    context.fillRect(0, 0, 1, 1);
-    return context.getImageData(0, 0, 1, 1).data;
 }
 
 function parseAdditionalDataNibble(nibble: number) {
@@ -107,7 +101,7 @@ function drawPixelsToCanvas(
 export default function PixelGridCanvas({pixels}: {
     readonly pixels: Uint8ClampedArray;
 }) {
-    const theme = useContext(ThemeContext);
+    const theme = useRgbaTheme();
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -137,12 +131,12 @@ export default function PixelGridCanvas({pixels}: {
                 pixels,
                 additional: additionalData,
                 colors: {
-                    background: normalizeColor(drawContext, hslToString(theme.background)),
-                    foreground: normalizeColor(drawContext, hslToString(theme.primary)),
-                    player: normalizeColor(drawContext, hslToString(theme.secondary)),
-                    tanks: normalizeColor(drawContext, hslToString(theme.tertiary)),
-                    powerUps: normalizeColor(drawContext, hslToString(theme.tertiary)),
-                    bullets: normalizeColor(drawContext, hslToString(theme.tertiary))
+                    background: theme.background,
+                    foreground: theme.primary,
+                    player: theme.secondary,
+                    tanks: theme.tertiary,
+                    powerUps: theme.tertiary,
+                    bullets: theme.tertiary
                 }
             });
         };

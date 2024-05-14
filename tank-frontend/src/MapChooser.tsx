@@ -7,6 +7,7 @@ import Column from './components/Column.tsx';
 import Button from './components/Button.tsx';
 import Row from './components/Row.tsx';
 import './MapChooser.css';
+import Spacer from './components/Spacer.tsx';
 
 function base64ToArrayBuffer(base64: string) {
     const binaryString = atob(base64);
@@ -57,8 +58,11 @@ function MapChooserDialog({mapNames, onClose, onConfirm}: {
     readonly onClose: () => void;
 }) {
     const [chosenMap, setChosenMap] = useState<string>();
-    return <Dialog>
-        <h3>Choose a map</h3>
+    return <Dialog
+        className='MapChooser-Dialog'
+        title="Choose a map"
+        onClose={onClose}
+    >
         <Row className="MapChooser-Row overflow-scroll">
             {mapNames.map(name => <MapPreview
                 key={name}
@@ -68,7 +72,7 @@ function MapChooserDialog({mapNames, onClose, onConfirm}: {
             />)}
         </Row>
         <Row>
-            <div className="flex-grow"/>
+            <Spacer/>
             <Button text="« cancel" onClick={onClose}/>
             <Button text="√ confirm" disabled={!chosenMap} onClick={() => chosenMap && onConfirm(chosenMap)}/>
         </Row>
