@@ -66,8 +66,8 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
 
         try
         {
-            _displayConnection.Send(Command.BitmapLinearWin(0, 0, observerPixels.Clone()));
-            _displayConnection.Send(Command.Cp437Data(MapService.TilesPerRow, 0, _scoresBuffer.Clone()));
+            _displayConnection.Send(Command.BitmapLinearWin(0, 0, observerPixels.Clone()).IntoPacket());
+            _displayConnection.Send(Command.Cp437Data(MapService.TilesPerRow, 0, _scoresBuffer.Clone()).IntoPacket());
         }
         catch (SocketException ex)
         {

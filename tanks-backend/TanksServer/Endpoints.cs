@@ -31,7 +31,7 @@ internal sealed class Endpoints(
         app.Map("/controls", ConnectControlsAsync);
         app.MapGet("/map", () => mapService.MapNames);
         app.MapPost("/map", PostMap);
-        app.MapPost("/resetDisplay", () => displayConnection.Send(Command.HardReset()));
+        app.MapPost("/resetDisplay", () => displayConnection.Send(Command.HardReset().IntoPacket()));
         app.MapGet("/map/{name}", GetMapByName);
 
         app.MapHealthChecks("/health", new HealthCheckOptions
