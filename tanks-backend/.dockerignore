@@ -11,3 +11,5 @@
 **/bin
 **/Dockerfile*
 **/obj
+**/target
+**/examples
