@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using ServicePoint2;
 using TanksServer.GameLogic;
 using TanksServer.Graphics;
+using CompressionCode = ServicePoint2.BindGen.CompressionCode;
 
 namespace TanksServer.Interactivity;
 
@@ -66,7 +67,8 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
 
         try
         {
-            _displayConnection.Send(Command.BitmapLinearWin(0, 0, observerPixels.Clone()).IntoPacket());
+            _displayConnection.Send(Command.BitmapLinearWin(0, 0, observerPixels.Clone(), CompressionCode.Lzma)
+                .IntoPacket());
             _displayConnection.Send(Command.Cp437Data(MapService.TilesPerRow, 0, _scoresBuffer.Clone()).IntoPacket());
         }
         catch (SocketException ex)
