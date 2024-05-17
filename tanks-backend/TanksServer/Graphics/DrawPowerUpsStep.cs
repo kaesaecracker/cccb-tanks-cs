@@ -14,12 +14,12 @@ internal sealed class DrawPowerUpsStep(MapEntityManager entityManager) : IDrawSt
     {
         foreach (var powerUp in entityManager.PowerUps)
         {
-            var sprite = powerUp switch
+            var sprite = powerUp.Type switch
             {
-                { Type: PowerUpType.MagazineSize } => _magazineSprite,
-                { Type: PowerUpType.MagazineType, MagazineType: MagazineType.Smart } => _smartSprite,
-                { Type: PowerUpType.MagazineType, MagazineType: MagazineType.Explosive } => _explosiveSprite,
-                { Type: PowerUpType.MagazineType, MagazineType: MagazineType.Fast } => _fastSprite,
+                PowerUpType.MagazineSize => _magazineSprite,
+                PowerUpType.BulletAcceleration or PowerUpType.BulletSpeed => _fastSprite,
+                PowerUpType.SmartBullets => _smartSprite,
+                PowerUpType.ExplosiveBullets => _explosiveSprite,
                 _ => _genericSprite
             };
 

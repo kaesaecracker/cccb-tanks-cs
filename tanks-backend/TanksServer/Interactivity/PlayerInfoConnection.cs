@@ -13,7 +13,7 @@ internal sealed class PlayerInfoConnection
     private readonly MapEntityManager _entityManager;
     private readonly BufferPool _bufferPool;
     private readonly MemoryStream _tempStream = new();
-    private IMemoryOwner<byte>? _lastMessage = null;
+    private IMemoryOwner<byte>? _lastMessage;
 
     public PlayerInfoConnection(
         Player player,
@@ -47,20 +47,7 @@ internal sealed class PlayerInfoConnection
     private async ValueTask<IMemoryOwner<byte>?> GenerateMessageAsync()
     {
         var tank = _entityManager.GetCurrentTankOfPlayer(_player);
-
-        TankInfo? tankInfo = null;
-        if (tank != null)
-        {
-            var magazine = tank.ReloadingUntil > DateTime.Now ? "[ RELOADING ]" : tank.Magazine.ToDisplayString();
-            tankInfo = new TankInfo(tank.Orientation, magazine, tank.Position.ToPixelPosition(), tank.Moving);
-        }
-
-        var info = new PlayerInfo(
-            _player.Name,
-            _player.Scores,
-            _player.Controls.ToDisplayString(),
-            tankInfo,
-            _player.OpenConnections);
+        var info = new PlayerInfo(_player, _player.Controls.ToDisplayString(), tank);
 
         _tempStream.Position = 0;
         await JsonSerializer.SerializeAsync(_tempStream, info, AppSerializerContext.Default.PlayerInfo);
@@ -85,3 +72,9 @@ internal sealed class PlayerInfoConnection
         Interlocked.Exchange(ref _lastMessage, data)?.Dispose();
     }
 }
+
+internal record struct PlayerInfo(
+    Player Player,
+    string Controls,
+    Tank? Tank
+);

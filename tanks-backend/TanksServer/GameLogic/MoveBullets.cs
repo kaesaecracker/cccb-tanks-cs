@@ -17,12 +17,14 @@ internal sealed class MoveBullets(
 
     private void MoveBullet(Bullet bullet, TimeSpan delta)
     {
-        if (bullet.IsSmart && TryGetSmartRotation(bullet.Position, bullet.Owner, out var wantedRotation))
+        if (bullet.Stats.Smart && TryGetSmartRotation(bullet.Position, bullet.Owner, out var wantedRotation))
         {
             var inertiaFactor = _smartBulletInertia * delta.TotalSeconds;
             var difference = wantedRotation - bullet.Rotation;
             bullet.Rotation += difference * inertiaFactor;
         }
+
+        bullet.Speed += (bullet.Stats.Acceleration * delta.TotalSeconds);
 
         var speed = bullet.Speed * delta.TotalSeconds;
         var angle = bullet.Rotation * 2 * Math.PI;

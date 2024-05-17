@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using DotNext.Threading;
 
 namespace TanksServer.Interactivity;
@@ -10,27 +9,15 @@ internal abstract class DroppablePackageRequestConnection<TPackage>(
     where TPackage : class, IDisposable
 {
     private readonly AsyncAutoResetEvent _nextPackageEvent = new(false, 1);
-    private int _runningMessageHandlers = 0;
     private TPackage? _next;
 
-    protected override ValueTask HandleMessageAsync(Memory<byte> _)
+    protected override async ValueTask HandleMessageAsync(Memory<byte> _)
     {
-        if (Interlocked.Increment(ref _runningMessageHandlers) == 1)
-            return Core();
-
-        // client has requested multiple frames, ignoring duplicate requests
-        Interlocked.Decrement(ref _runningMessageHandlers);
-        return ValueTask.CompletedTask;
-
-        async ValueTask Core()
-        {
-            await _nextPackageEvent.WaitAsync();
-            var package = Interlocked.Exchange(ref _next, null);
-            if (package == null)
-                throw new UnreachableException("package should be set here");
-            await SendPackageAsync(package);
-            Interlocked.Decrement(ref _runningMessageHandlers);
-        }
+        await _nextPackageEvent.WaitAsync();
+        var package = Interlocked.Exchange(ref _next, null);
+        if (package == null)
+            return;
+        await SendPackageAsync(package);
     }
 
     protected void SetNextPackage(TPackage next)

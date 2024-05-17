@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using ServicePoint2;
 using TanksServer.GameLogic;
 using TanksServer.Interactivity;
 
@@ -17,7 +18,8 @@ internal sealed class Endpoints(
     PlayerServer playerService,
     ControlsServer controlsServer,
     MapService mapService,
-    ChangeToRequestedMap changeToRequestedMap
+    ChangeToRequestedMap changeToRequestedMap,
+    Connection displayConnection
 )
 {
     public void Map(WebApplication app)
@@ -29,6 +31,7 @@ internal sealed class Endpoints(
         app.Map("/controls", ConnectControlsAsync);
         app.MapGet("/map", () => mapService.MapNames);
         app.MapPost("/map", PostMap);
+        app.MapPost("/resetDisplay", () => displayConnection.Send(Command.HardReset().IntoPacket()));
         app.MapGet("/map/{name}", GetMapByName);
 
         app.MapHealthChecks("/health", new HealthCheckOptions
@@ -114,7 +117,7 @@ internal sealed class Endpoints(
         if (!mapService.TryGetPreview(name, out var preview))
             return TypedResults.NotFound();
 
-        var mapInfo = new MapInfo(prototype.Name, prototype.GetType().Name, preview.Data);
+        var mapInfo = new MapInfo(prototype.Name, prototype.GetType().Name, preview.Data.ToArray());
         return TypedResults.Ok(mapInfo);
     }
 

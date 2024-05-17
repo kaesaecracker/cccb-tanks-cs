@@ -1,4 +1,4 @@
-namespace DisplayCommands;
+namespace TanksServer.Models;
 
 public class DisplayConfiguration
 {

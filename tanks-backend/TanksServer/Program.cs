@@ -1,9 +1,9 @@
 using System.IO;
-using DisplayCommands;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using ServicePoint2;
+using SixLabors.ImageSharp;
 using TanksServer.GameLogic;
 using TanksServer.Graphics;
 using TanksServer.Interactivity;
@@ -54,11 +54,6 @@ public static class Program
         var healthCheckBuilder = builder.Services.AddHealthChecks();
         healthCheckBuilder.AddCheck<UpdatesPerSecondCounter>("updates check");
 
-        builder.Services.Configure<HostConfiguration>(builder.Configuration.GetSection("Host"));
-        var hostConfiguration = builder.Configuration.GetSection("Host").Get<HostConfiguration>();
-        if (hostConfiguration == null)
-            throw new InvalidOperationException("'Host' configuration missing");
-
         builder.Services.AddSingleton<MapService>();
         builder.Services.AddSingleton<MapEntityManager>();
         builder.Services.AddSingleton<ControlsServer>();
@@ -99,12 +94,15 @@ public static class Program
             sp.GetRequiredService<ClientScreenServer>());
 
         builder.Services.Configure<GameRules>(builder.Configuration.GetSection("GameRules"));
+        builder.Services.Configure<HostConfiguration>(builder.Configuration.GetSection("Host"));
+        builder.Services.Configure<DisplayConfiguration>(builder.Configuration.GetSection("ServicePointDisplay"));
 
-        if (hostConfiguration.EnableServicePointDisplay)
+        builder.Services.AddSingleton<IFrameConsumer, SendToServicePointDisplay>();
+        builder.Services.AddSingleton<Connection>(sp =>
         {
-            builder.Services.AddSingleton<IFrameConsumer, SendToServicePointDisplay>();
-            builder.Services.AddDisplay(builder.Configuration.GetSection("ServicePointDisplay"));
-        }
+            var config = sp.GetRequiredService<IOptions<DisplayConfiguration>>().Value;
+            return Connection.Open($"{config.Hostname}:{config.Port}");
+        });
 
         var app = builder.Build();
 

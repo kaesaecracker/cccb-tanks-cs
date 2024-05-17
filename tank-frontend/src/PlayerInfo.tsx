@@ -48,27 +48,31 @@ export default function PlayerInfo({player}: { player: string }) {
 
     return <Column className="PlayerInfo">
         <h3>
-            Playing as {lastJsonMessage.name}
+            Playing as {lastJsonMessage.player.name}
         </h3>
         <table>
             <tbody>
-            <ScoreRow name="magazine" value={lastJsonMessage.tank?.magazine}/>
+            {lastJsonMessage.tank && <>
+                <ScoreRow name="magazine" value={`${lastJsonMessage.tank.usedBullets} / ${lastJsonMessage.tank.maxBullets}`}/>
+                <ScoreRow name="position" value={`(${Math.round(lastJsonMessage.tank.pixelPosition.x)}|${Math.round(lastJsonMessage.tank.pixelPosition.y)})`}/>
+                <ScoreRow name="orientation" value={lastJsonMessage.tank.orientation}/>
+                <ScoreRow name="bullet speed" value={lastJsonMessage.tank.bulletStats.speed}/>
+                <ScoreRow name="bullet acceleration" value={lastJsonMessage.tank.bulletStats.acceleration}/>
+                <ScoreRow name="smart bullets" value={lastJsonMessage.tank.bulletStats.smart}/>
+                <ScoreRow name="explosive bullets" value={lastJsonMessage.tank.bulletStats.explosive}/>
+                <ScoreRow name="moving" value={lastJsonMessage.tank.moving}/>
+            </>}
+
             <ScoreRow name="controls" value={lastJsonMessage.controls}/>
-            <ScoreRow name="position" value={lastJsonMessage.tank?.position}/>
-            <ScoreRow name="orientation" value={lastJsonMessage.tank?.orientation}/>
-            <ScoreRow name="moving" value={lastJsonMessage.tank?.moving}/>
+            <ScoreRow name="kills" value={lastJsonMessage.player.scores.kills}/>
+            <ScoreRow name="deaths" value={lastJsonMessage.player.scores.deaths}/>
+            <ScoreRow name="walls destroyed" value={lastJsonMessage.player.scores.wallsDestroyed}/>
+            <ScoreRow name="bullets fired" value={lastJsonMessage.player.scores.shotsFired}/>
+            <ScoreRow name="power ups collected" value={lastJsonMessage.player.scores.powerUpsCollected}/>
+            <ScoreRow name="pixels moved" value={lastJsonMessage.player.scores.pixelsMoved}/>
+            <ScoreRow name="score" value={lastJsonMessage.player.scores.overallScore}/>
 
-            <ScoreRow name="kills" value={lastJsonMessage.scores.kills}/>
-            <ScoreRow name="deaths" value={lastJsonMessage.scores.deaths}/>
-
-            <ScoreRow name="walls destroyed" value={lastJsonMessage.scores.wallsDestroyed}/>
-            <ScoreRow name="bullets fired" value={lastJsonMessage.scores.shotsFired}/>
-            <ScoreRow name="power ups collected" value={lastJsonMessage.scores.powerUpsCollected}/>
-            <ScoreRow name="pixels moved" value={lastJsonMessage.scores.pixelsMoved}/>
-
-            <ScoreRow name="score" value={lastJsonMessage.scores.overallScore}/>
-
-            <ScoreRow name="connections" value={lastJsonMessage.openConnections}/>
+            <ScoreRow name="connections" value={lastJsonMessage.player.openConnections}/>
             </tbody>
         </table>
     </Column>;

@@ -35,7 +35,7 @@ internal sealed class CollideBullets : ITickStep
         if (bullet.Timeout > DateTime.Now)
             return false;
 
-        ExplodeAt(bullet.Position.ToPixelPosition(), bullet.IsExplosive, bullet.Owner);
+        ExplodeAt(bullet.Position.ToPixelPosition(), bullet.Stats.Explosive, bullet.Owner);
         return true;
     }
 
@@ -45,7 +45,7 @@ internal sealed class CollideBullets : ITickStep
         if (!_map.Current.IsWall(pixel))
             return false;
 
-        ExplodeAt(pixel, bullet.IsExplosive, bullet.Owner);
+        ExplodeAt(pixel, bullet.Stats.Explosive, bullet.Owner);
         return true;
     }
 
@@ -55,7 +55,7 @@ internal sealed class CollideBullets : ITickStep
         if (hitTank == null)
             return false;
 
-        ExplodeAt(bullet.Position.ToPixelPosition(), bullet.IsExplosive, bullet.Owner);
+        ExplodeAt(bullet.Position.ToPixelPosition(), bullet.Stats.Explosive, bullet.Owner);
         return true;
     }
 

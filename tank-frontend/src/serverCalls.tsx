@@ -14,24 +14,28 @@ export type Scores = {
     readonly pixelsMoved: number;
 };
 
+type Tank = {
+    readonly pixelPosition: { x: number; y: number };
+    readonly orientation: number;
+    readonly moving: boolean;
+    readonly bulletStats: BulletStats;
+    readonly reloadingUntil: string;
+    readonly nextShotAfter: string;
+    readonly usedBullets: number;
+    readonly maxBullets: number;
+}
+
 export type Player = {
     readonly name: string;
     readonly scores: Scores;
-};
-
-type TankInfo = {
-    readonly magazine: string;
-    readonly position: { x: number; y: number };
-    readonly orientation: number;
-    readonly moving: boolean;
+    readonly openConnections: number;
+    readonly lastInput: string;
 }
 
 export type PlayerInfoMessage = {
-    readonly name: string;
-    readonly scores: Scores;
+    readonly player: Player;
     readonly controls: string;
-    readonly tank?: TankInfo;
-    readonly openConnections: number;
+    readonly tank?: Tank;
 }
 
 export type MapInfo = {
@@ -39,6 +43,13 @@ export type MapInfo = {
     readonly typeName: string;
     readonly preview: string;
 }
+
+export type BulletStats = {
+    speed: number;
+    acceleration: number,
+    explosive: boolean,
+    smart: boolean
+};
 
 export function useMyWebSocket<T = unknown>(url: string, options: Options = {}) {
     return useWebSocket<T>(url, {
