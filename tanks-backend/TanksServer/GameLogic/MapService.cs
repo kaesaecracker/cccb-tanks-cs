@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using ServicePoint2;
+using ServicePoint;
 using TanksServer.Graphics;
 
 namespace TanksServer.GameLogic;

@@ -1,4 +1,4 @@
-using ServicePoint2;
+using ServicePoint;
 using TanksServer.GameLogic;
 
 namespace TanksServer.Graphics;

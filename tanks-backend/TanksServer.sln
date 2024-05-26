@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{12DB7D
 		Dockerfile = Dockerfile
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServicePoint2", "servicepoint\servicepoint2-binding-cs\src\ServicePoint2.csproj", "{DFCC69ED-E02B-4631-8A23-5D394BA01E03}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServicePoint", "servicepoint/crates/servicepoint_binding_cs/ServicePoint/ServicePoint.csproj", "{DFCC69ED-E02B-4631-8A23-5D394BA01E03}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

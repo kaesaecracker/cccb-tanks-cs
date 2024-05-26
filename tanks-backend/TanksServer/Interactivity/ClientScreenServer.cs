@@ -1,5 +1,5 @@
 using System.Net.WebSockets;
-using ServicePoint2;
+using ServicePoint;
 using TanksServer.Graphics;
 
 namespace TanksServer.Interactivity;

@@ -2,7 +2,7 @@ using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using ServicePoint2;
+using ServicePoint;
 using SixLabors.ImageSharp;
 using TanksServer.GameLogic;
 using TanksServer.Graphics;

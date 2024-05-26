@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using ServicePoint2;
+using ServicePoint;
 using TanksServer.GameLogic;
 using TanksServer.Graphics;
-using CompressionCode = ServicePoint2.BindGen.CompressionCode;
+using CompressionCode = ServicePoint.BindGen.CompressionCode;
 
 namespace TanksServer.Interactivity;
 

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using ServicePoint2;
+using ServicePoint;
 using TanksServer.GameLogic;
 using TanksServer.Interactivity;
 
