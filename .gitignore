@@ -3,4 +3,5 @@ obj
 .idea
 client
 *.sarif
+.direnv
 

@@ -5,6 +5,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{12DB7D48-1BB2-488B-B4D9-4126087D2F8C}"
 	ProjectSection(SolutionItems) = preProject
 		Dockerfile = Dockerfile
+		..\shell.nix = ..\shell.nix
+		..\.envrc = ..\.envrc
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServicePoint", "servicepoint/crates/servicepoint_binding_cs/ServicePoint/ServicePoint.csproj", "{DFCC69ED-E02B-4631-8A23-5D394BA01E03}"
