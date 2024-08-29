@@ -21,7 +21,7 @@
     <ItemGroup>
         <PackageReference Include="DotNext.Threading" Version="5.3.0" />
         <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
-        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
     </ItemGroup>
 
     <ItemGroup>
