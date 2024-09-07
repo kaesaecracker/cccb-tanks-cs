@@ -18,7 +18,7 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
     private readonly MapService _mapService;
     private readonly ILogger<SendToServicePointDisplay> _logger;
     private readonly PlayerServer _players;
-    private readonly ByteGrid _scoresBuffer;
+    private readonly Cp437Grid _scoresBuffer;
     private readonly TimeSpan _minFrameTime;
     private readonly IOptionsMonitor<HostConfiguration> _options;
 
@@ -43,7 +43,7 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
 
         var localIp = GetLocalIPv4(displayConfig.Value).Split('.');
         Debug.Assert(localIp.Length == 4);
-        _scoresBuffer = ByteGrid.New(12, 20);
+        _scoresBuffer = Cp437Grid.New(12, 20);
 
         _scoresBuffer[00] = "== TANKS! ==";
         _scoresBuffer[01] = "-- scores --";
