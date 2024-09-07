@@ -1,11 +1,23 @@
 {pkgs ? import <nixpkgs> {}}:
+let
+rust-toolchain = pkgs.symlinkJoin {
+    name = "rust-toolchain";
+    paths = with pkgs; [rustc cargo rustPlatform.rustcSrc rustfmt clippy];
+  };
+in
 pkgs.mkShell {
   nativeBuildInputs = with pkgs.buildPackages; [
-    rustup
+    rust-toolchain
+
     pkg-config
     xe
     lzma
     cargo-tarpaulin
     gnumake
+    iconv
+
+    dotnet-sdk_8
   ];
+
+  RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
 }
