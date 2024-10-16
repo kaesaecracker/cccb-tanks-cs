@@ -22,7 +22,7 @@ internal sealed class ClientScreenServer(
         return base.HandleClientAsync(connection);
     }
 
-    public Task OnFrameDoneAsync(GamePixelGrid gamePixelGrid, PixelGrid observerPixels)
+    public Task OnFrameDoneAsync(GamePixelGrid gamePixelGrid, Bitmap observerPixels)
         => Connections.Select(c => c.OnGameTickAsync(observerPixels, gamePixelGrid))
             .WhenAll();
 }

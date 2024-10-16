@@ -52,7 +52,7 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
         _scoresBuffer[19] = string.Join('.', localIp[2..]);
     }
 
-    public async Task OnFrameDoneAsync(GamePixelGrid gamePixelGrid, PixelGrid observerPixels)
+    public async Task OnFrameDoneAsync(GamePixelGrid gamePixelGrid, Bitmap observerPixels)
     {
         if (!_options.CurrentValue.EnableServicePointDisplay)
             return;

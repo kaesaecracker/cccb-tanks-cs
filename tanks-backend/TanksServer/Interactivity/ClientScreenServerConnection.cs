@@ -27,14 +27,14 @@ internal sealed class ClientScreenServerConnection
             : new PlayerScreenData(logger, player);
     }
 
-    public async Task OnGameTickAsync(PixelGrid pixels, GamePixelGrid gamePixelGrid)
+    public async Task OnGameTickAsync(Bitmap pixels, GamePixelGrid gamePixelGrid)
     {
         await Task.Yield();
         var next = BuildNextPackage(pixels, gamePixelGrid);
         SetNextPackage(next);
     }
 
-    private Package BuildNextPackage(PixelGrid pixels, GamePixelGrid gamePixelGrid)
+    private Package BuildNextPackage(Bitmap pixels, GamePixelGrid gamePixelGrid)
     {
         var pixelsData = pixels.Data;
         var nextPixels = _bufferPool.Rent(pixelsData.Length);

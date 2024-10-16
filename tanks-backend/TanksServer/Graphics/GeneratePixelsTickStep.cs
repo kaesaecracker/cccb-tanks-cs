@@ -10,9 +10,9 @@ internal sealed class GeneratePixelsTickStep(
 ) : ITickStep
 {
     private GamePixelGrid _lastGamePixelGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
-    private PixelGrid _lastObserverPixelGrid = PixelGrid.New(MapService.PixelsPerRow, MapService.PixelsPerColumn);
+    private Bitmap _lastObserverPixelGrid = Bitmap.New(MapService.PixelsPerRow, MapService.PixelsPerColumn);
     private GamePixelGrid _gamePixelGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
-    private PixelGrid _observerPixelGrid = PixelGrid.New(MapService.PixelsPerRow, MapService.PixelsPerColumn);
+    private Bitmap _observerPixelGrid = Bitmap.New(MapService.PixelsPerRow, MapService.PixelsPerColumn);
 
     private readonly List<IDrawStep> _drawSteps = drawSteps.ToList();
     private readonly List<IFrameConsumer> _consumers = consumers.ToList();
@@ -30,7 +30,7 @@ internal sealed class GeneratePixelsTickStep(
         (_lastObserverPixelGrid, _observerPixelGrid) = (_observerPixelGrid, _lastObserverPixelGrid);
     }
 
-    private void Draw(GamePixelGrid gamePixelGrid, PixelGrid observerPixelGrid)
+    private void Draw(GamePixelGrid gamePixelGrid, Bitmap observerPixelGrid)
     {
         gamePixelGrid.Clear();
         foreach (var step in _drawSteps)

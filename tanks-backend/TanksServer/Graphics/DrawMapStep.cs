@@ -19,7 +19,7 @@ internal sealed class DrawMapStep(MapService map) : IDrawStep
         }
     }
 
-    public static void Draw(PixelGrid pixels, Map map)
+    public static void Draw(Bitmap pixels, Map map)
     {
         for (ushort y = 0; y < MapService.PixelsPerColumn; y++)
         for (ushort x = 0; x < MapService.PixelsPerRow; x++)

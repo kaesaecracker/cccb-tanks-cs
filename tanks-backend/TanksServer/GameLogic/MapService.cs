@@ -15,7 +15,7 @@ internal sealed class MapService
     public const ushort PixelsPerColumn = TilesPerColumn * TileSize;
 
     private readonly ConcurrentDictionary<string, MapPrototype> _mapPrototypes = new();
-    private readonly ConcurrentDictionary<string, PixelGrid> _mapPreviews = new();
+    private readonly ConcurrentDictionary<string, Bitmap> _mapPreviews = new();
 
     public IEnumerable<string> MapNames => _mapPrototypes.Keys;
 
@@ -35,14 +35,14 @@ internal sealed class MapService
 
     public void SwitchTo(MapPrototype prototype) => Current = prototype.CreateInstance();
 
-    public bool TryGetPreview(string name, [MaybeNullWhen(false)] out PixelGrid pixelGrid)
+    public bool TryGetPreview(string name, [MaybeNullWhen(false)] out Bitmap pixelGrid)
     {
         if (_mapPreviews.TryGetValue(name, out pixelGrid))
             return true; // already generated
         if (!_mapPrototypes.TryGetValue(name, out var prototype))
             return false; // name not found
 
-        pixelGrid = PixelGrid.New(PixelsPerRow, PixelsPerColumn);
+        pixelGrid = Bitmap.New(PixelsPerRow, PixelsPerColumn);
         DrawMapStep.Draw(pixelGrid, prototype.CreateInstance());
 
         _mapPreviews.TryAdd(name, pixelGrid); // another thread may have added the map already
