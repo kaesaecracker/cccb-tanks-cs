@@ -4,11 +4,10 @@ using System.Net.Sockets;
 using ServicePoint;
 using TanksServer.GameLogic;
 using TanksServer.Graphics;
-using CompressionCode = ServicePoint.BindGen.CompressionCode;
 
 namespace TanksServer.Interactivity;
 
-internal sealed class SendToServicePointDisplay : IFrameConsumer
+internal sealed class SendToServicePointDisplay : IFrameConsumer, IDisposable
 {
     private const int ScoresWidth = 12;
     private const int ScoresHeight = 20;
@@ -43,7 +42,7 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
 
         var localIp = GetLocalIPv4(displayConfig.Value).Split('.');
         Debug.Assert(localIp.Length == 4);
-        _scoresBuffer = Cp437Grid.New(12, 20);
+        _scoresBuffer = new Cp437Grid(12, 20);
 
         _scoresBuffer[00] = "== TANKS! ==";
         _scoresBuffer[01] = "-- scores --";
@@ -112,5 +111,11 @@ internal sealed class SendToServicePointDisplay : IFrameConsumer
         socket.Connect(configuration.Hostname, configuration.Port);
         var endPoint = socket.LocalEndPoint as IPEndPoint ?? throw new NotSupportedException();
         return endPoint.Address.ToString();
+    }
+
+    public void Dispose()
+    {
+        _displayConnection.Dispose();
+        _scoresBuffer.Dispose();
     }
 }

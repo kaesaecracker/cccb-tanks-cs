@@ -7,12 +7,12 @@ namespace TanksServer.Graphics;
 internal sealed class GeneratePixelsTickStep(
     IEnumerable<IDrawStep> drawSteps,
     IEnumerable<IFrameConsumer> consumers
-) : ITickStep
+) : ITickStep, IDisposable
 {
     private GamePixelGrid _lastGamePixelGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
-    private Bitmap _lastObserverPixelGrid = Bitmap.New(MapService.PixelsPerRow, MapService.PixelsPerColumn);
+    private Bitmap _lastObserverPixelGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
     private GamePixelGrid _gamePixelGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
-    private Bitmap _observerPixelGrid = Bitmap.New(MapService.PixelsPerRow, MapService.PixelsPerColumn);
+    private Bitmap _observerPixelGrid = new(MapService.PixelsPerRow, MapService.PixelsPerColumn);
 
     private readonly List<IDrawStep> _drawSteps = drawSteps.ToList();
     private readonly List<IFrameConsumer> _consumers = consumers.ToList();
@@ -43,5 +43,11 @@ internal sealed class GeneratePixelsTickStep(
             if (gamePixelGrid[x, y].EntityType.HasValue)
                 observerPixelGrid[(ushort)x, (ushort)y] = true;
         }
+    }
+
+    public void Dispose()
+    {
+        _lastObserverPixelGrid.Dispose();
+        _observerPixelGrid.Dispose();
     }
 }

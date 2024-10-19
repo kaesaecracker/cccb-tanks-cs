@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using ServicePoint;
-using SixLabors.ImageSharp;
 using TanksServer.GameLogic;
 using TanksServer.Graphics;
 using TanksServer.Interactivity;
@@ -101,7 +100,11 @@ public static class Program
         builder.Services.AddSingleton<Connection>(sp =>
         {
             var config = sp.GetRequiredService<IOptions<DisplayConfiguration>>().Value;
-            return Connection.Open($"{config.Hostname}:{config.Port}");
+            var connection = Connection.Open($"{config.Hostname}:{config.Port}");
+            if (connection == null)
+                throw new IOException($"Could not open connection to {config.Hostname}:{config.Port}");
+
+            return connection;
         });
 
         var app = builder.Build();

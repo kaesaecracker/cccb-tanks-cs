@@ -42,7 +42,7 @@ internal sealed class MapService
         if (!_mapPrototypes.TryGetValue(name, out var prototype))
             return false; // name not found
 
-        pixelGrid = Bitmap.New(PixelsPerRow, PixelsPerColumn);
+        pixelGrid = new Bitmap(PixelsPerRow, PixelsPerColumn);
         DrawMapStep.Draw(pixelGrid, prototype.CreateInstance());
 
         _mapPreviews.TryAdd(name, pixelGrid); // another thread may have added the map already
